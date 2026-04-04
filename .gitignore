@@ -1,0 +1,59 @@
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+
+# Expo
+.expo/
+dist/
+build/
+web-build/
+
+# Native builds
+android/build/
+android/.gradle/
+android/app/build/
+ios/build/
+ios/Pods/
+ios/DerivedData/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# Environment variables (never commit secrets)
+.env
+.env.local
+.env.production
+
+# Mac
+.DS_Store
+*.icloud
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+
+# Signing keys (never commit these)
+*.jks
+*.p12
+*.p8
+*.keystore
+*.mobileprovision
+*.cer
+
+# EAS
+.easignore.stuck
+.gitignore.stuck
+
+# IDE
+.vscode/
+.idea/
+
+# TypeScript generated
+expo-env.d.ts

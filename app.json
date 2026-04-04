@@ -1,0 +1,80 @@
+{
+  "expo": {
+    "name": "MC Admin for Clubs",
+    "slug": "tailwind-demo",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/expo_icons_pack/icon.png",
+    "scheme": "tailwinddemo",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.bgetachw222.tailwinddemo",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSPhotoLibraryUsageDescription": "Allow access to photos to send images in chat.",
+        "NSCameraUsageDescription": "Allow Connect Camp to access your camera to scan QR codes.",
+        "NSBluetoothAlwaysUsageDescription": "Allow Connect Camp to use Bluetooth to find students nearby.",
+        "NSBluetoothPeripheralUsageDescription": "Allow Connect Camp to use Bluetooth to find students nearby.",
+        "NSLocalNetworkUsageDescription": "Allow Connect Camp to find nearby students on your Wi-Fi.",
+        "NSBonjourServices": [
+          "_connectcamp._tcp"
+        ]
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/images/expo_icons_pack/android-icon-foreground.png",
+        "backgroundImage": "./assets/images/expo_icons_pack/android-icon-background.png",
+        "monochromeImage": "./assets/images/expo_icons_pack/android-icon-monochrome.png"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false,
+      "package": "com.bgetachw222.tailwinddemo",
+      "softwareKeyboardLayoutMode": "resize"
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/expo_icons_pack/icon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/expo_icons_pack/studlife.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
+        }
+      ],
+      "expo-secure-store",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Connect Camp to access your camera to scan QR codes."
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          }
+        }
+      ],
+      "./plugins/withZeroconf.js"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": false
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "f03a8ae7-3bd3-4fd7-bb98-2c8363f2bb7d"
+      }
+    }
+  }
+}

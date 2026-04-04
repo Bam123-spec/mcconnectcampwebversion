@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+@plugin "tailwindcss-animate";
+
+@theme {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --primary: #51237f;
+  --primary-foreground: #ffffff;
+  --sidebar-width: 260px;
+  --sidebar-background: #ffffff;
+}
+
+@layer base {
+  * {
+    @apply border-gray-200;
+  }
+  body {
+    @apply bg-[var(--background)] text-[var(--foreground)] antialiased;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300;
+  }
+  
+  .btn-primary {
+    @apply bg-[var(--primary)] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all active:scale-[0.98];
+  }
+
+  .nav-link {
+    @apply flex items-center gap-3 px-4 py-3 rounded-lg text-gray-500 hover:text-[var(--primary)] hover:bg-purple-50 transition-all font-medium;
+  }
+
+  .nav-link.active {
+    @apply text-[var(--primary)] bg-purple-50;
+  }
+}
