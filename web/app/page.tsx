@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { LogIn, Users, Search, Filter, ExternalLink } from "lucide-react";
 import { EventCard } from "@/components/events/EventCard";
-import { AUTH_ENABLED } from "@/lib/features";
 
 const MOCK_EVENTS = [
   {
@@ -86,13 +85,13 @@ export default async function Home() {
           <p className="text-white text-xl md:text-2xl mb-8 font-medium drop-shadow-md">
             {isAuthenticated ? "Here's what's happening on your campus today." : "The official campus community platform at Montgomery College"}
           </p>
-          {!isAuthenticated && AUTH_ENABLED && (
+          {!isAuthenticated && (
             <Link 
-              href="/login" 
+              href="/events" 
               className="flex items-center gap-2 bg-[#51237f] hover:bg-[#51237f]/90 text-white px-8 py-3 rounded-full font-semibold transition-colors shadow-lg"
             >
               <LogIn size={18} />
-              Sign In
+              Explore Events
             </Link>
           )}
         </div>

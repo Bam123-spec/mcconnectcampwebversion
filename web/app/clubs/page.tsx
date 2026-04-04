@@ -1,20 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Search, Filter, Users, MapPin, Tag } from "lucide-react";
-import { createServerSupabaseClient } from "@/lib/supabase";
 import { slugifyClubName } from "@/lib/club-utils";
+import { previewClubs } from "@/lib/preview-data";
 
 export const metadata = {
   title: "Clubs & Organizations | Raptor Connect",
   description: "Browse and join student organizations at Montgomery College.",
-};
-
-type ClubRow = {
-  id: string;
-  name: string | null;
-  description: string | null;
-  cover_image_url: string | { url?: string; publicUrl?: string } | null;
-  member_count: number | null;
 };
 
 type ClubCardData = {
@@ -29,126 +21,14 @@ type ClubCardData = {
   coverImageUrl: string | null;
 };
 
-const fallbackClubs: ClubCardData[] = [
-  {
-    id: "fallback-1",
-    name: "Computer Science Club",
-    category: "Academic",
-    members: 142,
-    campus: "Montgomery College",
-    description:
-      "A community for students passionate about programming, software engineering, and the tech industry.",
-    initials: "CS",
-    color: "bg-blue-600",
-    coverImageUrl: null,
-  },
-  {
-    id: "fallback-2",
-    name: "Ethiopian & Eritrean Student Association",
-    category: "Cultural",
-    members: 89,
-    campus: "Montgomery College",
-    description:
-      "Celebrating and educating the campus about Ethiopian and Eritrean culture, history, and traditions.",
-    initials: "EE",
-    color: "bg-green-600",
-    coverImageUrl: null,
-  },
-  {
-    id: "fallback-3",
-    name: "Student Senate",
-    category: "Leadership",
-    members: 30,
-    campus: "All Campuses",
-    description:
-      "The official voice of the student body for student advocacy, policy changes, and campus initiatives.",
-    initials: "SS",
-    color: "bg-[#51237f]",
-    coverImageUrl: null,
-  },
-];
+const getClubs = (query: string): ClubCardData[] => {
+  const trimmedQuery = query.trim().toLowerCase();
 
-const colorTokens = [
-  "bg-blue-600",
-  "bg-green-600",
-  "bg-orange-500",
-  "bg-[#51237f]",
-  "bg-pink-500",
-  "bg-cyan-600",
-];
-
-const categoryTokens = [
-  "Academic",
-  "Cultural",
-  "Leadership",
-  "Technology",
-  "Arts",
-  "Community",
-];
-
-const seededNumber = (seed: string, floor: number, range: number) => {
-  const total = seed.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0);
-  return floor + (total % range);
+  return previewClubs.filter((club) => {
+    if (!trimmedQuery || trimmedQuery.length < 2) return true;
+    return `${club.name} ${club.description} ${club.category}`.toLowerCase().includes(trimmedQuery);
+  });
 };
-
-const getInitials = (value: string) => {
-  const parts = value
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean);
-
-  if (parts.length === 0) return "RC";
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-
-  return `${parts[0][0] || ""}${parts[1][0] || ""}`.toUpperCase();
-};
-
-const normalizeCover = (value: ClubRow["cover_image_url"]) => {
-  if (!value) return null;
-  if (typeof value === "string") return value;
-  return value.url || value.publicUrl || null;
-};
-
-const normalizeClub = (club: ClubRow): ClubCardData => {
-  const name = club.name || "Untitled Club";
-  const seed = `${club.id}${name}`;
-
-  return {
-    id: club.id,
-    name,
-    description: club.description || "Club description coming soon.",
-    members: club.member_count || seededNumber(seed, 20, 90),
-    campus: "Montgomery College",
-    category: categoryTokens[seededNumber(seed, 0, categoryTokens.length)],
-    initials: getInitials(name),
-    color: colorTokens[seededNumber(name, 0, colorTokens.length)],
-    coverImageUrl: normalizeCover(club.cover_image_url),
-  };
-};
-
-async function getClubs(query: string): Promise<ClubCardData[]> {
-  const supabase = createServerSupabaseClient();
-
-  let request = supabase
-    .from("clubs")
-    .select("id, name, description, cover_image_url, member_count")
-    .order("member_count", { ascending: false, nullsFirst: false })
-    .order("name", { ascending: true })
-    .limit(60);
-
-  if (query.trim().length >= 2) {
-    request = request.ilike("name", `%${query.trim()}%`);
-  }
-
-  const { data, error } = await request;
-
-  if (error) {
-    console.error("Error loading web clubs:", error);
-    return [];
-  }
-
-  return ((data || []) as ClubRow[]).map(normalizeClub);
-}
 
 export default async function ClubsPage({
   searchParams,
@@ -157,8 +37,7 @@ export default async function ClubsPage({
 }) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const query = resolvedSearchParams?.q?.trim() || "";
-  const clubs = await getClubs(query);
-  const displayClubs = clubs.length > 0 ? clubs : fallbackClubs;
+  const displayClubs = getClubs(query);
 
   return (
     <div className="bg-[#f5f6f8] min-h-screen py-8">

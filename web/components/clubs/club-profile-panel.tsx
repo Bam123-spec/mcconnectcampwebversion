@@ -2,12 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
-import { CalendarDays, Edit3, MapPin, Save, ShieldCheck, Users, X } from "lucide-react";
-import { supabase } from "@/lib/supabase";
-import { slugifyClubName } from "@/lib/club-utils";
-import { AUTH_ENABLED } from "@/lib/features";
+import { CalendarDays, MapPin, ShieldCheck, Users } from "lucide-react";
 
 type ClubProfile = {
   id: string;
@@ -49,115 +44,13 @@ export function ClubProfilePanel({
   initialClub: ClubProfile;
   initialEvents: ClubEvent[];
 }) {
-  const router = useRouter();
-  const [club, setClub] = useState(initialClub);
-  const [events] = useState(initialEvents);
-  const [canEdit, setCanEdit] = useState(false);
-  const [checkedAccess, setCheckedAccess] = useState(!AUTH_ENABLED);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [draft, setDraft] = useState({
-    name: initialClub.name,
-    description: initialClub.description,
-    meetingTime: initialClub.meetingTime,
-    coverImageUrl: initialClub.coverImageUrl || "",
-  });
-
-  useEffect(() => {
-    if (!AUTH_ENABLED) {
-      return;
-    }
-
-    const checkAccess = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        setCheckedAccess(true);
-        return;
-      }
-
-      const [{ data: profile }, { data: officerRow }] = await Promise.all([
-        supabase.from("profiles").select("role").eq("id", user.id).maybeSingle(),
-        supabase
-          .from("officers")
-          .select("id")
-          .eq("club_id", initialClub.id)
-          .eq("user_id", user.id)
-          .maybeSingle(),
-      ]);
-
-      setCanEdit(profile?.role === "admin" || Boolean(officerRow));
-      setCheckedAccess(true);
-    };
-
-    checkAccess();
-  }, [initialClub.id]);
-
-  const clubBadge = useMemo(() => club.name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase(), [club.name]);
-
-  const handleCancel = () => {
-    setDraft({
-      name: club.name,
-      description: club.description,
-      meetingTime: club.meetingTime,
-      coverImageUrl: club.coverImageUrl || "",
-    });
-    setError(null);
-    setIsEditing(false);
-  };
-
-  const handleSave = async () => {
-    setIsSaving(true);
-    setError(null);
-
-    const payload = {
-      name: draft.name.trim(),
-      description: draft.description.trim() || null,
-      meeting_time: draft.meetingTime.trim() || null,
-      cover_image_url: draft.coverImageUrl.trim() || null,
-    };
-
-    const { error: updateError } = await supabase
-      .from("clubs")
-      .update(payload)
-      .eq("id", club.id);
-
-    if (updateError) {
-      console.error("Error updating club profile:", updateError);
-      setError("We couldn't save your club changes.");
-      setIsSaving(false);
-      return;
-    }
-
-    const nextSlug = slugifyClubName(payload.name || club.name);
-    const nextClub = {
-      ...club,
-      name: payload.name || club.name,
-      description: payload.description || "",
-      meetingTime: payload.meeting_time || "",
-      coverImageUrl: payload.cover_image_url,
-      slug: nextSlug,
-    };
-
-    setClub(nextClub);
-    setDraft({
-      name: nextClub.name,
-      description: nextClub.description,
-      meetingTime: nextClub.meetingTime,
-      coverImageUrl: nextClub.coverImageUrl || "",
-    });
-    setIsEditing(false);
-    setIsSaving(false);
-
-    if (nextSlug !== initialClub.slug) {
-      router.replace(`/clubs/${nextSlug}`);
-    } else {
-      router.refresh();
-    }
-  };
+  const clubBadge = initialClub.name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
 
   return (
     <div className="bg-[#f5f6f8] min-h-screen py-8">
@@ -166,24 +59,16 @@ export function ClubProfilePanel({
           <Link href="/clubs" className="text-sm font-semibold text-[#51237f] hover:underline">
             Back to clubs
           </Link>
-
-          {checkedAccess && canEdit && !isEditing ? (
-            <button
-              type="button"
-              onClick={() => setIsEditing(true)}
-              className="inline-flex items-center gap-2 rounded-md bg-[#51237f] px-4 py-2 text-sm font-semibold text-white hover:bg-[#45206b] transition-colors"
-            >
-              <Edit3 size={16} />
-              Edit club page
-            </button>
-          ) : null}
+          <span className="rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-500">
+            Preview page
+          </span>
         </div>
 
         <section className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
           <div className="relative h-56 w-full bg-gray-100">
             <Image
-              src={club.coverImageUrl || fallbackCover}
-              alt={club.name}
+              src={initialClub.coverImageUrl || fallbackCover}
+              alt={initialClub.name}
               fill
               className="object-cover"
             />
@@ -198,7 +83,7 @@ export function ClubProfilePanel({
                 </div>
                 <div className="pb-1">
                   <p className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Club Profile</p>
-                  <h1 className="mt-1 text-3xl font-black tracking-tight text-gray-900">{club.name}</h1>
+                  <h1 className="mt-1 text-3xl font-black tracking-tight text-gray-900">{initialClub.name}</h1>
                 </div>
               </div>
 
@@ -207,14 +92,14 @@ export function ClubProfilePanel({
                   <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">Members</div>
                   <div className="mt-1 flex items-center gap-2 font-bold text-gray-900">
                     <Users size={16} className="text-[#51237f]" />
-                    {club.memberCount}
+                    {initialClub.memberCount}
                   </div>
                 </div>
                 <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm">
                   <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">Meeting Time</div>
                   <div className="mt-1 flex items-center gap-2 font-bold text-gray-900">
                     <CalendarDays size={16} className="text-[#51237f]" />
-                    {club.meetingTime || "TBA"}
+                    {initialClub.meetingTime || "TBA"}
                   </div>
                 </div>
               </div>
@@ -227,89 +112,16 @@ export function ClubProfilePanel({
                     <ShieldCheck size={16} className="text-[#51237f]" />
                     <h2 className="text-lg font-bold text-gray-900">About this club</h2>
                   </div>
-
-                  {isEditing ? (
-                    <div className="space-y-4 rounded-xl border border-gray-200 bg-gray-50 p-5">
-                      <label className="block">
-                        <span className="mb-2 block text-sm font-semibold text-gray-700">Club name</span>
-                        <input
-                          value={draft.name}
-                          onChange={(event) => setDraft((current) => ({ ...current, name: event.target.value }))}
-                          className="w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#51237f] focus:ring-2 focus:ring-[#51237f]/15"
-                        />
-                      </label>
-
-                      <label className="block">
-                        <span className="mb-2 block text-sm font-semibold text-gray-700">Description</span>
-                        <textarea
-                          value={draft.description}
-                          onChange={(event) => setDraft((current) => ({ ...current, description: event.target.value }))}
-                          rows={5}
-                          className="w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#51237f] focus:ring-2 focus:ring-[#51237f]/15"
-                        />
-                      </label>
-
-                      <div className="grid gap-4 md:grid-cols-2">
-                        <label className="block">
-                          <span className="mb-2 block text-sm font-semibold text-gray-700">Meeting time</span>
-                          <input
-                            value={draft.meetingTime}
-                            onChange={(event) => setDraft((current) => ({ ...current, meetingTime: event.target.value }))}
-                            placeholder="Wednesdays at 3:00 PM"
-                            className="w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#51237f] focus:ring-2 focus:ring-[#51237f]/15"
-                          />
-                        </label>
-
-                        <label className="block">
-                          <span className="mb-2 block text-sm font-semibold text-gray-700">Cover image URL</span>
-                          <input
-                            value={draft.coverImageUrl}
-                            onChange={(event) => setDraft((current) => ({ ...current, coverImageUrl: event.target.value }))}
-                            placeholder="https://..."
-                            className="w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#51237f] focus:ring-2 focus:ring-[#51237f]/15"
-                          />
-                        </label>
-                      </div>
-
-                      {error ? (
-                        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
-                          {error}
-                        </div>
-                      ) : null}
-
-                      <div className="flex flex-wrap items-center gap-3">
-                        <button
-                          type="button"
-                          onClick={handleSave}
-                          disabled={isSaving || !draft.name.trim()}
-                          className="inline-flex items-center gap-2 rounded-md bg-[#51237f] px-4 py-2 text-sm font-semibold text-white hover:bg-[#45206b] transition-colors disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                          <Save size={16} />
-                          {isSaving ? "Saving..." : "Save changes"}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={handleCancel}
-                          disabled={isSaving}
-                          className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
-                        >
-                          <X size={16} />
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <p className="max-w-3xl leading-7 text-gray-600">
-                      {club.description || "This club has not added a public description yet."}
-                    </p>
-                  )}
+                  <p className="max-w-3xl leading-7 text-gray-600">
+                    {initialClub.description || "This club has not added a public description yet."}
+                  </p>
                 </section>
 
                 <section>
                   <h2 className="mb-4 text-lg font-bold text-gray-900">Upcoming club events</h2>
                   <div className="space-y-3">
-                    {events.length > 0 ? (
-                      events.map((event) => (
+                    {initialEvents.length > 0 ? (
+                      initialEvents.map((event) => (
                         <div
                           key={event.id}
                           className="rounded-xl border border-gray-200 bg-white px-5 py-4 shadow-sm"
@@ -349,19 +161,17 @@ export function ClubProfilePanel({
                       href="/activity"
                       className="block rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-semibold text-gray-700 hover:border-[#51237f] hover:text-[#51237f] transition-colors"
                     >
-                      View my activity
+                      View activity preview
                     </Link>
                   </div>
                 </section>
 
-                {checkedAccess && canEdit ? (
-                  <section className="rounded-xl border border-purple-200 bg-purple-50 p-5">
-                    <h2 className="text-base font-bold text-[#51237f]">Officer access enabled</h2>
-                    <p className="mt-2 text-sm leading-6 text-[#51237f]/80">
-                      You can update this club page directly from the web. Changes made here update the same club record used by the mobile app.
-                    </p>
-                  </section>
-                ) : null}
+                <section className="rounded-xl border border-purple-200 bg-purple-50 p-5">
+                  <h2 className="text-base font-bold text-[#51237f]">Static preview mode</h2>
+                  <p className="mt-2 text-sm leading-6 text-[#51237f]/80">
+                    This club page is currently running on preview content only. Live officer editing and database-backed profile updates will be reconnected later.
+                  </p>
+                </section>
               </aside>
             </div>
           </div>
