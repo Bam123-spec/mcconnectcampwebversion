@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { LogIn, Users, Search, Filter, ExternalLink } from "lucide-react";
 import { EventCard } from "@/components/events/EventCard";
-import { cookies } from "next/headers";
+import { AUTH_ENABLED } from "@/lib/features";
 
 const MOCK_EVENTS = [
   {
@@ -64,8 +64,7 @@ const QUICK_LINKS = [
 ];
 
 export default async function Home() {
-  const cookieStore = await cookies();
-  const isAuthenticated = cookieStore.get("auth")?.value === "true";
+  const isAuthenticated = false;
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f5f6f8]">
@@ -87,7 +86,7 @@ export default async function Home() {
           <p className="text-white text-xl md:text-2xl mb-8 font-medium drop-shadow-md">
             {isAuthenticated ? "Here's what's happening on your campus today." : "The official campus community platform at Montgomery College"}
           </p>
-          {!isAuthenticated && (
+          {!isAuthenticated && AUTH_ENABLED && (
             <Link 
               href="/login" 
               className="flex items-center gap-2 bg-[#51237f] hover:bg-[#51237f]/90 text-white px-8 py-3 rounded-full font-semibold transition-colors shadow-lg"

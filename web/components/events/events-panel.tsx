@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { EventCard, type WebEventCardEvent } from "@/components/events/EventCard";
 import { supabase } from "@/lib/supabase";
+import { AUTH_ENABLED } from "@/lib/features";
 
 const parseLocalDate = (value?: string | null) => {
   if (!value) return null;
@@ -21,6 +22,10 @@ export function EventsPanel({ initialEvents }: { initialEvents: WebEventCardEven
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!AUTH_ENABLED) {
+      return;
+    }
+
     let mounted = true;
 
     const syncRegistrations = async () => {
@@ -69,6 +74,7 @@ export function EventsPanel({ initialEvents }: { initialEvents: WebEventCardEven
   }, []);
 
   const handleToggleRsvp = async (eventId: string, isRegistered: boolean) => {
+    if (!AUTH_ENABLED) return;
     setError(null);
 
     const {
@@ -174,6 +180,7 @@ export function EventsPanel({ initialEvents }: { initialEvents: WebEventCardEven
                 isPending={pendingEventIds.has(event.id)}
                 onToggleRsvp={handleToggleRsvp}
                 hasSession={hasSession}
+                authEnabled={AUTH_ENABLED}
               />
             ))}
           </div>
@@ -202,6 +209,7 @@ export function EventsPanel({ initialEvents }: { initialEvents: WebEventCardEven
               isPast
               isRegistered={registeredIds.has(event.id)}
               hasSession={hasSession}
+              authEnabled={AUTH_ENABLED}
             />
           ))}
         </div>

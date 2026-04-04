@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { CalendarDays, Edit3, MapPin, Save, ShieldCheck, Users, X } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { slugifyClubName } from "@/lib/club-utils";
+import { AUTH_ENABLED } from "@/lib/features";
 
 type ClubProfile = {
   id: string;
@@ -52,7 +53,7 @@ export function ClubProfilePanel({
   const [club, setClub] = useState(initialClub);
   const [events] = useState(initialEvents);
   const [canEdit, setCanEdit] = useState(false);
-  const [checkedAccess, setCheckedAccess] = useState(false);
+  const [checkedAccess, setCheckedAccess] = useState(!AUTH_ENABLED);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -64,6 +65,10 @@ export function ClubProfilePanel({
   });
 
   useEffect(() => {
+    if (!AUTH_ENABLED) {
+      return;
+    }
+
     const checkAccess = async () => {
       const {
         data: { user },

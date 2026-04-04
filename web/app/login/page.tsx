@@ -1,11 +1,34 @@
 import Link from "next/link";
 import { ArrowLeft, ShieldCheck, Fingerprint } from "lucide-react";
 import { OtherCollegeLogin } from "@/components/auth/other-college-login";
+import { AUTH_ENABLED } from "@/lib/features";
 
 const montgomeryCollegeLoginUrl =
   "https://mymclogin.glb.montgomerycollege.edu/authenticationendpoint/login.do?RelayState=eyJ0ZW5hbnRJZCI6Ijg4M2ZmNDhjLTkwOTItNGYxZi05NGY4LWMzODY4ODlhNzM1NSIsImFjY291bnRJZCI6IjAwMUcwMDAwMDBpSG4zZklBQyIsImp3dENhbGxiYWNrVXJsIjoiaHR0cHM6Ly9leHBlcmllbmNlLmVsbHVjaWFuY2xvdWQuY29tL21jODI1L2F1dGgvY2FsbGJhY2s%2Fc2lkPVMyNW9pTThnN3VqRld1R1hJcHlCYmE2eEF1amROQVNFIiwiaWRwTG9nb3V0VXJsIjoiaHR0cHM6Ly9leHBlcmllbmNlLmVsbHVjaWFuY2xvdWQuY29tL2lkcC1sb2dvdXQiLCJ0b2tlblZlcnNpb24iOiIxLjEuMCJ9&SigAlg=http%3A%2F%2Fwww.w3.org%2F2001%2F04%2Fxmldsig-more%23rsa-sha256&Signature=Be7M8BeRY1wQeE619S5yJ4t5IQa%2BvKHsPKQSLKDVAuBaIo6SojYH66U%2BTT7Vo3a9fthoedp6H9icmmwz3TBZFbXxexUr18hg7u3dYLdurqAfleC2R3Ca3nhmrWe%2FhEcgBnE5yQdKvymJclbBs%2B5CcXvlQV8qqZh3rlLVAd%2B04USPrjAesAlMk5HTCWYdj7%2Fxmn%2F4ydzHV78BnxbomSYKIGKBCMUksUtbTI5%2BA3HMQDf7aRt%2Bx3go4IMGtMY8VQ2Pi9SuZIx4JBoYuMLtMUp59mnq1MPQ51%2F6LpQiUqZN5Yl1O3ekn74AfHdxaqc8KVL%2B4ooToyYWF8RD%2Bc3xXkeQsQ%3D%3D&commonAuthCallerPath=%2Fsamlsso&forceAuth=false&passiveAuth=false&spEntityID=EthosExperience&tenantDomain=carbon.super&sessionDataKey=5cb4ef0d-6a95-4422-9c73-8634bb912af9&relyingParty=EthosExperience&type=samlsso&sp=EthosExperience&isSaaSApp=false&authenticators=BasicAuthenticator:LOCAL";
 
 export default function LoginPage() {
+  if (!AUTH_ENABLED) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
+        <div className="w-full max-w-md rounded-[2rem] border border-gray-200 bg-white p-10 text-center shadow-sm">
+          <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-purple-50 text-[var(--primary)] mb-6">
+            <Fingerprint size={30} strokeWidth={1.5} />
+          </div>
+          <h1 className="text-3xl font-black tracking-tight text-gray-900 mb-3">Institutional login is temporarily disabled</h1>
+          <p className="text-gray-600 leading-relaxed mb-8">
+            The web portal is currently running in public preview mode while deployment and campus SSO setup are being finalized.
+          </p>
+          <Link
+            href="/"
+            className="inline-flex items-center justify-center rounded-xl bg-[#51237f] px-6 py-3 text-sm font-semibold text-white hover:bg-[#45206b] transition-colors"
+          >
+            Return to homepage
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 relative overflow-hidden">
       {/* Premium Background Ambience */}

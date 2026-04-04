@@ -22,6 +22,7 @@ export function EventCard({
   isRegistered = false,
   isPending = false,
   hasSession = false,
+  authEnabled = true,
   onToggleRsvp,
 }: {
   event: WebEventCardEvent;
@@ -29,6 +30,7 @@ export function EventCard({
   isRegistered?: boolean;
   isPending?: boolean;
   hasSession?: boolean;
+  authEnabled?: boolean;
   onToggleRsvp?: (eventId: string, isRegistered: boolean) => void | Promise<void>;
 }) {
   // Format dates similarly to "Fri, Apr 3, 2026 At 5:30 PM"
@@ -86,6 +88,8 @@ export function EventCard({
             <span className="text-xs font-medium text-gray-500">
               {isPast
                 ? "Event closed"
+                : !authEnabled
+                  ? "RSVP will be available soon"
                 : isRegistered
                   ? "You are registered"
                   : hasSession
@@ -96,6 +100,10 @@ export function EventCard({
             {isPast ? (
               <span className="inline-flex items-center rounded-md border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-400">
                 Closed
+              </span>
+            ) : !authEnabled ? (
+              <span className="inline-flex items-center rounded-md border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-500">
+                RSVP Soon
               </span>
             ) : onToggleRsvp ? (
               <button

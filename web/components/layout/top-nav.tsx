@@ -7,13 +7,18 @@ import { useEffect, useState } from "react";
 import { LogIn, User, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
+import { AUTH_ENABLED } from "@/lib/features";
 
 export function TopNav({ isAuthenticated = false }: { isAuthenticated?: boolean }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [hasSession, setHasSession] = useState(isAuthenticated);
+  const [hasSession, setHasSession] = useState(AUTH_ENABLED ? isAuthenticated : false);
 
   useEffect(() => {
+    if (!AUTH_ENABLED) {
+      return;
+    }
+
     let mounted = true;
 
     const syncSession = async () => {
@@ -40,6 +45,7 @@ export function TopNav({ isAuthenticated = false }: { isAuthenticated?: boolean 
   }, [isAuthenticated]);
 
   const handleSignOut = async () => {
+    if (!AUTH_ENABLED) return;
     await supabase.auth.signOut();
     await fetch("/auth/session", {
       method: "DELETE",
@@ -115,7 +121,9 @@ export function TopNav({ isAuthenticated = false }: { isAuthenticated?: boolean 
 
       {/* Auth / Right Side */}
       <div className="bg-[#51237f] flex items-center px-6 h-full shrink-0">
-        {!hasSession ? (
+        {!AUTH_ENABLED ? (
+          <div className="text-white font-semibold text-sm">Public Preview</div>
+        ) : !hasSession ? (
           <Link 
             href="/login" 
             className="flex items-center gap-2 text-white font-semibold text-sm hover:opacity-80 transition-opacity"

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Award, Clock, Clock3, QrCode, ShieldCheck, Ticket, Users, MapPin } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { AUTH_ENABLED } from "@/lib/features";
 
 type EventRow = {
   id: string;
@@ -128,7 +129,7 @@ const unwrapSingle = <T,>(value: T | T[] | null | undefined): T | null => {
 };
 
 export function ActivityPanel() {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(AUTH_ENABLED);
   const [hasSession, setHasSession] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [registrations, setRegistrations] = useState<ActivityRegistration[]>([]);
@@ -136,6 +137,10 @@ export function ActivityPanel() {
   const [leadershipCount, setLeadershipCount] = useState(0);
 
   useEffect(() => {
+    if (!AUTH_ENABLED) {
+      return;
+    }
+
     let mounted = true;
 
     const loadActivity = async () => {
@@ -351,15 +356,19 @@ export function ActivityPanel() {
     return (
       <div className="bg-[#f5f6f8] min-h-[calc(100vh-60px)] flex flex-col items-center justify-center p-4">
         <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200 text-center max-w-md">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Sign In Required</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            {AUTH_ENABLED ? "Sign In Required" : "Activity is coming soon"}
+          </h2>
           <p className="text-gray-600 mb-8 leading-relaxed">
-            You must be logged into Raptor Connect to view your personalized activity, memberships, and RSVPs.
+            {AUTH_ENABLED
+              ? "You must be logged into Raptor Connect to view your personalized activity, memberships, and RSVPs."
+              : "The web portal is currently in public preview mode. Personalized activity, memberships, and RSVPs will appear here once web sign-in is re-enabled."}
           </p>
           <Link
-            href="/login"
+            href={AUTH_ENABLED ? "/login" : "/"}
             className="inline-block bg-[#51237f] hover:bg-[#51237f]/90 text-white px-8 py-3 rounded-md font-bold shadow-sm transition-colors"
           >
-            Sign In with MyMC
+            {AUTH_ENABLED ? "Sign In with MyMC" : "Return to homepage"}
           </Link>
         </div>
       </div>
