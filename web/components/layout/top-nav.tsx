@@ -95,6 +95,8 @@ export function TopNav() {
     return pathname === href || pathname.startsWith(`${href}/`);
   };
 
+  const showManageNav = leadershipCount > 0 || isPlatformAdmin;
+
   return (
     <header className="w-full h-[60px] bg-white border-b border-gray-300 flex items-stretch top-0 sticky z-50 shadow-sm">
       {/* Institutional Logo Section */}
@@ -157,15 +159,27 @@ export function TopNav() {
         >
           Profile
         </Link>
-        <Link 
-          href="/docs" 
-          className={cn(
-            "flex items-center px-6 h-full text-sm font-semibold border-b-2 transition-colors",
-            isPathActive("/docs") ? "border-[#51237f] text-gray-900" : "border-transparent text-gray-600 hover:text-gray-900"
-          )}
-        >
-          Support & Help
-        </Link>
+        {showManageNav ? (
+          <Link 
+            href="/manage" 
+            className={cn(
+              "flex items-center px-6 h-full text-sm font-semibold border-b-2 transition-colors",
+              isPathActive("/manage") ? "border-[#51237f] text-gray-900" : "border-transparent text-gray-600 hover:text-gray-900"
+            )}
+          >
+            Manage
+          </Link>
+        ) : (
+          <Link 
+            href="/docs" 
+            className={cn(
+              "flex items-center px-6 h-full text-sm font-semibold border-b-2 transition-colors",
+              isPathActive("/docs") ? "border-[#51237f] text-gray-900" : "border-transparent text-gray-600 hover:text-gray-900"
+            )}
+          >
+            Support & Help
+          </Link>
+        )}
       </nav>
 
       {/* Auth / Right Side */}
