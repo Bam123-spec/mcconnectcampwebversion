@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { ChevronRight, LoaderCircle, ShieldCheck, Users } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { formatJoinedLabel, formatOfficerRole, getClubInitials } from "@/lib/live-data";
-import { slugifyClubName } from "@/lib/club-utils";
+import { getClubPath } from "@/lib/club-utils";
 
 type MembershipRow = {
   id: string;
@@ -28,7 +28,7 @@ type ProfileRow = {
 type MembershipSummary = {
   id: string;
   name: string;
-  slug: string;
+  href: string;
   initials: string;
   joinedLabel: string;
   roleLabel: string;
@@ -98,7 +98,7 @@ export function CampusAccessPanel() {
           return {
             id: membership.id,
             name: clubName,
-            slug: slugifyClubName(clubName),
+            href: getClubPath(membership.club_id),
             initials: getClubInitials(clubName),
             joinedLabel: formatJoinedLabel(),
             roleLabel: officerRole ? formatOfficerRole(officerRole) : "Member",
@@ -182,7 +182,7 @@ export function CampusAccessPanel() {
                 {memberships.map((membership) => (
                   <Link
                     key={membership.id}
-                    href={`/clubs/${membership.slug}`}
+                    href={membership.href}
                     className="flex items-center justify-between rounded-md border border-gray-200 px-3 py-3 transition hover:border-[#51237f] hover:bg-[#faf8fd]"
                   >
                     <div className="flex items-center gap-3 min-w-0">

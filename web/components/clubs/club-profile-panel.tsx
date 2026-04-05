@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { CalendarDays, LoaderCircle, MapPin, ShieldCheck, Users } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
@@ -12,7 +13,6 @@ type ClubProfile = {
   description: string;
   coverImageUrl: string | null;
   memberCount: number;
-  meetingTime: string;
   slug: string;
 };
 
@@ -48,10 +48,12 @@ export function ClubProfilePanel({
   initialEvents: ClubEvent[];
   officerNames: string[];
 }) {
+  const router = useRouter();
   const [hasSession, setHasSession] = useState(false);
   const [isMember, setIsMember] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [isBusy, setIsBusy] = useState<"join" | "follow" | null>(null);
+  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -112,7 +114,7 @@ export function ClubProfilePanel({
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) {
-      window.location.href = "/login";
+      router.push("/login");
       return null;
     }
     return user;
@@ -123,6 +125,7 @@ export function ClubProfilePanel({
     if (!user) return;
 
     setIsBusy("join");
+    setFeedback(null);
     try {
       const { error } = await supabase.from("club_members").insert({
         club_id: initialClub.id,
@@ -131,9 +134,21 @@ export function ClubProfilePanel({
       });
 
       if (error) throw error;
+
+      await supabase.from("club_followers").upsert(
+        {
+          club_id: initialClub.id,
+          user_id: user.id,
+        },
+        { onConflict: "user_id, club_id", ignoreDuplicates: true }
+      );
+
       setIsMember(true);
+      setIsFollowing(true);
+      setFeedback({ type: "success", message: "You joined this club successfully." });
     } catch (error) {
       console.error("Error joining club:", error);
+      setFeedback({ type: "error", message: "We couldn't join this club right now. Please try again." });
     } finally {
       setIsBusy(null);
     }
@@ -144,6 +159,7 @@ export function ClubProfilePanel({
     if (!user) return;
 
     setIsBusy("follow");
+    setFeedback(null);
     try {
       if (isFollowing) {
         const { error } = await supabase
@@ -154,6 +170,7 @@ export function ClubProfilePanel({
 
         if (error) throw error;
         setIsFollowing(false);
+        setFeedback({ type: "success", message: "You will stop receiving updates from this club." });
       } else {
         const { error } = await supabase.from("club_followers").insert({
           club_id: initialClub.id,
@@ -162,9 +179,11 @@ export function ClubProfilePanel({
 
         if (error) throw error;
         setIsFollowing(true);
+        setFeedback({ type: "success", message: "You're now following this club." });
       }
     } catch (error) {
       console.error("Error updating follow state:", error);
+      setFeedback({ type: "error", message: "We couldn't update your follow preferences right now." });
     } finally {
       setIsBusy(null);
     }
@@ -181,12 +200,12 @@ export function ClubProfilePanel({
   return (
     <div className="bg-[#f5f6f8] min-h-screen py-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-6 flex items-center justify-between gap-4">
+        <div className="mb-6 flex items-center justify-between gap-4">
           <Link href="/clubs" className="text-sm font-semibold text-[#51237f] hover:underline">
             Back to clubs
           </Link>
           <span className="rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-500">
-            Live club page
+            Montgomery College organization
           </span>
         </div>
 
@@ -213,7 +232,7 @@ export function ClubProfilePanel({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 md:flex md:items-center">
+              <div className="grid grid-cols-3 gap-3 md:flex md:items-center">
                 <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm">
                   <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">Members</div>
                   <div className="mt-1 flex items-center gap-2 font-bold text-gray-900">
@@ -222,10 +241,10 @@ export function ClubProfilePanel({
                   </div>
                 </div>
                 <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm">
-                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">Meeting Time</div>
+                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">Upcoming Events</div>
                   <div className="mt-1 flex items-center gap-2 font-bold text-gray-900">
                     <CalendarDays size={16} className="text-[#51237f]" />
-                    {initialClub.meetingTime || "TBA"}
+                    {initialEvents.length}
                   </div>
                 </div>
                 <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm">
@@ -236,6 +255,18 @@ export function ClubProfilePanel({
                 </div>
               </div>
             </div>
+
+            {feedback ? (
+              <div
+                className={`mt-6 rounded-lg px-4 py-3 text-sm font-medium ${
+                  feedback.type === "success"
+                    ? "border border-green-200 bg-green-50 text-green-700"
+                    : "border border-red-200 bg-red-50 text-red-700"
+                }`}
+              >
+                {feedback.message}
+              </div>
+            ) : null}
 
             <div className="mt-8 grid gap-8 lg:grid-cols-[1.7fr_1fr]">
               <div className="space-y-8">
@@ -339,15 +370,15 @@ export function ClubProfilePanel({
                       href="/activity"
                       className="block rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-semibold text-gray-700 hover:border-[#51237f] hover:text-[#51237f] transition-colors"
                     >
-                      View activity preview
+                      View my activity
                     </Link>
                   </div>
                 </section>
 
-                <section className="rounded-xl border border-purple-200 bg-purple-50 p-5">
-                  <h2 className="text-base font-bold text-[#51237f]">Connected to campus data</h2>
-                  <p className="mt-2 text-sm leading-6 text-[#51237f]/80">
-                    This profile is reading the live club record, current officer assignments, and linked events from Supabase.
+                <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+                  <h2 className="text-base font-bold text-gray-900">Membership Access</h2>
+                  <p className="mt-2 text-sm leading-6 text-gray-600">
+                    Join this organization to add it to your activity page and receive follow-up updates through your campus portal.
                   </p>
                 </section>
               </aside>

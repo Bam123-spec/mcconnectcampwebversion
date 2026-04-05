@@ -17,7 +17,15 @@ type EventLike = {
   day?: string | null;
   time?: string | null;
   cover_image_url?: string | null;
-  audience_count?: number | null;
+  rsvp_count?: number | null;
+  clubs?:
+    | {
+        name?: string | null;
+      }
+    | {
+        name?: string | null;
+      }[]
+    | null;
 };
 
 const CLUB_COLORS = [
@@ -86,14 +94,15 @@ export const normalizeEventForWeb = (event: EventLike): WebEventCardEvent => ({
   date: event.date || event.day || new Date().toISOString(),
   time: event.time || "TBA",
   cover_image_url: event.cover_image_url ?? null,
-  audience_count: event.audience_count ?? undefined,
+  rsvp_count: event.rsvp_count ?? undefined,
+  organizer_name: Array.isArray(event.clubs) ? event.clubs[0]?.name : event.clubs?.name,
 });
 
 export const formatJoinedLabel = (value?: string | null) => {
-  if (!value) return "Joined recently";
+  if (!value) return "";
 
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Joined recently";
+  if (Number.isNaN(date.getTime())) return "";
 
   return `Joined ${date.toLocaleDateString("en-US", {
     month: "short",

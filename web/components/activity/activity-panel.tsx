@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Award, Bookmark, Clock, Clock3, LoaderCircle, QrCode, ShieldCheck, Ticket, Users, MapPin } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { formatEventDateLabel, formatJoinedLabel, formatOfficerRole, getClubInitials } from "@/lib/live-data";
-import { slugifyClubName } from "@/lib/club-utils";
+import { getClubPath } from "@/lib/club-utils";
 
 type ActivityRegistration = {
   id: string;
@@ -19,6 +19,7 @@ type ActivityRegistration = {
 
 type ActivityMembership = {
   id: string;
+  clubId: string;
   name: string;
   role: string;
   joinedLabel: string;
@@ -198,6 +199,7 @@ export function ActivityPanel() {
 
           return {
             id: membership.id,
+            clubId: membership.club_id,
             name: clubName,
             role: officerRole ? `${formatOfficerRole(officerRole)} (Officer)` : "Member",
             joinedLabel: formatJoinedLabel(),
@@ -405,7 +407,7 @@ export function ActivityPanel() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <Link
-                        href={`/clubs/${slugifyClubName(membership.name)}`}
+                        href={getClubPath(membership.clubId)}
                         className="text-base font-bold text-gray-900 truncate hover:text-[#51237f]"
                       >
                         {membership.name}
@@ -466,7 +468,7 @@ export function ActivityPanel() {
 
             <section className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
               <div className="px-6 py-4 border-b border-gray-100">
-                <h2 className="font-bold text-gray-900">Preview Notes</h2>
+                <h2 className="font-bold text-gray-900">Activity Notes</h2>
               </div>
               <div className="p-6 space-y-5">
                 <div className="flex items-start gap-3">

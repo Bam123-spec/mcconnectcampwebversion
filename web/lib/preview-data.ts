@@ -11,7 +11,6 @@ export type PreviewClub = {
   initials: string;
   color: string;
   coverImageUrl: string | null;
-  meetingTime: string;
 };
 
 export type PreviewActivityRegistration = {
@@ -42,7 +41,8 @@ export const previewEvents: WebEventCardEvent[] = [
     date: "2026-04-18",
     time: "10:00 AM",
     cover_image_url: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=1600&auto=format&fit=crop",
-    audience_count: 86,
+    rsvp_count: 86,
+    organizer_name: "Career Services",
   },
   {
     id: "evt-2",
@@ -52,7 +52,8 @@ export const previewEvents: WebEventCardEvent[] = [
     date: "2026-04-21",
     time: "4:00 PM",
     cover_image_url: "https://images.unsplash.com/photo-1515169067868-5387ec356754?q=80&w=1600&auto=format&fit=crop",
-    audience_count: 41,
+    rsvp_count: 41,
+    organizer_name: "Student Leadership Office",
   },
   {
     id: "evt-3",
@@ -62,7 +63,8 @@ export const previewEvents: WebEventCardEvent[] = [
     date: "2026-04-24",
     time: "5:30 PM",
     cover_image_url: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=1600&auto=format&fit=crop",
-    audience_count: 59,
+    rsvp_count: 59,
+    organizer_name: "Student Life Office",
   },
   {
     id: "evt-4",
@@ -72,7 +74,8 @@ export const previewEvents: WebEventCardEvent[] = [
     date: "2026-04-27",
     time: "6:30 PM",
     cover_image_url: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=1600&auto=format&fit=crop",
-    audience_count: 112,
+    rsvp_count: 112,
+    organizer_name: "Ethiopian & Eritrean Student Association",
   },
   {
     id: "evt-5",
@@ -82,7 +85,8 @@ export const previewEvents: WebEventCardEvent[] = [
     date: "2026-03-12",
     time: "7:00 PM",
     cover_image_url: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1600&auto=format&fit=crop",
-    audience_count: 74,
+    rsvp_count: 74,
+    organizer_name: "Computer Science Club",
   },
   {
     id: "evt-6",
@@ -92,7 +96,8 @@ export const previewEvents: WebEventCardEvent[] = [
     date: "2026-03-04",
     time: "3:00 PM",
     cover_image_url: "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=1600&auto=format&fit=crop",
-    audience_count: 33,
+    rsvp_count: 33,
+    organizer_name: "Community Outreach",
   },
 ];
 
@@ -107,7 +112,6 @@ export const previewClubs: PreviewClub[] = [
     initials: "CS",
     color: "bg-blue-600",
     coverImageUrl: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1600&auto=format&fit=crop",
-    meetingTime: "Wednesdays at 3:00 PM",
   },
   {
     id: "club-2",
@@ -119,7 +123,6 @@ export const previewClubs: PreviewClub[] = [
     initials: "EE",
     color: "bg-green-600",
     coverImageUrl: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=1600&auto=format&fit=crop",
-    meetingTime: "Fridays at 1:00 PM",
   },
   {
     id: "club-3",
@@ -131,7 +134,6 @@ export const previewClubs: PreviewClub[] = [
     initials: "SS",
     color: "bg-[#51237f]",
     coverImageUrl: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1600&auto=format&fit=crop",
-    meetingTime: "Mondays at 5:30 PM",
   },
   {
     id: "club-4",
@@ -143,7 +145,6 @@ export const previewClubs: PreviewClub[] = [
     initials: "CS",
     color: "bg-cyan-600",
     coverImageUrl: "https://images.unsplash.com/photo-1516321497487-e288fb19713f?q=80&w=1600&auto=format&fit=crop",
-    meetingTime: "Tuesdays at 4:00 PM",
   },
 ];
 

@@ -15,14 +15,21 @@ export default function MessagingPage() {
       <article className="prose prose-gray max-w-none">
         <h1 className="text-3xl md:text-5xl font-black tracking-tight text-gray-900 mb-6">Messaging & Forums</h1>
         <p className="text-xl text-gray-600 mb-10 leading-relaxed font-medium">
-          Connect Camp integrates direct messaging and organization-wide forums for seamless campus communication.
+          Raptor Connect supports campus conversations through club spaces, officer coordination, and community updates surfaced across the platform.
+        </p>
+
+        <h2 className="text-2xl font-bold text-gray-900 mt-12 mb-4 pt-10 border-t border-gray-100">
+          What to Expect
+        </h2>
+        <p className="text-gray-600 mb-6 leading-relaxed">
+          Messaging and discussion features may vary by role and by surface. Some conversations are available only inside authenticated club, officer, or admin workflows. Public web pages do not expose every messaging feature from the mobile experience.
         </p>
 
         <h2 className="text-2xl font-bold text-gray-900 mt-12 mb-4 pt-10 border-t border-gray-100">
           Conduct Policy
         </h2>
         <p className="text-gray-600 mb-6 leading-relaxed">
-          All messaging instances on Raptor Connect fall under the standard Montgomery College Title IX and Student Code of Conduct guidelines.
+          Use of campus communication tools remains subject to Montgomery College conduct expectations, moderation policies, and any applicable student communication guidelines.
         </p>
 
         <div className="mt-16 pt-8 border-t border-gray-100 flex justify-between items-center text-sm font-semibold">

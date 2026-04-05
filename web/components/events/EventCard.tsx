@@ -10,7 +10,8 @@ export type WebEventCardEvent = {
   date: string;
   time: string;
   cover_image_url?: string | null;
-  audience_count?: number;
+  rsvp_count?: number;
+  organizer_name?: string | null;
 };
 
 const fallbackCover =
@@ -33,14 +34,15 @@ export function EventCard({
   authEnabled?: boolean;
   onToggleRsvp?: (eventId: string, isRegistered: boolean) => void | Promise<void>;
 }) {
-  // Format dates similarly to "Fri, Apr 3, 2026 At 5:30 PM"
   const eventDate = new Date(event.date);
-  const dateString = eventDate.toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+  const dateString = Number.isNaN(eventDate.getTime())
+    ? "Date to be announced"
+    : eventDate.toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
 
   return (
     <div
@@ -59,7 +61,7 @@ export function EventCard({
           {isPast ? "Past" : "Campus"}
         </div>
         <div className="absolute top-2 right-2 bg-gray-800/60 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm flex items-center gap-1">
-          <Users size={12} /> {event.audience_count ?? 10}
+          <Users size={12} /> {event.rsvp_count ?? 0}
         </div>
       </div>
       
@@ -81,7 +83,7 @@ export function EventCard({
           </div>
           <div className="flex items-center gap-2 mt-4 pt-4 border-t border-gray-100 text-xs font-semibold text-gray-500">
             <Users size={14} className="text-gray-400" />
-            Student Life Office
+            {event.organizer_name || "Campus Event"}
           </div>
 
           <div className="mt-4 flex items-center justify-between gap-3">

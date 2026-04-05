@@ -45,19 +45,19 @@ export default function DocsPage() {
           2. Finding and Joining Groups
         </h2>
         <p className="text-gray-600 mb-4 leading-relaxed">
-          Montgomery College hosts over 100+ active student organizations. You can browse these through the <strong>Featured Groups</strong> section on your dashboard or by searching the directory.
+          Montgomery College hosts active student organizations across academic, cultural, leadership, and service communities. You can browse them from the Clubs page or from the featured group section on the homepage.
         </p>
         <ul className="list-disc pl-5 space-y-2 text-gray-600 mb-8 marker:text-[#51237f]">
-          <li>Navigate to the <span className="font-semibold text-gray-900">Groups Index</span> using the top navigation.</li>
-          <li>Filter by your campus (Rockville, Takoma Park/Silver Spring, or Germantown).</li>
-          <li>Click <strong className="text-gray-900">Request to Join</strong> on any group&apos;s profile page.</li>
+          <li>Navigate to <span className="font-semibold text-gray-900">Clubs</span> using the top navigation.</li>
+          <li>Search by organization name or keyword.</li>
+          <li>Open a club profile and use <strong className="text-gray-900">Join Club</strong> to become a member.</li>
         </ul>
 
         <h2 id="managing-rsvps" className="text-2xl font-bold text-gray-900 mt-12 mb-4">
           3. Managing Event RSVPs
         </h2>
         <p className="text-gray-600 mb-6 leading-relaxed">
-          When you click on an event card from your dashboard, you will be taken to the event details page. From there, you can RSVP, add the event to your calendar, or contact the event organizers directly.
+          The Events page is where you browse upcoming campus programming and RSVP directly from the event cards. Your registrations then appear automatically on the Activity page.
         </p>
         
         <div className="rounded-lg border border-gray-200 overflow-hidden bg-white mb-6 shadow-sm">
@@ -71,15 +71,11 @@ export default function DocsPage() {
             <tbody className="divide-y divide-gray-100 bg-white">
               <tr>
                 <td className="px-6 py-4 whitespace-nowrap font-bold text-green-700 bg-green-50/50">Confirmed</td>
-                <td className="px-6 py-4 text-gray-600 font-medium">Your spot is reserved. A QR code is generated for entry.</td>
+                <td className="px-6 py-4 text-gray-600 font-medium">Your spot is reserved and the registration appears on your Activity page.</td>
               </tr>
               <tr>
-                <td className="px-6 py-4 whitespace-nowrap font-bold text-yellow-700 bg-yellow-50/50">Waitlisted</td>
-                <td className="px-6 py-4 text-gray-600 font-medium">The event is at capacity. You will be notified if a spot opens.</td>
-              </tr>
-              <tr>
-                <td className="px-6 py-4 whitespace-nowrap font-bold text-blue-700 bg-blue-50/50">Pending Approval</td>
-                <td className="px-6 py-4 text-gray-600 font-medium">The organizer must manually approve your request to attend.</td>
+                <td className="px-6 py-4 whitespace-nowrap font-bold text-gray-700 bg-gray-50">Canceled</td>
+                <td className="px-6 py-4 text-gray-600 font-medium">If you remove your RSVP, the event will no longer appear in your registered list.</td>
               </tr>
             </tbody>
           </table>

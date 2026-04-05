@@ -19,16 +19,27 @@ type OfficerRow = {
 
 const getClubBySlug = async (slug: string) => {
   const supabase = createServerSupabaseClient();
-  const { data: clubs, error: clubsError } = await supabase
+  const { data: directClub, error: directClubError } = await supabase
     .from("clubs")
     .select("id, name, description, cover_image_url, member_count")
-    .order("name", { ascending: true });
+    .eq("id", slug)
+    .maybeSingle();
 
-  if (clubsError) {
-    return null;
+  let club = directClubError ? null : directClub;
+
+  if (!club) {
+    const { data: clubs, error: clubsError } = await supabase
+      .from("clubs")
+      .select("id, name, description, cover_image_url, member_count")
+      .order("name", { ascending: true });
+
+    if (clubsError) {
+      return null;
+    }
+
+    club = (clubs ?? []).find((entry) => slugifyClubName(entry.name || "") === slug) ?? null;
   }
 
-  const club = (clubs ?? []).find((entry) => slugifyClubName(entry.name || "") === slug);
   if (!club?.id) return null;
 
   const [{ data: events }, { data: officers }] = await Promise.all([
@@ -61,7 +72,6 @@ const getClubBySlug = async (slug: string) => {
       description: club.description ?? "",
       coverImageUrl: club.cover_image_url ?? null,
       memberCount: club.member_count ?? 0,
-      meetingTime: "TBA",
       slug: slugifyClubName(club.name),
     },
     events: (events ?? []).map((event) => ({

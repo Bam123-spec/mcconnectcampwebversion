@@ -67,8 +67,8 @@ export function TopNav() {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUserEmail(session?.user?.email ?? null);
+    } = supabase.auth.onAuthStateChange(() => {
+      syncUser();
     });
 
     return () => {
@@ -162,7 +162,7 @@ export function TopNav() {
       {/* Auth / Right Side */}
       <div className="bg-[#51237f] flex items-center gap-3 px-6 h-full shrink-0">
         {!AUTH_ENABLED ? (
-          <div className="text-white font-semibold text-sm">Public Preview</div>
+          <div className="text-white font-semibold text-sm">Sign-in unavailable</div>
         ) : userEmail ? (
           <>
             <div className="text-right">

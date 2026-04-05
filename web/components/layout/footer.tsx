@@ -9,14 +9,14 @@ export function Footer() {
           <div className="col-span-1 md:col-span-2">
             <Link href="/" className="relative h-12 w-48 mb-6 hover:opacity-80 transition-opacity flex items-center shrink-0">
               <Image 
-                src="/connect-camp-logo.png" 
-                alt="Connect Camp Logo" 
+                src="/mc-logo.png" 
+                alt="Montgomery College Logo" 
                 fill
                 className="object-contain object-left"
               />
             </Link>
             <p className="text-gray-500 mb-4 max-w-sm leading-relaxed">
-              Empowering students to achieve their academic and professional goals through community engagement and campus leadership.
+              Montgomery College&apos;s community platform for campus events, student organizations, and involvement opportunities.
             </p>
           </div>
           
@@ -40,9 +40,9 @@ export function Footer() {
         </div>
         
         <div className="pt-8 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-medium text-gray-400">
-          <div>© {new Date().getFullYear()} Connect Camp. All rights reserved.</div>
+          <div>© {new Date().getFullYear()} Raptor Connect. All rights reserved.</div>
           <div className="flex items-center gap-1 text-gray-500">
-            <span>The premier involvement platform for higher education.</span>
+            <span>Built for Montgomery College campus life.</span>
           </div>
         </div>
       </div>

@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { LogIn, Users, Search, Filter, ExternalLink } from "lucide-react";
+import { LogIn, Users, Search, ExternalLink } from "lucide-react";
 import { EventCard } from "@/components/events/EventCard";
 import { CampusAccessPanel } from "@/components/home/campus-access-panel";
 import { AUTH_ENABLED } from "@/lib/features";
 import { createServerSupabaseClient } from "@/lib/supabase";
-import { slugifyClubName } from "@/lib/club-utils";
+import { getClubPath } from "@/lib/club-utils";
 import { getClubColor, getClubInitials, inferCampus, inferClubCategory, normalizeEventForWeb } from "@/lib/live-data";
 
 type NewsRow = {
@@ -35,7 +35,7 @@ export default async function Home() {
   const [{ data: eventsData }, { data: clubsData }, { data: newsData }] = await Promise.all([
     supabase
       .from("events")
-      .select("id, name, description, location, date, day, time, cover_image_url")
+      .select("id, name, description, location, date, day, time, cover_image_url, clubs(name)")
       .order("date", { ascending: true, nullsFirst: false })
       .order("day", { ascending: true, nullsFirst: false })
       .limit(3),
@@ -53,7 +53,26 @@ export default async function Home() {
       .limit(2),
   ]);
 
-  const featuredEvents = (eventsData ?? []).map((event) => normalizeEventForWeb(event));
+  const eventIds = (eventsData ?? []).map((event) => event.id);
+  const { data: registrations } = eventIds.length
+    ? await supabase
+        .from("event_registrations")
+        .select("event_id")
+        .in("event_id", eventIds)
+        .limit(1000)
+    : { data: [] as Array<{ event_id: string }> };
+
+  const registrationCounts = new Map<string, number>();
+  for (const row of registrations ?? []) {
+    registrationCounts.set(row.event_id, (registrationCounts.get(row.event_id) ?? 0) + 1);
+  }
+
+  const featuredEvents = (eventsData ?? []).map((event) =>
+    normalizeEventForWeb({
+      ...event,
+      rsvp_count: registrationCounts.get(event.id) ?? 0,
+    })
+  );
   const featuredClubs = (clubsData ?? []).map((club) => ({
     id: club.id,
     name: club.name,
@@ -124,20 +143,20 @@ export default async function Home() {
                 Upcoming Events <span className="text-gray-500 font-normal text-lg">({featuredEvents.length})</span>
               </h2>
               
-              {/* Filter / Search Bar */}
-              <div className="flex items-center gap-2">
+              <form action="/events" className="flex items-center gap-2">
                 <div className="relative">
                   <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input 
                     type="text" 
+                    name="q"
                     placeholder="Search events..." 
                     className="pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#51237f] w-full md:w-64"
                   />
                 </div>
-                <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-md text-sm font-semibold hover:bg-gray-50 transition-colors">
-                  <Filter size={16} /> Filter
+                <button className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-md text-sm font-semibold hover:bg-gray-50 transition-colors">
+                  Search
                 </button>
-              </div>
+              </form>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -151,9 +170,9 @@ export default async function Home() {
           <section>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-semibold text-gray-800">Latest News</h2>
-              <button className="flex items-center gap-2 px-4 py-1.5 bg-gray-200 text-gray-700 rounded-md text-sm font-semibold hover:bg-gray-300 transition-colors">
+              <Link href="/announcements" className="flex items-center gap-2 px-4 py-1.5 bg-gray-200 text-gray-700 rounded-md text-sm font-semibold hover:bg-gray-300 transition-colors">
                 All News
-              </button>
+              </Link>
             </div>
 
             <div className="bg-white border text-left border-gray-200 rounded-lg overflow-hidden flex flex-col">
@@ -174,7 +193,7 @@ export default async function Home() {
                       </div>
                     </div>
                     <Link
-                      href="/docs/messaging"
+                      href={`/announcements/${news.id}`}
                       className="px-4 py-2 border border-gray-300 rounded font-semibold text-sm hover:bg-gray-50 flex items-center gap-2 w-full sm:w-auto justify-center"
                     >
                       Read
@@ -202,7 +221,7 @@ export default async function Home() {
             <div className="p-5 flex flex-col gap-4">
               {featuredClubs.map(club => (
                 <div key={club.id} className="flex flex-col border-b border-gray-100 last:border-0 pb-4 last:pb-0">
-                  <Link href={`/clubs/${slugifyClubName(club.name)}`} className="font-bold text-[#51237f] hover:underline mb-1 flex items-center gap-3">
+                  <Link href={getClubPath(club.id)} className="font-bold text-[#51237f] hover:underline mb-1 flex items-center gap-3">
                     <span className={`inline-flex h-8 w-8 items-center justify-center rounded-md text-xs font-black text-white ${club.color}`}>
                       {club.initials}
                     </span>

@@ -3,10 +3,22 @@ import { ArrowLeft, ShieldCheck, Fingerprint } from "lucide-react";
 import { OtherCollegeLogin } from "@/components/auth/other-college-login";
 import { AUTH_ENABLED } from "@/lib/features";
 
-const montgomeryCollegeLoginUrl =
-  "https://mymclogin.glb.montgomerycollege.edu/authenticationendpoint/login.do?RelayState=eyJ0ZW5hbnRJZCI6Ijg4M2ZmNDhjLTkwOTItNGYxZi05NGY4LWMzODY4ODlhNzM1NSIsImFjY291bnRJZCI6IjAwMUcwMDAwMDBpSG4zZklBQyIsImp3dENhbGxiYWNrVXJsIjoiaHR0cHM6Ly9leHBlcmllbmNlLmVsbHVjaWFuY2xvdWQuY29tL21jODI1L2F1dGgvY2FsbGJhY2s%2Fc2lkPVMyNW9pTThnN3VqRld1R1hJcHlCYmE2eEF1amROQVNFIiwiaWRwTG9nb3V0VXJsIjoiaHR0cHM6Ly9leHBlcmllbmNlLmVsbHVjaWFuY2xvdWQuY29tL2lkcC1sb2dvdXQiLCJ0b2tlblZlcnNpb24iOiIxLjEuMCJ9&SigAlg=http%3A%2F%2Fwww.w3.org%2F2001%2F04%2Fxmldsig-more%23rsa-sha256&Signature=Be7M8BeRY1wQeE619S5yJ4t5IQa%2BvKHsPKQSLKDVAuBaIo6SojYH66U%2BTT7Vo3a9fthoedp6H9icmmwz3TBZFbXxexUr18hg7u3dYLdurqAfleC2R3Ca3nhmrWe%2FhEcgBnE5yQdKvymJclbBs%2B5CcXvlQV8qqZh3rlLVAd%2B04USPrjAesAlMk5HTCWYdj7%2Fxmn%2F4ydzHV78BnxbomSYKIGKBCMUksUtbTI5%2BA3HMQDf7aRt%2Bx3go4IMGtMY8VQ2Pi9SuZIx4JBoYuMLtMUp59mnq1MPQ51%2F6LpQiUqZN5Yl1O3ekn74AfHdxaqc8KVL%2B4ooToyYWF8RD%2Bc3xXkeQsQ%3D%3D&commonAuthCallerPath=%2Fsamlsso&forceAuth=false&passiveAuth=false&spEntityID=EthosExperience&tenantDomain=carbon.super&sessionDataKey=5cb4ef0d-6a95-4422-9c73-8634bb912af9&relyingParty=EthosExperience&type=samlsso&sp=EthosExperience&isSaaSApp=false&authenticators=BasicAuthenticator:LOCAL";
+const getErrorMessage = (code?: string) => {
+  if (code === "mc_unavailable") {
+    return "Montgomery College SSO is not configured for this deployment yet.";
+  }
 
-export default function LoginPage() {
+  return null;
+};
+
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ error?: string }>;
+}) {
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const errorMessage = getErrorMessage(resolvedSearchParams?.error);
+
   if (!AUTH_ENABLED) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
@@ -16,7 +28,7 @@ export default function LoginPage() {
           </div>
           <h1 className="text-3xl font-black tracking-tight text-gray-900 mb-3">Institutional login is temporarily disabled</h1>
           <p className="text-gray-600 leading-relaxed mb-8">
-            The web portal is currently running in public preview mode while deployment and campus SSO setup are being finalized.
+            This deployment is not accepting web sign-ins right now.
           </p>
           <Link
             href="/"
@@ -54,9 +66,15 @@ export default function LoginPage() {
             </p>
           </div>
 
+          {errorMessage ? (
+            <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
+              {errorMessage}
+            </div>
+          ) : null}
+
           <div className="space-y-4">
             <a
-              href={montgomeryCollegeLoginUrl}
+              href="/auth/montgomery"
               className="w-full h-16 rounded-2xl border-2 border-transparent bg-gray-900 flex items-center justify-center gap-3 px-6 text-base font-bold text-white hover:bg-[var(--primary)] hover:shadow-xl hover:shadow-[var(--primary)]/20 transition-all duration-300 group hover:-translate-y-1"
             >
               <div className="h-6 w-6 rounded bg-white/20 flex items-center justify-center text-white text-[10px] font-black tracking-wider">
