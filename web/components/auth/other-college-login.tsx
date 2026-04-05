@@ -53,7 +53,7 @@ export function OtherCollegeLogin() {
   }
 
   return (
-    <form onSubmit={handleLogin} className="space-y-4 rounded-2xl border border-gray-200 bg-gray-50/70 p-5">
+    <form onSubmit={handleLogin} aria-busy={loading} className="space-y-4 rounded-2xl border border-gray-200 bg-gray-50/70 p-5">
       <div>
         <label htmlFor="other-college-email" className="mb-2 block text-sm font-semibold text-gray-700">
           School Email
@@ -85,7 +85,7 @@ export function OtherCollegeLogin() {
       </div>
 
       {error ? (
-        <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-3 text-sm text-red-700">
+        <div aria-live="assertive" className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-3 text-sm text-red-700">
           <AlertCircle size={16} className="mt-0.5 shrink-0" />
           <span>{error}</span>
         </div>

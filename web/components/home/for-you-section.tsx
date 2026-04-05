@@ -190,11 +190,11 @@ export function ForYouSection() {
   }, []);
 
   return (
-    <section className="rounded-[24px] border border-gray-200 bg-white p-6 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
+    <section aria-labelledby="for-you-heading" aria-busy={loading} className="rounded-[24px] border border-gray-200 bg-white p-6 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#51237f]">For You</p>
-          <h2 className="mt-2 text-2xl font-bold tracking-[-0.02em] text-gray-950">Personalized picks from your campus activity</h2>
+          <h2 id="for-you-heading" className="mt-2 text-2xl font-bold tracking-[-0.02em] text-gray-950">Personalized picks from your campus activity</h2>
           <p className="mt-2 text-sm leading-6 text-gray-600">
             {signedIn
               ? joinedClubCount
@@ -209,7 +209,7 @@ export function ForYouSection() {
       </div>
 
       {loading ? (
-        <div className="mt-6 flex items-center gap-3 text-sm text-gray-500">
+        <div role="status" aria-live="polite" className="mt-6 flex items-center gap-3 text-sm text-gray-500">
           <LoaderCircle size={16} className="animate-spin text-[#51237f]" />
           Loading your personalized campus feed.
         </div>

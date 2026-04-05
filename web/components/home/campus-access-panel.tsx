@@ -133,19 +133,19 @@ export function CampusAccessPanel() {
   const leadershipCount = memberships.filter((membership) => membership.isLeadership).length;
 
   return (
-    <div className="rounded-[24px] border border-gray-200 bg-white p-6 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
+    <section aria-labelledby="campus-access-heading" aria-busy={loading} className="rounded-[24px] border border-gray-200 bg-white p-6 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
       <div className="mb-5">
         <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">
           Your Campus Access
         </p>
-        <h3 className="mt-2 text-xl font-bold tracking-[-0.02em] text-gray-950">
+        <h3 id="campus-access-heading" className="mt-2 text-xl font-bold tracking-[-0.02em] text-gray-950">
           Clubs, roles, and shortcuts tied to your account
         </h3>
       </div>
 
       <div>
         {loading ? (
-          <div className="flex items-center gap-3 text-sm text-gray-500">
+          <div role="status" aria-live="polite" className="flex items-center gap-3 text-sm text-gray-500">
             <LoaderCircle size={16} className="animate-spin text-[#51237f]" />
             Loading your clubs and access.
           </div>
@@ -228,6 +228,6 @@ export function CampusAccessPanel() {
           </div>
         )}
       </div>
-    </div>
+    </section>
   );
 }

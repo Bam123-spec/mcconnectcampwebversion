@@ -27,9 +27,12 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans`}>
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
         <div className="flex flex-col min-h-screen">
           <TopNav />
-          <main className="flex-1 w-full bg-white relative">
+          <main id="main-content" className="flex-1 w-full bg-white relative">
             {children}
           </main>
           <Footer />

@@ -483,12 +483,12 @@ export function ManageOverview() {
       </section>
 
       {actionError ? (
-        <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <p aria-live="assertive" className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {actionError}
         </p>
       ) : null}
       {actionSuccess ? (
-        <p className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+        <p aria-live="polite" className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
           {actionSuccess}
         </p>
       ) : null}
@@ -545,13 +545,14 @@ export function ManageOverview() {
         </div>
         <div className="overflow-hidden rounded-2xl border border-gray-200">
           <table className="min-w-full divide-y divide-gray-200">
+            <caption className="sr-only">Events managed by the selected club</caption>
             <thead className="bg-[#faf8fd]">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Event Name</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Date</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">RSVPs</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Status</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Actions</th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Event Name</th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Date</th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">RSVPs</th>
+                <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Status</th>
+                <th scope="col" className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 bg-white">
@@ -577,6 +578,7 @@ export function ManageOverview() {
                       <div className="flex justify-end gap-2">
                         <Link
                           href={`/manage/events/${event.id}/edit`}
+                          aria-label={`Edit ${event.name}`}
                           className="inline-flex items-center gap-1 rounded-full border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-800 transition-colors hover:bg-gray-50"
                         >
                           <Pencil size={13} />
@@ -585,6 +587,7 @@ export function ManageOverview() {
                         <button
                           type="button"
                           onClick={() => handleDeleteEvent(event.id)}
+                          aria-label={`Delete ${event.name}`}
                           className="inline-flex items-center gap-1 rounded-full border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-700 transition-colors hover:bg-red-50"
                         >
                           <Trash2 size={13} />
@@ -629,6 +632,7 @@ export function ManageOverview() {
                     type="button"
                     disabled={!canManageRoles || member.isOfficer || member.isSelf}
                     onClick={() => handlePromote(member.userId)}
+                    aria-label={`Promote ${member.name} to officer`}
                     className={cn(
                       "inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold transition-colors",
                       !canManageRoles || member.isOfficer || member.isSelf
@@ -642,6 +646,7 @@ export function ManageOverview() {
                     type="button"
                     disabled={!canManageMembers || member.isSelf}
                     onClick={() => handleRemoveMember(member.userId)}
+                    aria-label={`Remove ${member.name} from club`}
                     className={cn(
                       "inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold transition-colors",
                       !canManageMembers || member.isSelf

@@ -15,21 +15,29 @@ export function DocsSidebar() {
         
         {/* Dropdown Area: Getting Started */}
         <div>
-          <button 
-            onClick={() => setGettingStartedOpen(!gettingStartedOpen)}
-            className={`w-full flex items-center justify-between px-3 py-2 text-sm font-bold rounded-md transition-colors ${
-              pathname === '/docs' ? 'text-[#0a2342] bg-gray-50' : 'text-gray-700 hover:bg-gray-50'
+          <div
+            className={`flex items-center justify-between gap-2 rounded-md px-3 py-2 text-sm font-bold transition-colors ${
+              pathname === "/docs" ? "bg-gray-50 text-[#0a2342]" : "text-gray-700 hover:bg-gray-50"
             }`}
           >
-            <div className="flex items-center gap-2">
-              <BookOpen size={16} className={pathname === '/docs' ? "text-[#51237f]" : "text-gray-400"}/>
-              <Link href="/docs" onClick={(e) => e.stopPropagation()}>Getting Started</Link>
-            </div>
-            {gettingStartedOpen ? <ChevronDown size={16} className="text-gray-400" /> : <ChevronRight size={16} className="text-gray-400" />}
-          </button>
+            <Link href="/docs" className="flex min-w-0 items-center gap-2">
+              <BookOpen size={16} className={pathname === "/docs" ? "text-[#51237f]" : "text-gray-400"} />
+              <span>Getting Started</span>
+            </Link>
+            <button
+              type="button"
+              aria-expanded={gettingStartedOpen}
+              aria-controls="docs-getting-started-links"
+              aria-label={gettingStartedOpen ? "Collapse getting started links" : "Expand getting started links"}
+              onClick={() => setGettingStartedOpen(!gettingStartedOpen)}
+              className="rounded-md p-1 text-gray-500 transition-colors hover:bg-white hover:text-gray-700"
+            >
+              {gettingStartedOpen ? <ChevronDown size={16} className="text-gray-400" /> : <ChevronRight size={16} className="text-gray-400" />}
+            </button>
+          </div>
           
           {gettingStartedOpen && (
-            <div className="flex flex-col gap-1 mt-1 pl-7 border-l-2 border-gray-100 ml-4">
+            <div id="docs-getting-started-links" className="flex flex-col gap-1 mt-1 pl-7 border-l-2 border-gray-100 ml-4">
               <Link href="/docs#completing-your-profile" className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">
                 1. Completing Your Profile
               </Link>

@@ -258,6 +258,7 @@ export function ClubProfilePanel({
 
             {feedback ? (
               <div
+                aria-live={feedback.type === "error" ? "assertive" : "polite"}
                 className={`mt-6 rounded-lg px-4 py-3 text-sm font-medium ${
                   feedback.type === "success"
                     ? "border border-green-200 bg-green-50 text-green-700"
@@ -338,6 +339,7 @@ export function ClubProfilePanel({
                       type="button"
                       onClick={handleJoin}
                       disabled={isMember || isBusy === "join"}
+                      aria-label={isMember ? `You already joined ${initialClub.name}` : `Join ${initialClub.name}`}
                       className="block w-full rounded-md border border-[#51237f] bg-[#51237f] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#45206b] disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {isBusy === "join" ? (
@@ -351,6 +353,7 @@ export function ClubProfilePanel({
                       type="button"
                       onClick={handleFollowToggle}
                       disabled={isBusy === "follow"}
+                      aria-label={`${isFollowing ? "Unfollow" : "Follow"} ${initialClub.name}`}
                       className="block w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-semibold text-gray-700 transition hover:border-[#51237f] hover:text-[#51237f] disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {isBusy === "follow" ? (

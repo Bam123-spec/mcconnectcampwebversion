@@ -245,15 +245,21 @@ export function LeadershipChatRoom({ conversationId }: { conversationId: string 
             </div>
 
             <form onSubmit={handleSend} className="mt-5 flex gap-3">
+              <label htmlFor="leadership-chat-draft" className="sr-only">
+                Message leadership channel
+              </label>
               <input
+                id="leadership-chat-draft"
                 value={draft}
                 onChange={(event) => setDraft(event.target.value)}
                 placeholder="Write to leadership..."
+                aria-label="Message leadership channel"
                 className="flex-1 rounded-2xl border border-gray-300 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-[#51237f]"
               />
               <button
                 type="submit"
                 disabled={sending || !draft.trim()}
+                aria-label={sending ? "Sending message to leadership" : "Send message to leadership"}
                 className="inline-flex items-center gap-2 rounded-full bg-[#51237f] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#45206b] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <Send size={15} />

@@ -113,9 +113,10 @@ export function TopNav() {
       </div>
 
       {/* Nav Links (White Background) */}
-      <nav className="flex-1 flex items-stretch bg-white px-2">
+      <nav aria-label="Primary" className="flex-1 flex items-stretch bg-white px-2">
         <Link 
           href="/" 
+          aria-current={isPathActive("/") ? "page" : undefined}
           className={cn(
             "flex items-center px-6 h-full text-sm font-semibold border-b-2 transition-colors",
             isPathActive("/") ? "border-[#51237f] text-gray-900" : "border-transparent text-gray-600 hover:text-gray-900"
@@ -125,6 +126,7 @@ export function TopNav() {
         </Link>
         <Link 
           href="/clubs" 
+          aria-current={isPathActive("/clubs") ? "page" : undefined}
           className={cn(
             "flex items-center px-6 h-full text-sm font-semibold border-b-2 transition-colors",
             isPathActive("/clubs") ? "border-[#51237f] text-gray-900" : "border-transparent text-gray-600 hover:text-gray-900"
@@ -134,6 +136,7 @@ export function TopNav() {
         </Link>
         <Link 
           href="/events" 
+          aria-current={isPathActive("/events") ? "page" : undefined}
           className={cn(
             "flex items-center px-6 h-full text-sm font-semibold border-b-2 transition-colors",
             isPathActive("/events") ? "border-[#51237f] text-gray-900" : "border-transparent text-gray-600 hover:text-gray-900"
@@ -143,6 +146,7 @@ export function TopNav() {
         </Link>
         <Link 
           href="/activity" 
+          aria-current={isPathActive("/activity") ? "page" : undefined}
           className={cn(
             "flex items-center px-6 h-full text-sm font-semibold border-b-2 transition-colors",
             isPathActive("/activity") ? "border-[#51237f] text-gray-900" : "border-transparent text-gray-600 hover:text-gray-900"
@@ -152,6 +156,7 @@ export function TopNav() {
         </Link>
         <Link 
           href="/profile" 
+          aria-current={isPathActive("/profile") ? "page" : undefined}
           className={cn(
             "flex items-center px-6 h-full text-sm font-semibold border-b-2 transition-colors",
             isPathActive("/profile") ? "border-[#51237f] text-gray-900" : "border-transparent text-gray-600 hover:text-gray-900"
@@ -162,6 +167,7 @@ export function TopNav() {
         {showManageNav ? (
           <Link 
             href="/manage" 
+            aria-current={isPathActive("/manage") ? "page" : undefined}
             className={cn(
               "flex items-center px-6 h-full text-sm font-semibold border-b-2 transition-colors",
               isPathActive("/manage") ? "border-[#51237f] text-gray-900" : "border-transparent text-gray-600 hover:text-gray-900"
@@ -172,6 +178,7 @@ export function TopNav() {
         ) : (
           <Link 
             href="/docs" 
+            aria-current={isPathActive("/docs") ? "page" : undefined}
             className={cn(
               "flex items-center px-6 h-full text-sm font-semibold border-b-2 transition-colors",
               isPathActive("/docs") ? "border-[#51237f] text-gray-900" : "border-transparent text-gray-600 hover:text-gray-900"

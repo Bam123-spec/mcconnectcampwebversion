@@ -112,7 +112,7 @@ export function ClubsDirectory({ initialClubs }: { initialClubs: ClubCardData[] 
         const officerRole = viewerState?.officerRole ?? null;
 
         return (
-          <div
+          <article
             key={club.id}
             className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow overflow-hidden flex flex-col h-full group"
           >
@@ -160,7 +160,7 @@ export function ClubsDirectory({ initialClubs }: { initialClubs: ClubCardData[] 
                     </span>
                   ) : null}
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 leading-tight mb-2 group-hover:text-[#51237f] transition-colors line-clamp-2">
+                <h3 id={`club-card-${club.id}`} className="text-xl font-bold text-gray-900 leading-tight mb-2 group-hover:text-[#51237f] transition-colors line-clamp-2">
                   {club.name}
                 </h3>
                 <p className="text-sm text-gray-500 leading-relaxed line-clamp-3">
@@ -181,13 +181,15 @@ export function ClubsDirectory({ initialClubs }: { initialClubs: ClubCardData[] 
                 </div>
                 <Link
                   href={getClubPath(club.id)}
+                  aria-labelledby={`club-card-${club.id}`}
+                  aria-label={`${officerRole ? "Manage" : isMember ? "Open" : "View"} ${club.name}`}
                   className="flex justify-center w-full py-2.5 bg-gray-50 hover:bg-[#51237f] hover:text-white text-gray-700 font-semibold rounded-md transition-colors border border-gray-200 hover:border-[#51237f]"
                 >
                   {officerRole ? "Manage Club" : isMember ? "Open Club" : "View Profile"}
                 </Link>
               </div>
             </div>
-          </div>
+          </article>
         );
       })}
     </div>

@@ -23,9 +23,34 @@
   body {
     @apply bg-[var(--background)] text-[var(--foreground)] antialiased;
   }
+
+  :where(a, button, input, select, textarea):focus-visible {
+    outline: 3px solid #51237f;
+    outline-offset: 2px;
+  }
 }
 
 @layer components {
+  .skip-link {
+    position: absolute;
+    left: 1rem;
+    top: 1rem;
+    z-index: 100;
+    transform: translateY(-220%);
+    border-radius: 9999px;
+    background: #51237f;
+    color: #ffffff;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    box-shadow: 0 12px 30px -12px rgba(17, 24, 39, 0.5);
+    transition: transform 0.2s ease;
+  }
+
+  .skip-link:focus {
+    transform: translateY(0);
+  }
+
   .glass-card {
     @apply bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300;
   }

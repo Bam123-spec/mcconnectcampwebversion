@@ -81,9 +81,13 @@ export default async function ClubsPage({
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-8 flex flex-col md:flex-row gap-4 items-center justify-between sticky top-[72px] z-20">
-          <form className="w-full md:w-1/3 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+          <form role="search" aria-label="Search organizations" className="w-full md:w-1/3 relative">
+            <label htmlFor="clubs-search" className="sr-only">
+              Search organizations by name or keyword
+            </label>
+            <Search aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input
+              id="clubs-search"
               type="text"
               name="q"
               defaultValue={query}

@@ -45,7 +45,7 @@ export function EventCard({
       });
 
   return (
-    <div
+    <article
       className={`flex h-full flex-col overflow-hidden rounded-xl border bg-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg ${
         isPast ? "border-gray-150 opacity-90" : "border-gray-200"
       }`}
@@ -61,7 +61,7 @@ export function EventCard({
           {isPast ? "Past" : "Campus"}
         </div>
         <div className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-white/92 px-3 py-1 text-xs font-semibold text-gray-800 shadow-sm backdrop-blur-sm">
-          <Users size={12} className="text-[#51237f]" /> {(event.rsvp_count ?? 0).toLocaleString()}
+          <Users aria-hidden="true" size={12} className="text-[#51237f]" /> {(event.rsvp_count ?? 0).toLocaleString()}
         </div>
       </div>
       
@@ -71,23 +71,23 @@ export function EventCard({
         </h3>
 
         <div className="mb-4 flex items-center gap-2 text-sm font-medium text-gray-700">
-          <Users size={15} className="text-[#51237f]" />
+          <Users aria-hidden="true" size={15} className="text-[#51237f]" />
           <span>{(event.rsvp_count ?? 0).toLocaleString()} going</span>
         </div>
 
         <div className="mt-auto space-y-3">
           <div className="flex items-start gap-2 text-sm text-gray-700">
-            <Clock size={16} className="mt-0.5 shrink-0 text-gray-400" />
+            <Clock aria-hidden="true" size={16} className="mt-0.5 shrink-0 text-gray-400" />
             <span>
               {dateString} At {(event.time || "TBA").split(" - ")[0]}
             </span>
           </div>
           <div className="flex items-start gap-2 text-sm text-gray-700">
-            <MapPin size={16} className="mt-0.5 shrink-0 text-gray-400" />
+            <MapPin aria-hidden="true" size={16} className="mt-0.5 shrink-0 text-gray-400" />
             <span className="line-clamp-2">{event.location}</span>
           </div>
           <div className="mt-4 flex items-center gap-2 border-t border-gray-100 pt-4 text-sm font-medium text-gray-600">
-            <Users size={14} className="text-gray-400" />
+            <Users aria-hidden="true" size={14} className="text-gray-400" />
             {event.organizer_name || "Campus Event"}
           </div>
 
@@ -117,6 +117,7 @@ export function EventCard({
                 type="button"
                 onClick={() => onToggleRsvp(event.id, isRegistered)}
                 disabled={isPending}
+                aria-label={`${isRegistered ? "Cancel RSVP for" : "RSVP for"} ${event.name}`}
                 className={`inline-flex items-center rounded-md px-3.5 py-2.5 text-sm font-semibold transition-colors ${
                   isRegistered
                     ? "border border-[#51237f] text-[#51237f] hover:bg-purple-50"
@@ -128,6 +129,7 @@ export function EventCard({
             ) : (
               <Link
                 href="/login"
+                aria-label={`Sign in to RSVP for ${event.name}`}
                 className="inline-flex items-center rounded-md bg-[#51237f] px-3.5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#45206b]"
               >
                 Sign in
@@ -136,6 +138,6 @@ export function EventCard({
           </div>
         </div>
       </div>
-    </div>
+    </article>
   );
 }
