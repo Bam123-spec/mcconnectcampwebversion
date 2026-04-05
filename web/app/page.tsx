@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Users, Search, ExternalLink } from "lucide-react";
 import { EventCard } from "@/components/events/EventCard";
 import { ForYouSection } from "@/components/home/for-you-section";
@@ -6,7 +7,14 @@ import { CampusAccessPanel } from "@/components/home/campus-access-panel";
 import { AUTH_ENABLED } from "@/lib/features";
 import { createServerSupabaseClient } from "@/lib/supabase";
 import { getClubPath } from "@/lib/club-utils";
-import { getClubColor, getClubInitials, inferCampus, inferClubCategory, normalizeEventForWeb } from "@/lib/live-data";
+import {
+  formatEventDateLabel,
+  getClubColor,
+  getClubInitials,
+  inferCampus,
+  inferClubCategory,
+  normalizeEventForWeb,
+} from "@/lib/live-data";
 
 type NewsRow = {
   id: string;
@@ -30,6 +38,9 @@ const QUICK_LINKS = [
   { id: "q4", name: "Privacy & Access", url: "/docs/privacy" },
 ];
 
+const fallbackEventCover =
+  "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1600&auto=format&fit=crop";
+
 export default async function Home() {
   const supabase = createServerSupabaseClient();
 
@@ -39,7 +50,7 @@ export default async function Home() {
       .select("id, name, description, location, date, day, time, cover_image_url, clubs(name)")
       .order("date", { ascending: true, nullsFirst: false })
       .order("day", { ascending: true, nullsFirst: false })
-      .limit(3),
+      .limit(9),
     supabase
       .from("clubs")
       .select("id, name, description, cover_image_url, member_count")
@@ -68,12 +79,23 @@ export default async function Home() {
     registrationCounts.set(row.event_id, (registrationCounts.get(row.event_id) ?? 0) + 1);
   }
 
-  const featuredEvents = (eventsData ?? []).map((event) =>
+  const homepageEvents = (eventsData ?? []).map((event) =>
     normalizeEventForWeb({
       ...event,
       rsvp_count: registrationCounts.get(event.id) ?? 0,
     })
   );
+  const featuredEvents = homepageEvents.slice(0, 3);
+  const trendingEvents = [...homepageEvents]
+    .sort((left, right) => {
+      const countDelta = (right.rsvp_count ?? 0) - (left.rsvp_count ?? 0);
+      if (countDelta !== 0) {
+        return countDelta;
+      }
+
+      return new Date(left.date).getTime() - new Date(right.date).getTime();
+    })
+    .slice(0, Math.min(4, homepageEvents.length));
   const featuredClubs = (clubsData ?? []).map((club) => ({
     id: club.id,
     name: club.name,
@@ -140,6 +162,64 @@ export default async function Home() {
           <div className="hidden lg:block">
             <ForYouSection />
           </div>
+
+          {trendingEvents.length ? (
+            <section>
+              <div className="mb-6 flex items-end justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">
+                    Trending Now
+                  </p>
+                  <h2 className="mt-2 text-2xl font-semibold text-gray-800">
+                    Popular events students are joining this week
+                  </h2>
+                </div>
+                <Link
+                  href="/events"
+                  className="text-sm font-semibold text-[#51237f] hover:underline"
+                >
+                  Browse all events
+                </Link>
+              </div>
+
+              <div className="-mx-1 flex gap-5 overflow-x-auto px-1 pb-2">
+                {trendingEvents.map((event) => (
+                  <Link
+                    key={event.id}
+                    href="/events"
+                    className="min-w-[270px] max-w-[320px] flex-1 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-transform hover:-translate-y-0.5"
+                  >
+                    <div className="relative h-40 w-full bg-gray-100">
+                      <Image
+                        src={event.cover_image_url || fallbackEventCover}
+                        alt={event.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <div className="space-y-3 p-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="inline-flex items-center rounded-full bg-[#fff3e8] px-2.5 py-1 text-[11px] font-semibold text-[#8a3c00]">
+                          🔥 Trending
+                        </span>
+                        <span className="text-xs font-medium text-gray-500">
+                          {event.rsvp_count ?? 0} going
+                        </span>
+                      </div>
+                      <div>
+                        <h3 className="line-clamp-2 text-lg font-bold leading-tight text-gray-900">
+                          {event.name}
+                        </h3>
+                        <p className="mt-2 text-sm text-gray-600">
+                          {formatEventDateLabel(event.date, event.time)}
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          ) : null}
           
           {/* Upcoming Events */}
           <section>
