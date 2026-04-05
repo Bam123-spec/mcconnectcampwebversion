@@ -190,11 +190,11 @@ export function ForYouSection() {
   }, []);
 
   return (
-    <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+    <section className="rounded-[24px] border border-gray-200 bg-white p-6 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#51237f]">For You</p>
-          <h2 className="mt-2 text-2xl font-bold tracking-tight text-gray-900">Personalized picks from your campus activity</h2>
+          <h2 className="mt-2 text-2xl font-bold tracking-[-0.02em] text-gray-950">Personalized picks from your campus activity</h2>
           <p className="mt-2 text-sm leading-6 text-gray-600">
             {signedIn
               ? joinedClubCount
@@ -218,7 +218,7 @@ export function ForYouSection() {
           {cards.map((card) => (
             <div
               key={card.id}
-              className="min-w-[280px] max-w-[320px] flex-1 rounded-xl border border-gray-200 bg-[#fafafa] p-5"
+              className="min-w-[280px] max-w-[320px] flex-1 rounded-2xl border border-gray-200 bg-[linear-gradient(180deg,#ffffff_0%,#faf8fd_100%)] p-5 shadow-[0_12px_35px_-30px_rgba(17,24,39,0.35)]"
             >
               <div className="flex items-center justify-between gap-3">
                 <span className="rounded-full bg-[#ede7f6] px-3 py-1 text-[11px] font-semibold text-[#51237f]">
@@ -226,8 +226,8 @@ export function ForYouSection() {
                 </span>
                 <CalendarDays size={16} className="text-gray-400" />
               </div>
-              <h3 className="mt-4 text-lg font-bold leading-tight text-gray-900">{card.title}</h3>
-              <p className="mt-3 text-sm font-medium text-gray-700">{card.detail}</p>
+              <h3 className="mt-4 text-xl font-bold leading-tight tracking-[-0.02em] text-gray-950">{card.title}</h3>
+              <p className="mt-3 text-sm font-semibold text-gray-700">{card.detail}</p>
               <p className="mt-2 flex items-center gap-2 text-xs text-gray-500">
                 <Users size={13} className="text-gray-400" />
                 {card.meta}

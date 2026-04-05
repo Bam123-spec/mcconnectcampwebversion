@@ -132,13 +132,13 @@ export function FromYourClubsSection() {
   }, []);
 
   return (
-    <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+    <section className="rounded-[24px] border border-gray-200 bg-white p-6 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#51237f]">
             From Your Clubs
           </p>
-          <h2 className="mt-2 text-2xl font-bold tracking-tight text-gray-900">
+          <h2 className="mt-2 text-2xl font-bold tracking-[-0.02em] text-gray-950">
             New activity from the communities you joined
           </h2>
           <p className="mt-2 text-sm leading-6 text-gray-600">
@@ -160,7 +160,7 @@ export function FromYourClubsSection() {
           {items.map((item) => (
             <div
               key={item.id}
-              className="flex flex-col gap-3 rounded-lg border border-gray-200 bg-[#fafafa] px-4 py-4 md:flex-row md:items-center md:justify-between"
+              className="flex flex-col gap-3 rounded-2xl border border-gray-200 bg-[linear-gradient(180deg,#ffffff_0%,#faf8fd_100%)] px-5 py-4 shadow-[0_12px_35px_-30px_rgba(17,24,39,0.35)] md:flex-row md:items-center md:justify-between"
             >
               <div className="min-w-0">
                 <p className="text-sm font-medium text-gray-600">
@@ -169,10 +169,10 @@ export function FromYourClubsSection() {
                   </Link>{" "}
                   posted a new event
                 </p>
-                <p className="mt-1 text-lg font-semibold leading-tight text-gray-900">
+                <p className="mt-1 text-xl font-bold leading-tight tracking-[-0.02em] text-gray-950">
                   {item.eventTitle}
                 </p>
-                <p className="mt-2 flex items-center gap-2 text-sm text-gray-600">
+                <p className="mt-2 flex items-center gap-2 text-sm font-medium text-gray-600">
                   <CalendarDays size={15} className="text-gray-400" />
                   {item.eventDate}
                 </p>
@@ -188,7 +188,7 @@ export function FromYourClubsSection() {
           ))}
         </div>
       ) : (
-        <div className="mt-6 rounded-lg border border-dashed border-gray-200 bg-[#fafafa] px-5 py-6 text-sm text-gray-600">
+        <div className="mt-6 rounded-2xl border border-dashed border-gray-200 bg-[#fafafa] px-5 py-6 text-sm text-gray-600">
           {signedIn
             ? "Join a club or wait for your communities to post new events. Activity from your groups will show up here."
             : "Sign in to see new events posted by the clubs you joined."}

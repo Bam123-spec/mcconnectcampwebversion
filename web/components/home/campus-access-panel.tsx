@@ -133,12 +133,12 @@ export function CampusAccessPanel() {
   const leadershipCount = memberships.filter((membership) => membership.isLeadership).length;
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+    <div className="rounded-[24px] border border-gray-200 bg-white p-6 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
       <div className="mb-5">
         <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">
           Your Campus Access
         </p>
-        <h3 className="mt-2 text-xl font-bold tracking-tight text-gray-950">
+        <h3 className="mt-2 text-xl font-bold tracking-[-0.02em] text-gray-950">
           Clubs, roles, and shortcuts tied to your account
         </h3>
       </div>
@@ -188,7 +188,7 @@ export function CampusAccessPanel() {
                   <Link
                     key={membership.id}
                     href={membership.href}
-                    className="flex items-center justify-between rounded-md border border-gray-200 px-3 py-3 transition hover:border-[#51237f] hover:bg-[#faf8fd]"
+                    className="flex items-center justify-between rounded-2xl border border-gray-200 px-4 py-3 transition hover:border-[#d7cae8] hover:bg-[#faf8fd]"
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[#51237f] text-xs font-black text-white">

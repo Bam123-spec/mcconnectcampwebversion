@@ -126,46 +126,47 @@ export default async function Home() {
   });
 
   return (
-    <div className="min-h-screen bg-white">
-      <section className="border-b border-gray-200 bg-white">
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-10 md:px-6 md:py-12 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.9fr)] lg:px-8">
+    <div className="min-h-screen bg-[#fcfcfd]">
+      <section className="relative overflow-hidden border-b border-gray-200 bg-white">
+        <div className="absolute inset-x-0 top-0 h-32 bg-[radial-gradient(circle_at_top_left,_rgba(81,35,127,0.08),_transparent_45%)]" />
+        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-10 md:px-6 md:py-14 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.9fr)] lg:px-8">
           <div className="flex flex-col justify-center">
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#51237f]">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#51237f]">
               Montgomery College
             </p>
-            <h1 className="mt-3 max-w-3xl text-4xl font-black tracking-tight text-gray-950 md:text-5xl">
+            <h1 className="mt-4 max-w-3xl text-4xl font-black tracking-[-0.03em] text-gray-950 md:text-6xl">
               What&apos;s happening this week at Montgomery College.
             </h1>
-            <p className="mt-4 max-w-2xl text-base leading-7 text-gray-600 md:text-lg">
+            <p className="mt-5 max-w-2xl text-base leading-7 text-gray-600 md:text-lg">
               See what students are joining, discover events worth your time, and keep up with the clubs shaping campus this week.
             </p>
 
-            <div className="mt-7 flex flex-wrap gap-3">
+            <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 href="/events"
-                className="inline-flex items-center rounded-md bg-[#51237f] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#45206b]"
+                className="inline-flex items-center rounded-full bg-[#51237f] px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-[#45206b] hover:shadow-md"
               >
                 Explore Events
               </Link>
               <Link
                 href="/clubs"
-                className="inline-flex items-center rounded-md border border-gray-300 px-6 py-3 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50"
+                className="inline-flex items-center rounded-full border border-gray-300 bg-white px-6 py-3 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50"
               >
                 Browse Clubs
               </Link>
             </div>
 
-            <div className="mt-8 flex flex-wrap gap-6 text-sm">
+            <div className="mt-10 flex flex-wrap gap-4 text-sm">
               <div>
-                <p className="font-semibold text-gray-900">{homepageEvents.length}</p>
+                <p className="text-xl font-bold tracking-tight text-gray-950">{homepageEvents.length}</p>
                 <p className="text-gray-500">events on deck</p>
               </div>
               <div>
-                <p className="font-semibold text-gray-900">{featuredClubs.length}</p>
+                <p className="text-xl font-bold tracking-tight text-gray-950">{featuredClubs.length}</p>
                 <p className="text-gray-500">active clubs featured</p>
               </div>
               <div>
-                <p className="font-semibold text-gray-900">
+                <p className="text-xl font-bold tracking-tight text-gray-950">
                   {(trendingEvents[0]?.rsvp_count ?? 0).toLocaleString()}
                 </p>
                 <p className="text-gray-500">students in the top event</p>
@@ -176,30 +177,31 @@ export default async function Home() {
           {spotlightEvent ? (
             <Link
               href="/events"
-              className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
+              className="group overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-[0_20px_60px_-40px_rgba(17,24,39,0.4)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_30px_80px_-40px_rgba(17,24,39,0.45)]"
             >
               <div className="relative h-64 w-full bg-gray-100">
                 <Image
                   src={spotlightEvent.cover_image_url || fallbackEventCover}
                   alt={spotlightEvent.name}
                   fill
-                  className="object-cover"
+                  className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
               </div>
-              <div className="space-y-4 p-6">
+              <div className="space-y-5 p-7">
                 <div className="flex flex-wrap items-center gap-3">
                   <span className="inline-flex items-center rounded-full bg-[#ede7f6] px-3 py-1 text-[11px] font-semibold text-[#51237f]">
                     Happening This Week
                   </span>
-                  <span className="text-sm font-medium text-gray-600">
+                  <span className="text-sm font-medium text-gray-700">
                     {(spotlightEvent.rsvp_count ?? 0).toLocaleString()} going
                   </span>
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold leading-tight text-gray-950">
+                  <h2 className="text-[1.9rem] font-bold leading-tight tracking-[-0.02em] text-gray-950">
                     {spotlightEvent.name}
                   </h2>
-                  <p className="mt-3 text-sm font-medium text-gray-700">
+                  <p className="mt-3 text-sm font-semibold text-gray-700">
                     {formatEventDateLabel(spotlightEvent.date, spotlightEvent.time)}
                   </p>
                   <p className="mt-2 text-sm text-gray-600">{spotlightEvent.location}</p>
@@ -216,7 +218,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <main className="mx-auto max-w-7xl space-y-14 px-4 py-10 md:px-6 md:py-12 lg:px-8">
+      <main className="mx-auto max-w-7xl space-y-16 px-4 py-10 md:px-6 md:py-14 lg:px-8">
         <ForYouSection />
 
         <section>
@@ -225,7 +227,7 @@ export default async function Home() {
               <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">
                 Happening This Week
               </p>
-              <h2 className="mt-2 text-3xl font-bold tracking-tight text-gray-950">
+              <h2 className="mt-2 text-3xl font-bold tracking-[-0.02em] text-gray-950">
                 Start with the events students are actually showing up for
               </h2>
             </div>
@@ -257,13 +259,13 @@ export default async function Home() {
           <FromYourClubsSection />
 
           {trendingEvents.length ? (
-            <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <section className="rounded-[24px] border border-gray-200 bg-white p-6 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
               <div className="mb-6 flex items-end justify-between gap-4">
                 <div>
                   <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">
                     Trending Now
                   </p>
-                  <h2 className="mt-2 text-2xl font-bold tracking-tight text-gray-950">
+                  <h2 className="mt-2 text-2xl font-bold tracking-[-0.02em] text-gray-950">
                     Popular events moving fastest
                   </h2>
                 </div>
@@ -277,7 +279,7 @@ export default async function Home() {
                   <Link
                     key={event.id}
                     href="/events"
-                    className="flex items-center gap-4 rounded-xl border border-gray-200 p-3 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                    className="flex items-center gap-4 rounded-2xl border border-gray-200 p-3 transition-all duration-200 hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-md"
                   >
                     <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-gray-100">
                       <Image
@@ -296,10 +298,10 @@ export default async function Home() {
                           {event.rsvp_count ?? 0} going
                         </span>
                       </div>
-                      <h3 className="mt-2 line-clamp-2 text-base font-bold leading-tight text-gray-900">
+                      <h3 className="mt-2 line-clamp-2 text-[1.02rem] font-bold leading-tight text-gray-900">
                         {event.name}
                       </h3>
-                      <p className="mt-1 text-sm text-gray-600">
+                      <p className="mt-1 text-sm font-medium text-gray-600">
                         {formatEventDateLabel(event.date, event.time)}
                       </p>
                     </div>
@@ -329,7 +331,7 @@ export default async function Home() {
               </Link>
             </div>
 
-            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+            <div className="overflow-hidden rounded-[24px] border border-gray-200 bg-white shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
               {latestNews.length ? (
                 latestNews.map((news, index) => (
                   <div
@@ -363,7 +365,7 @@ export default async function Home() {
             <CampusAccessPanel />
 
             <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-              <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+              <div className="rounded-[24px] border border-gray-200 bg-white p-6 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
                 <div className="mb-5">
                   <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">
                     Featured Clubs
@@ -403,7 +405,7 @@ export default async function Home() {
                 </div>
               </div>
 
-              <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+              <div className="rounded-[24px] border border-gray-200 bg-white p-6 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
                 <div className="mb-5">
                   <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">
                     Campus Resources
