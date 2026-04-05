@@ -2,7 +2,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { Search, Filter, Users, MapPin, Tag } from "lucide-react";
 import { slugifyClubName } from "@/lib/club-utils";
-import { previewClubs } from "@/lib/preview-data";
+import { createServerSupabaseClient } from "@/lib/supabase";
+import { getClubColor, getClubInitials, inferCampus, inferClubCategory } from "@/lib/live-data";
 
 export const metadata = {
   title: "Clubs & Organizations | Raptor Connect",
@@ -21,15 +22,6 @@ type ClubCardData = {
   coverImageUrl: string | null;
 };
 
-const getClubs = (query: string): ClubCardData[] => {
-  const trimmedQuery = query.trim().toLowerCase();
-
-  return previewClubs.filter((club) => {
-    if (!trimmedQuery || trimmedQuery.length < 2) return true;
-    return `${club.name} ${club.description} ${club.category}`.toLowerCase().includes(trimmedQuery);
-  });
-};
-
 export default async function ClubsPage({
   searchParams,
 }: {
@@ -37,7 +29,31 @@ export default async function ClubsPage({
 }) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const query = resolvedSearchParams?.q?.trim() || "";
-  const displayClubs = getClubs(query);
+  const supabase = createServerSupabaseClient();
+
+  let request = supabase
+    .from("clubs")
+    .select("id, name, description, cover_image_url, member_count")
+    .order("member_count", { ascending: false, nullsFirst: false })
+    .order("name", { ascending: true });
+
+  if (query.length >= 2) {
+    request = request.or(`name.ilike.%${query}%,description.ilike.%${query}%`);
+  }
+
+  const { data } = await request.limit(60);
+
+  const displayClubs: ClubCardData[] = (data ?? []).map((club) => ({
+    id: club.id,
+    name: club.name,
+    description: club.description ?? "Montgomery College student organization",
+    members: club.member_count ?? 0,
+    campus: inferCampus(),
+    category: inferClubCategory(club),
+    initials: getClubInitials(club.name),
+    color: getClubColor(club.id),
+    coverImageUrl: club.cover_image_url ?? null,
+  }));
 
   return (
     <div className="bg-[#f5f6f8] min-h-screen py-8">

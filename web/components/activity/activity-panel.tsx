@@ -1,11 +1,253 @@
 "use client";
 
 import Link from "next/link";
-import { Award, Clock, Clock3, QrCode, ShieldCheck, Ticket, Users, MapPin } from "lucide-react";
-import { previewActivityMemberships, previewActivityRegistrations } from "@/lib/preview-data";
+import { useEffect, useState } from "react";
+import { Award, Clock, Clock3, LoaderCircle, QrCode, ShieldCheck, Ticket, Users, MapPin } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { formatEventDateLabel, formatJoinedLabel, formatOfficerRole, getClubInitials } from "@/lib/live-data";
+
+type ActivityRegistration = {
+  id: string;
+  eventName: string;
+  clubName: string;
+  dateLabel: string;
+  location: string;
+  status: "Confirmed";
+  isUpcoming: boolean;
+};
+
+type ActivityMembership = {
+  id: string;
+  name: string;
+  role: string;
+  joinedLabel: string;
+  initials: string;
+  badgeTone: "officer" | "member";
+};
+
+type RegistrationRow = {
+  id: string;
+  created_at?: string | null;
+  event:
+    | {
+        name: string;
+        location?: string | null;
+        date?: string | null;
+        day?: string | null;
+        time?: string | null;
+        clubs?:
+          | {
+              name?: string | null;
+            }
+          | {
+              name?: string | null;
+            }[]
+          | null;
+      }
+    | {
+        name: string;
+        location?: string | null;
+        date?: string | null;
+        day?: string | null;
+        time?: string | null;
+        clubs?:
+          | {
+              name?: string | null;
+            }
+          | {
+              name?: string | null;
+            }[]
+          | null;
+      }[]
+    | null;
+};
+
+type MembershipRow = {
+  id: string;
+  joined_at?: string | null;
+  club_id: string;
+  clubs?:
+    | {
+        name?: string | null;
+      }
+    | {
+        name?: string | null;
+      }[]
+    | null;
+};
+
+const firstItem = <T,>(value: T | T[] | null | undefined): T | null => {
+  if (Array.isArray(value)) return value[0] ?? null;
+  return value ?? null;
+};
 
 export function ActivityPanel() {
-  const leadershipCount = previewActivityMemberships.filter((membership) => membership.badgeTone === "officer").length;
+  const [loading, setLoading] = useState(true);
+  const [signedIn, setSignedIn] = useState(false);
+  const [registrations, setRegistrations] = useState<ActivityRegistration[]>([]);
+  const [memberships, setMemberships] = useState<ActivityMembership[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadActivity = async () => {
+      setLoading(true);
+      setError(null);
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        if (!cancelled) {
+          setSignedIn(false);
+          setRegistrations([]);
+          setMemberships([]);
+          setLoading(false);
+        }
+        return;
+      }
+
+      if (!cancelled) {
+        setSignedIn(true);
+      }
+
+      const [registrationsResult, membershipsResult, officersResult] = await Promise.all([
+        supabase
+          .from("event_registrations")
+          .select("id, created_at, event:events(name, location, date, day, time, clubs(name))")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(8),
+        supabase
+          .from("club_members")
+          .select("id, joined_at, club_id, clubs(name)")
+          .eq("user_id", user.id)
+          .eq("status", "approved")
+          .order("joined_at", { ascending: false })
+          .limit(8),
+        supabase
+          .from("officers")
+          .select("club_id, role")
+          .eq("user_id", user.id),
+      ]);
+
+      if (registrationsResult.error || membershipsResult.error || officersResult.error) {
+        if (!cancelled) {
+          setError(
+            registrationsResult.error?.message ||
+              membershipsResult.error?.message ||
+              officersResult.error?.message ||
+              "Unable to load your activity right now."
+          );
+          setLoading(false);
+        }
+        return;
+      }
+
+      const officerMap = new Map<string, string>();
+      for (const officerRow of officersResult.data ?? []) {
+        if (officerRow.club_id) {
+          officerMap.set(officerRow.club_id, officerRow.role ?? "Officer");
+        }
+      }
+
+      const nextRegistrations: ActivityRegistration[] = ((registrationsResult.data ?? []) as RegistrationRow[])
+        .map((registration) => {
+          const event = firstItem(registration.event);
+          if (!event?.name) return null;
+          const eventClub = firstItem(event.clubs);
+
+          const eventDate = event.date || event.day || null;
+          const parsedDate = eventDate ? new Date(eventDate) : null;
+
+          return {
+            id: registration.id,
+            eventName: event.name,
+            clubName: eventClub?.name || "Campus Event",
+            dateLabel: formatEventDateLabel(eventDate, event.time),
+            location: event.location || "Location TBA",
+            status: "Confirmed",
+            isUpcoming: parsedDate ? parsedDate >= new Date() : true,
+          };
+        })
+        .filter(Boolean) as ActivityRegistration[];
+
+      const nextMemberships: ActivityMembership[] = ((membershipsResult.data ?? []) as MembershipRow[])
+        .map((membership) => {
+          const club = firstItem(membership.clubs);
+          const clubName = club?.name;
+          if (!clubName) return null;
+
+          const officerRole = officerMap.get(membership.club_id);
+
+          return {
+            id: membership.id,
+            name: clubName,
+            role: officerRole ? `${formatOfficerRole(officerRole)} (Officer)` : "Member",
+            joinedLabel: formatJoinedLabel(membership.joined_at),
+            initials: getClubInitials(clubName),
+            badgeTone: officerRole ? "officer" : "member",
+          };
+        })
+        .filter(Boolean) as ActivityMembership[];
+
+      if (!cancelled) {
+        setRegistrations(nextRegistrations);
+        setMemberships(nextMemberships);
+        setLoading(false);
+      }
+    };
+
+    loadActivity();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(() => {
+      loadActivity();
+    });
+
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const leadershipCount = memberships.filter((membership) => membership.badgeTone === "officer").length;
+
+  if (loading) {
+    return (
+      <div className="bg-[#f5f6f8] min-h-screen py-16">
+        <div className="max-w-4xl mx-auto px-4 flex flex-col items-center justify-center text-center">
+          <LoaderCircle className="animate-spin text-[#51237f] mb-4" size={28} />
+          <h1 className="text-2xl font-bold text-gray-900">Loading your activity</h1>
+          <p className="text-gray-500 mt-2">Pulling your Montgomery College memberships and event registrations.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!signedIn) {
+    return (
+      <div className="bg-[#f5f6f8] min-h-screen py-16">
+        <div className="max-w-3xl mx-auto px-4">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-10 text-center">
+            <h1 className="text-3xl font-black text-gray-900 tracking-tight">Sign in to view your activity</h1>
+            <p className="text-gray-600 mt-3 max-w-xl mx-auto">
+              Your Montgomery College memberships, RSVPs, and officer access will appear here once you sign in.
+            </p>
+            <Link
+              href="/login"
+              className="inline-flex mt-6 items-center rounded-md bg-[#51237f] px-5 py-3 text-sm font-semibold text-white hover:bg-[#45206b] transition-colors"
+            >
+              Go to Login
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-[#f5f6f8] min-h-screen py-8">
@@ -28,7 +270,7 @@ export function ActivityPanel() {
                 </Link>
               </div>
               <div className="p-6 flex flex-col gap-4">
-                {previewActivityRegistrations.map((registration) => (
+                {registrations.length ? registrations.map((registration) => (
                   <div
                     key={registration.id}
                     className="flex flex-col sm:flex-row gap-4 border border-gray-200 rounded-lg p-4"
@@ -58,11 +300,16 @@ export function ActivityPanel() {
                         {registration.isUpcoming ? <QrCode size={32} /> : <Clock3 size={32} />}
                       </div>
                       <span className="text-sm font-semibold text-[#51237f]">
-                        {registration.isUpcoming ? "Preview Pass" : "Preview Event"}
+                        {registration.isUpcoming ? "Event Pass" : "Past Event"}
                       </span>
                     </div>
                   </div>
-                ))}
+                )) : (
+                  <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 px-5 py-8 text-center">
+                    <h3 className="text-lg font-bold text-gray-900">No event registrations yet</h3>
+                    <p className="text-sm text-gray-500 mt-2">Once you RSVP to events, they’ll appear here.</p>
+                  </div>
+                )}
               </div>
             </section>
 
@@ -77,7 +324,7 @@ export function ActivityPanel() {
                 </Link>
               </div>
               <ul className="divide-y divide-gray-100">
-                {previewActivityMemberships.map((membership) => (
+                {memberships.length ? memberships.map((membership) => (
                   <li key={membership.id} className="p-6 flex items-center gap-4 hover:bg-gray-50 transition-colors">
                     <div className="w-12 h-12 rounded-md bg-[#51237f] flex items-center justify-center text-white font-black text-lg shadow-sm border border-white shrink-0">
                       {membership.initials}
@@ -98,7 +345,14 @@ export function ActivityPanel() {
                       </span>
                     </div>
                   </li>
-                ))}
+                )) : (
+                  <li className="p-6">
+                    <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 px-5 py-8 text-center">
+                      <h3 className="text-lg font-bold text-gray-900">No club memberships yet</h3>
+                      <p className="text-sm text-gray-500 mt-2">Join a club to start building your campus activity profile.</p>
+                    </div>
+                  </li>
+                )}
               </ul>
             </section>
           </div>
@@ -111,11 +365,11 @@ export function ActivityPanel() {
               <div className="space-y-4">
                 <div className="flex justify-between items-end border-b border-white/20 pb-4">
                   <div className="text-purple-200 text-sm font-medium">Registered Events</div>
-                  <div className="text-3xl font-black">{previewActivityRegistrations.length}</div>
+                  <div className="text-3xl font-black">{registrations.length}</div>
                 </div>
                 <div className="flex justify-between items-end border-b border-white/20 pb-4">
                   <div className="text-purple-200 text-sm font-medium">Groups Joined</div>
-                  <div className="text-3xl font-black">{previewActivityMemberships.length}</div>
+                  <div className="text-3xl font-black">{memberships.length}</div>
                 </div>
                 <div className="flex justify-between items-end">
                   <div className="text-purple-200 text-sm font-medium">Leadership Roles</div>
@@ -139,9 +393,9 @@ export function ActivityPanel() {
                 <div className="flex items-start gap-3">
                   <Users className="text-[#51237f] shrink-0 mt-0.5" size={18} />
                   <div>
-                    <h4 className="text-sm font-bold text-gray-900">Static showcase mode</h4>
+                    <h4 className="text-sm font-bold text-gray-900">Live involvement data</h4>
                     <p className="text-xs text-gray-500 mt-1 leading-relaxed">
-                      The activity page is currently using preview content only while the web rollout is being finalized.
+                      This page is now reading your approved club memberships and event registrations from Supabase.
                     </p>
                   </div>
                 </div>
@@ -149,12 +403,18 @@ export function ActivityPanel() {
                 <div className="flex items-start gap-3">
                   <ShieldCheck className="text-[#51237f] shrink-0 mt-0.5" size={18} />
                   <div>
-                    <h4 className="text-sm font-bold text-gray-900">Live sync returns later</h4>
+                    <h4 className="text-sm font-bold text-gray-900">Officer roles included</h4>
                     <p className="text-xs text-gray-500 mt-1 leading-relaxed">
-                      Real memberships, RSVPs, and officer access can be reconnected once the public preview is live.
+                      If you have officer status in a club, it will be reflected here automatically.
                     </p>
                   </div>
                 </div>
+
+                {error ? (
+                  <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-700">
+                    {error}
+                  </div>
+                ) : null}
               </div>
             </section>
           </div>

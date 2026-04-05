@@ -1,36 +1,9 @@
 import Link from "next/link";
 import { LogIn, Users, Search, Filter, ExternalLink } from "lucide-react";
 import { EventCard } from "@/components/events/EventCard";
-
-const MOCK_EVENTS = [
-  {
-    id: "1",
-    name: "Spring Career Fair 2026",
-    description: "Connect with over 50 top employers hiring for internships and full-time positions.",
-    location: "Main Gymnasium",
-    date: new Date(Date.now() + 86400000 * 5).toISOString(),
-    time: "10:00 AM - 3:00 PM",
-    cover_image_url: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2670&auto=format&fit=crop",
-  },
-  {
-    id: "2",
-    name: "Student Leadership Workshop",
-    description: "Interactive session focusing on team building, effective communication, and leading campus clubs to success.",
-    location: "Student Union Building",
-    date: new Date(Date.now() + 86400000 * 7).toISOString(),
-    time: "4:00 PM - 5:30 PM",
-    cover_image_url: "https://images.unsplash.com/photo-1515169067868-5387ec356754?q=80&w=2670&auto=format&fit=crop",
-  },
-  {
-    id: "3",
-    name: "Networking Mixer",
-    description: "Casual evening for students and alumni to connect over coffee and discuss career pathways.",
-    location: "Private Location (sign in to display)",
-    date: new Date(Date.now() + 86400000 * 10).toISOString(),
-    time: "5:00 PM - 7:00 PM",
-    cover_image_url: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=2670&auto=format&fit=crop",
-  }
-];
+import { AUTH_ENABLED } from "@/lib/features";
+import { createServerSupabaseClient } from "@/lib/supabase";
+import { getClubColor, getClubInitials, inferCampus, inferClubCategory, normalizeEventForWeb } from "@/lib/live-data";
 
 const LATEST_NEWS = [
   {
@@ -49,12 +22,6 @@ const LATEST_NEWS = [
   }
 ];
 
-const FEATURED_CLUBS = [
-  { id: "c1", name: "Cybersecurity Society", category: "Academic", members: 124 },
-  { id: "c2", name: "Student Senate", category: "Governance", members: 45 },
-  { id: "c3", name: "Raptor Athletics", category: "Sports", members: 310 },
-];
-
 const QUICK_LINKS = [
   { id: "q1", name: "Blackboard Learning", url: "#" },
   { id: "q2", name: "MyMC Portal", url: "#" },
@@ -64,6 +31,33 @@ const QUICK_LINKS = [
 
 export default async function Home() {
   const isAuthenticated = false;
+  const supabase = createServerSupabaseClient();
+
+  const [{ data: eventsData }, { data: clubsData }] = await Promise.all([
+    supabase
+      .from("events")
+      .select("id, name, description, location, date, day, time, cover_image_url")
+      .order("date", { ascending: true, nullsFirst: false })
+      .order("day", { ascending: true, nullsFirst: false })
+      .limit(3),
+    supabase
+      .from("clubs")
+      .select("id, name, description, cover_image_url, member_count")
+      .order("member_count", { ascending: false, nullsFirst: false })
+      .order("name", { ascending: true })
+      .limit(3),
+  ]);
+
+  const featuredEvents = (eventsData ?? []).map((event) => normalizeEventForWeb(event));
+  const featuredClubs = (clubsData ?? []).map((club) => ({
+    id: club.id,
+    name: club.name,
+    category: inferClubCategory(club),
+    members: club.member_count ?? 0,
+    campus: inferCampus(),
+    initials: getClubInitials(club.name),
+    color: getClubColor(club.id),
+  }));
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f5f6f8]">
@@ -107,7 +101,7 @@ export default async function Home() {
           <section>
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
               <h2 className="text-2xl font-semibold text-gray-800">
-                Upcoming Events <span className="text-gray-500 font-normal text-lg">(72)</span>
+                Upcoming Events <span className="text-gray-500 font-normal text-lg">({featuredEvents.length})</span>
               </h2>
               
               {/* Filter / Search Bar */}
@@ -127,8 +121,8 @@ export default async function Home() {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {MOCK_EVENTS.map(event => (
-                <EventCard key={event.id} event={event} />
+              {featuredEvents.map(event => (
+                <EventCard key={event.id} event={event} authEnabled={AUTH_ENABLED} />
               ))}
             </div>
           </section>
@@ -178,10 +172,13 @@ export default async function Home() {
               <h3 className="text-white font-bold text-lg">Featured Groups</h3>
             </div>
             <div className="p-5 flex flex-col gap-4">
-              {FEATURED_CLUBS.map(club => (
+              {featuredClubs.map(club => (
                 <div key={club.id} className="flex flex-col border-b border-gray-100 last:border-0 pb-4 last:pb-0">
-                  <Link href="#" className="font-bold text-[#51237f] hover:underline mb-1">
-                    {club.name}
+                  <Link href={`/clubs`} className="font-bold text-[#51237f] hover:underline mb-1 flex items-center gap-3">
+                    <span className={`inline-flex h-8 w-8 items-center justify-center rounded-md text-xs font-black text-white ${club.color}`}>
+                      {club.initials}
+                    </span>
+                    <span>{club.name}</span>
                   </Link>
                   <div className="flex items-center justify-between text-xs text-gray-500">
                     <span className="bg-gray-100 px-2 py-0.5 rounded text-gray-600">{club.category}</span>
