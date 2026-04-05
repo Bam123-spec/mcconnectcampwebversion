@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { LogIn, Users, Search, Filter, ExternalLink } from "lucide-react";
 import { EventCard } from "@/components/events/EventCard";
-import { AUTH_ENABLED } from "@/lib/features";
+import { CampusAccessPanel } from "@/components/home/campus-access-panel";
 import { createServerSupabaseClient } from "@/lib/supabase";
+import { slugifyClubName } from "@/lib/club-utils";
 import { getClubColor, getClubInitials, inferCampus, inferClubCategory, normalizeEventForWeb } from "@/lib/live-data";
 
 type NewsRow = {
@@ -28,7 +29,6 @@ const QUICK_LINKS = [
 ];
 
 export default async function Home() {
-  const isAuthenticated = false;
   const supabase = createServerSupabaseClient();
 
   const [{ data: eventsData }, { data: clubsData }, { data: newsData }] = await Promise.all([
@@ -95,20 +95,18 @@ export default async function Home() {
         {/* Hero Content */}
         <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4 max-w-4xl mx-auto">
           <h1 className="text-white text-5xl md:text-6xl font-bold mb-4 drop-shadow-lg">
-            {isAuthenticated ? "Welcome back, Student!" : "Welcome to Raptor Connect!"}
+            Welcome to Raptor Connect!
           </h1>
           <p className="text-white text-xl md:text-2xl mb-8 font-medium drop-shadow-md">
-            {isAuthenticated ? "Here's what's happening on your campus today." : "The official campus community platform at Montgomery College"}
+            The official campus community platform at Montgomery College
           </p>
-          {!isAuthenticated && (
-            <Link 
-              href="/events" 
-              className="flex items-center gap-2 bg-[#51237f] hover:bg-[#51237f]/90 text-white px-8 py-3 rounded-full font-semibold transition-colors shadow-lg"
-            >
-              <LogIn size={18} />
-              Explore Events
-            </Link>
-          )}
+          <Link 
+            href="/events" 
+            className="flex items-center gap-2 bg-[#51237f] hover:bg-[#51237f]/90 text-white px-8 py-3 rounded-full font-semibold transition-colors shadow-lg"
+          >
+            <LogIn size={18} />
+            Explore Events
+          </Link>
         </div>
       </section>
 
@@ -193,6 +191,7 @@ export default async function Home() {
 
         {/* Right Column: Sidebars */}
         <aside className="w-full lg:w-80 space-y-8 shrink-0">
+          <CampusAccessPanel />
           
           {/* Featured Clubs */}
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
@@ -202,7 +201,7 @@ export default async function Home() {
             <div className="p-5 flex flex-col gap-4">
               {featuredClubs.map(club => (
                 <div key={club.id} className="flex flex-col border-b border-gray-100 last:border-0 pb-4 last:pb-0">
-                  <Link href={`/clubs`} className="font-bold text-[#51237f] hover:underline mb-1 flex items-center gap-3">
+                  <Link href={`/clubs/${slugifyClubName(club.name)}`} className="font-bold text-[#51237f] hover:underline mb-1 flex items-center gap-3">
                     <span className={`inline-flex h-8 w-8 items-center justify-center rounded-md text-xs font-black text-white ${club.color}`}>
                       {club.initials}
                     </span>

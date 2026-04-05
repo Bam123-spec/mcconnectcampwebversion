@@ -4,15 +4,24 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { LogOut } from "lucide-react";
+import { LogOut, ShieldCheck, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AUTH_ENABLED } from "@/lib/features";
 import { supabase } from "@/lib/supabase";
+
+type ProfileRow = {
+  full_name?: string | null;
+  role?: string | null;
+};
 
 export function TopNav() {
   const pathname = usePathname();
   const router = useRouter();
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [displayName, setDisplayName] = useState<string | null>(null);
+  const [joinedClubCount, setJoinedClubCount] = useState(0);
+  const [leadershipCount, setLeadershipCount] = useState(0);
+  const [isPlatformAdmin, setIsPlatformAdmin] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   useEffect(() => {
@@ -23,8 +32,34 @@ export function TopNav() {
         data: { user },
       } = await supabase.auth.getUser();
 
+      if (!user) {
+        if (!cancelled) {
+          setUserEmail(null);
+          setDisplayName(null);
+          setJoinedClubCount(0);
+          setLeadershipCount(0);
+          setIsPlatformAdmin(false);
+        }
+        return;
+      }
+
+      const [profileResult, membershipsResult, officersResult] = await Promise.all([
+        supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
+        supabase
+          .from("club_members")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("status", "approved"),
+        supabase.from("officers").select("club_id").eq("user_id", user.id),
+      ]);
+
       if (!cancelled) {
-        setUserEmail(user?.email ?? null);
+        const profile = profileResult.data as ProfileRow | null;
+        setUserEmail(user.email ?? null);
+        setDisplayName(profile?.full_name || user.email?.split("@")[0] || null);
+        setJoinedClubCount(membershipsResult.data?.length ?? 0);
+        setLeadershipCount(officersResult.data?.length ?? 0);
+        setIsPlatformAdmin(profile?.role === "admin");
       }
     };
 
@@ -46,9 +81,18 @@ export function TopNav() {
     setIsSigningOut(true);
     await supabase.auth.signOut();
     setUserEmail(null);
+    setDisplayName(null);
+    setJoinedClubCount(0);
+    setLeadershipCount(0);
+    setIsPlatformAdmin(false);
     router.push("/");
     router.refresh();
     setIsSigningOut(false);
+  };
+
+  const isPathActive = (href: string) => {
+    if (href === "/") return pathname === "/";
+    return pathname === href || pathname.startsWith(`${href}/`);
   };
 
   return (
@@ -72,7 +116,7 @@ export function TopNav() {
           href="/" 
           className={cn(
             "flex items-center px-6 h-full text-sm font-semibold border-b-2 transition-colors",
-            pathname === "/" ? "border-[#51237f] text-gray-900" : "border-transparent text-gray-600 hover:text-gray-900"
+            isPathActive("/") ? "border-[#51237f] text-gray-900" : "border-transparent text-gray-600 hover:text-gray-900"
           )}
         >
           Home
@@ -81,7 +125,7 @@ export function TopNav() {
           href="/clubs" 
           className={cn(
             "flex items-center px-6 h-full text-sm font-semibold border-b-2 transition-colors",
-            pathname === "/clubs" ? "border-[#51237f] text-gray-900" : "border-transparent text-gray-600 hover:text-gray-900"
+            isPathActive("/clubs") ? "border-[#51237f] text-gray-900" : "border-transparent text-gray-600 hover:text-gray-900"
           )}
         >
           Clubs
@@ -90,7 +134,7 @@ export function TopNav() {
           href="/events" 
           className={cn(
             "flex items-center px-6 h-full text-sm font-semibold border-b-2 transition-colors",
-            pathname === "/events" ? "border-[#51237f] text-gray-900" : "border-transparent text-gray-600 hover:text-gray-900"
+            isPathActive("/events") ? "border-[#51237f] text-gray-900" : "border-transparent text-gray-600 hover:text-gray-900"
           )}
         >
           Events
@@ -99,7 +143,7 @@ export function TopNav() {
           href="/activity" 
           className={cn(
             "flex items-center px-6 h-full text-sm font-semibold border-b-2 transition-colors",
-            pathname === "/activity" ? "border-[#51237f] text-gray-900" : "border-transparent text-gray-600 hover:text-gray-900"
+            isPathActive("/activity") ? "border-[#51237f] text-gray-900" : "border-transparent text-gray-600 hover:text-gray-900"
           )}
         >
           Activity
@@ -108,7 +152,7 @@ export function TopNav() {
           href="/docs" 
           className={cn(
             "flex items-center px-6 h-full text-sm font-semibold border-b-2 transition-colors",
-            pathname === "/docs" ? "border-[#51237f] text-gray-900" : "border-transparent text-gray-600 hover:text-gray-900"
+            isPathActive("/docs") ? "border-[#51237f] text-gray-900" : "border-transparent text-gray-600 hover:text-gray-900"
           )}
         >
           Support & Help
@@ -123,9 +167,25 @@ export function TopNav() {
           <>
             <div className="text-right">
               <div className="text-white font-semibold text-sm leading-tight">
-                {userEmail.split("@")[0]}
+                {displayName || userEmail.split("@")[0]}
               </div>
-              <div className="text-white/70 text-[11px]">Signed in</div>
+              <div className="flex flex-wrap justify-end gap-1.5 pt-1">
+                <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-medium text-white/90">
+                  <Users size={11} />
+                  {joinedClubCount} club{joinedClubCount === 1 ? "" : "s"}
+                </span>
+                {leadershipCount > 0 ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-medium text-white/90">
+                    <ShieldCheck size={11} />
+                    {leadershipCount} leadership
+                  </span>
+                ) : null}
+                {isPlatformAdmin ? (
+                  <span className="inline-flex items-center rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-medium text-white/90">
+                    Admin
+                  </span>
+                ) : null}
+              </div>
             </div>
             <button
               type="button"
