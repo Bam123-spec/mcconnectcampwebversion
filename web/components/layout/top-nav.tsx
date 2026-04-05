@@ -149,6 +149,15 @@ export function TopNav() {
           Activity
         </Link>
         <Link 
+          href="/profile" 
+          className={cn(
+            "flex items-center px-6 h-full text-sm font-semibold border-b-2 transition-colors",
+            isPathActive("/profile") ? "border-[#51237f] text-gray-900" : "border-transparent text-gray-600 hover:text-gray-900"
+          )}
+        >
+          Profile
+        </Link>
+        <Link 
           href="/docs" 
           className={cn(
             "flex items-center px-6 h-full text-sm font-semibold border-b-2 transition-colors",
@@ -166,9 +175,9 @@ export function TopNav() {
         ) : userEmail ? (
           <>
             <div className="text-right">
-              <div className="text-white font-semibold text-sm leading-tight">
+              <Link href="/profile" className="text-white font-semibold text-sm leading-tight hover:underline">
                 {displayName || userEmail.split("@")[0]}
-              </div>
+              </Link>
               <div className="flex flex-wrap justify-end gap-1.5 pt-1">
                 <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-medium text-white/90">
                   <Users size={11} />
