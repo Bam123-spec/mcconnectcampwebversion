@@ -1,49 +1,29 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { LoaderCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import { formatOfficerRole } from "@/lib/live-data";
-import { hasOfficerCapability } from "@/lib/officer-capabilities";
 
-type ProfileRow = {
-  role?: string | null;
+type EventRow = {
+  id: string;
+  club_id?: string | null;
+  name?: string | null;
+  description?: string | null;
+  date?: string | null;
+  day?: string | null;
+  time?: string | null;
+  location?: string | null;
+  cover_image_url?: string | null;
 };
 
-type OfficerClubRow = {
-  club_id: string;
-  role?: string | null;
-  clubs?:
-    | {
-        name?: string | null;
-      }
-    | {
-        name?: string | null;
-      }[]
-    | null;
-};
-
-type OfficerClub = {
-  clubId: string;
-  clubName: string;
-  role: string;
-};
-
-const firstItem = <T,>(value: T | T[] | null | undefined): T | null => {
-  if (Array.isArray(value)) return value[0] ?? null;
-  return value ?? null;
-};
-
-export function CreateEventPanel({ initialClubId }: { initialClubId?: string }) {
+export function EventEditPanel({ eventId }: { eventId: string }) {
   const [loading, setLoading] = useState(true);
-  const [signedIn, setSignedIn] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [clubs, setClubs] = useState<OfficerClub[]>([]);
-  const [selectedClubId, setSelectedClubId] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [allowed, setAllowed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [clubId, setClubId] = useState("");
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -56,7 +36,7 @@ export function CreateEventPanel({ initialClubId }: { initialClubId?: string }) 
   useEffect(() => {
     let cancelled = false;
 
-    const loadAccess = async () => {
+    const loadEvent = async () => {
       setLoading(true);
 
       const {
@@ -65,79 +45,77 @@ export function CreateEventPanel({ initialClubId }: { initialClubId?: string }) 
 
       if (!user) {
         if (!cancelled) {
-          setSignedIn(false);
-          setIsAdmin(false);
-          setClubs([]);
+          setError("Sign in to edit this event.");
           setLoading(false);
         }
         return;
       }
 
-      const [profileResult, officersResult] = await Promise.all([
+      const { data: event, error: eventError } = await supabase
+        .from("events")
+        .select("id, club_id, name, description, date, day, time, location, cover_image_url")
+        .eq("id", eventId)
+        .maybeSingle();
+
+      if (eventError || !event) {
+        if (!cancelled) {
+          setError("Event not found.");
+          setLoading(false);
+        }
+        return;
+      }
+
+      const typedEvent = event as EventRow;
+      const [{ data: profile }, { data: officer }] = await Promise.all([
         supabase.from("profiles").select("role").eq("id", user.id).maybeSingle(),
         supabase
           .from("officers")
-          .select("club_id, role, clubs(name)")
-          .eq("user_id", user.id),
+          .select("club_id")
+          .eq("user_id", user.id)
+          .eq("club_id", typedEvent.club_id)
+          .maybeSingle(),
       ]);
 
-      const profile = profileResult.data as ProfileRow | null;
-      const officerRows = (officersResult.data ?? []) as OfficerClubRow[];
-      const manageableClubs = officerRows
-        .map((row) => {
-          const club = firstItem(row.clubs);
-          if (!row.club_id || !club?.name) return null;
-          return {
-            clubId: row.club_id,
-            clubName: club.name,
-            role: row.role || "officer",
-          };
-        })
-        .filter(Boolean)
-        .filter((row) => hasOfficerCapability((row as OfficerClub).role, "createEvents")) as OfficerClub[];
+      if (profile?.role !== "admin" && !officer?.club_id) {
+        if (!cancelled) {
+          setError("You do not have editing access to this event.");
+          setLoading(false);
+        }
+        return;
+      }
 
       if (!cancelled) {
-        setSignedIn(true);
-        setIsAdmin(profile?.role === "admin");
-        setClubs(manageableClubs);
-        setSelectedClubId((current) => {
-          if (current) return current;
-          if (initialClubId && manageableClubs.some((club) => club.clubId === initialClubId)) {
-            return initialClubId;
-          }
-          return manageableClubs[0]?.clubId || "";
+        setAllowed(true);
+        setClubId(typedEvent.club_id || "");
+        setForm({
+          title: typedEvent.name || "",
+          description: typedEvent.description || "",
+          date: typedEvent.date || typedEvent.day || "",
+          time: typedEvent.time || "",
+          location: typedEvent.location || "",
+          imageUrl: typedEvent.cover_image_url || "",
         });
         setLoading(false);
       }
     };
 
-    loadAccess();
+    loadEvent();
     return () => {
       cancelled = true;
     };
-  }, [initialClubId]);
-
-  const canCreate = isAdmin || clubs.length > 0;
-  const selectedClub = useMemo(
-    () => clubs.find((club) => club.clubId === selectedClubId) ?? clubs[0] ?? null,
-    [clubs, selectedClubId]
-  );
+  }, [eventId]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    if (!selectedClub?.clubId || !form.title || !form.date || !form.time || !form.location) {
-      setError("Fill in the required event details first.");
-      return;
-    }
+    if (!allowed) return;
 
     setSubmitting(true);
     setError(null);
     setSuccess(null);
 
-    const { error: insertError } = await supabase.from("events").insert([
-      {
-        club_id: selectedClub.clubId,
+    const { error: updateError } = await supabase
+      .from("events")
+      .update({
         name: form.title,
         description: form.description || null,
         date: form.date,
@@ -145,24 +123,16 @@ export function CreateEventPanel({ initialClubId }: { initialClubId?: string }) 
         time: form.time,
         location: form.location,
         cover_image_url: form.imageUrl || null,
-      },
-    ]);
+      })
+      .eq("id", eventId);
 
-    if (insertError) {
-      setError(insertError.message || "Failed to create event.");
+    if (updateError) {
+      setError(updateError.message || "Failed to update event.");
       setSubmitting(false);
       return;
     }
 
-    setSuccess(`Event created for ${selectedClub.clubName}.`);
-    setForm({
-      title: "",
-      description: "",
-      date: "",
-      time: "",
-      location: "",
-      imageUrl: "",
-    });
+    setSuccess("Event updated.");
     setSubmitting(false);
   };
 
@@ -170,35 +140,16 @@ export function CreateEventPanel({ initialClubId }: { initialClubId?: string }) 
     return (
       <div className="flex items-center gap-3 rounded-[24px] border border-gray-200 bg-white p-6 text-sm text-gray-500 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
         <LoaderCircle size={16} className="animate-spin text-[#51237f]" />
-        Loading event creation access.
+        Loading event details.
       </div>
     );
   }
 
-  if (!signedIn) {
+  if (!allowed) {
     return (
       <div className="rounded-[24px] border border-gray-200 bg-white p-8 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
-        <h1 className="text-3xl font-bold tracking-[-0.02em] text-gray-950">Create club events after sign in</h1>
-        <p className="mt-4 max-w-2xl text-sm leading-7 text-gray-600">
-          Sign in first so we can verify which clubs you manage and which event tools your role allows.
-        </p>
-        <Link
-          href="/login"
-          className="mt-6 inline-flex items-center rounded-full bg-[#51237f] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#45206b]"
-        >
-          Sign In
-        </Link>
-      </div>
-    );
-  }
-
-  if (!canCreate) {
-    return (
-      <div className="rounded-[24px] border border-gray-200 bg-white p-8 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
-        <h1 className="text-3xl font-bold tracking-[-0.02em] text-gray-950">Your role can’t create events yet</h1>
-        <p className="mt-4 max-w-2xl text-sm leading-7 text-gray-600">
-          Presidents, Vice Presidents, Treasurers, and platform admins can create events from this workspace.
-        </p>
+        <h1 className="text-3xl font-bold tracking-[-0.02em] text-gray-950">Event editing unavailable</h1>
+        <p className="mt-4 max-w-2xl text-sm leading-7 text-gray-600">{error || "You do not have access to edit this event."}</p>
         <Link
           href="/manage"
           className="mt-6 inline-flex items-center rounded-full border border-gray-300 px-6 py-3 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50"
@@ -212,12 +163,10 @@ export function CreateEventPanel({ initialClubId }: { initialClubId?: string }) 
   return (
     <div className="space-y-8">
       <section className="rounded-[24px] border border-gray-200 bg-white p-8 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#51237f]">Create Event</p>
-        <h1 className="mt-3 text-3xl font-bold tracking-[-0.02em] text-gray-950">
-          Launch a new event for your club
-        </h1>
+        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#51237f]">Edit Event</p>
+        <h1 className="mt-3 text-3xl font-bold tracking-[-0.02em] text-gray-950">Update event details</h1>
         <p className="mt-4 max-w-2xl text-sm leading-7 text-gray-600">
-          Publish events directly from the officer workspace so members can RSVP from the main campus feed.
+          Keep event info accurate so members see the right date, place, and context before they RSVP.
         </p>
       </section>
 
@@ -227,40 +176,21 @@ export function CreateEventPanel({ initialClubId }: { initialClubId?: string }) 
       >
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <label className="space-y-2 md:col-span-2">
-            <span className="text-sm font-semibold text-gray-900">Club</span>
-            <select
-              value={selectedClub?.clubId || ""}
-              onChange={(event) => setSelectedClubId(event.target.value)}
-              className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-800 outline-none ring-0 transition focus:border-[#51237f]"
-            >
-              {clubs.map((club) => (
-                <option key={club.clubId} value={club.clubId}>
-                  {club.clubName} · {formatOfficerRole(club.role)}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className="space-y-2 md:col-span-2">
             <span className="text-sm font-semibold text-gray-900">Event title</span>
             <input
               value={form.title}
               onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
               className="w-full rounded-2xl border border-gray-300 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-[#51237f]"
-              placeholder="Weekly planning meeting"
             />
           </label>
-
           <label className="space-y-2 md:col-span-2">
             <span className="text-sm font-semibold text-gray-900">Description</span>
             <textarea
               value={form.description}
               onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
               className="min-h-32 w-full rounded-2xl border border-gray-300 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-[#51237f]"
-              placeholder="What is this event for and why should members show up?"
             />
           </label>
-
           <label className="space-y-2">
             <span className="text-sm font-semibold text-gray-900">Date</span>
             <input
@@ -270,27 +200,22 @@ export function CreateEventPanel({ initialClubId }: { initialClubId?: string }) 
               className="w-full rounded-2xl border border-gray-300 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-[#51237f]"
             />
           </label>
-
           <label className="space-y-2">
             <span className="text-sm font-semibold text-gray-900">Time</span>
             <input
               value={form.time}
               onChange={(event) => setForm((current) => ({ ...current, time: event.target.value }))}
               className="w-full rounded-2xl border border-gray-300 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-[#51237f]"
-              placeholder="5:00 PM"
             />
           </label>
-
           <label className="space-y-2">
             <span className="text-sm font-semibold text-gray-900">Location</span>
             <input
               value={form.location}
               onChange={(event) => setForm((current) => ({ ...current, location: event.target.value }))}
               className="w-full rounded-2xl border border-gray-300 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-[#51237f]"
-              placeholder="Science West 301 or Zoom"
             />
           </label>
-
           <label className="space-y-2">
             <span className="text-sm font-semibold text-gray-900">Cover image URL</span>
             <input
@@ -319,10 +244,10 @@ export function CreateEventPanel({ initialClubId }: { initialClubId?: string }) 
             disabled={submitting}
             className="inline-flex items-center rounded-full bg-[#51237f] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#45206b] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {submitting ? "Creating event..." : "Create Event"}
+            {submitting ? "Saving..." : "Save Event"}
           </button>
           <Link
-            href="/manage"
+            href={clubId ? "/manage" : "/manage"}
             className="inline-flex items-center rounded-full border border-gray-300 px-6 py-3 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50"
           >
             Back to Manage
