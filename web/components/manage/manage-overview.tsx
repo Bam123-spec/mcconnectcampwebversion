@@ -223,33 +223,33 @@ export function ManageOverview() {
 
       <section className="grid grid-cols-1 gap-6 md:grid-cols-3">
         <Link
-          href="/events"
+          href="/manage/events/new"
           className="rounded-[24px] border border-gray-200 bg-white p-6 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)] transition hover:-translate-y-0.5 hover:shadow-md"
         >
           <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Events</p>
-          <h3 className="mt-2 text-xl font-bold tracking-[-0.02em] text-gray-950">Review event listings</h3>
+          <h3 className="mt-2 text-xl font-bold tracking-[-0.02em] text-gray-950">Create new events</h3>
           <p className="mt-3 text-sm leading-6 text-gray-600">
-            Jump into current event pages and check how your programs are appearing to students.
+            Publish club events directly from the officer workspace and push them into the main campus feed.
           </p>
         </Link>
         <Link
-          href="/activity"
+          href="/manage/chats/members"
           className="rounded-[24px] border border-gray-200 bg-white p-6 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)] transition hover:-translate-y-0.5 hover:shadow-md"
         >
-          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Activity</p>
-          <h3 className="mt-2 text-xl font-bold tracking-[-0.02em] text-gray-950">Track your involvement</h3>
+          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Member Chat</p>
+          <h3 className="mt-2 text-xl font-bold tracking-[-0.02em] text-gray-950">Talk with club members</h3>
           <p className="mt-3 text-sm leading-6 text-gray-600">
-            See your memberships, RSVPs, and saved items alongside the clubs you help lead.
+            Open the member-facing club conversation and keep replies moving from the same management area.
           </p>
         </Link>
         <Link
-          href="/docs"
+          href="/manage/chats/leadership"
           className="rounded-[24px] border border-gray-200 bg-white p-6 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)] transition hover:-translate-y-0.5 hover:shadow-md"
         >
-          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Support</p>
-          <h3 className="mt-2 text-xl font-bold tracking-[-0.02em] text-gray-950">Keep help close</h3>
+          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Leadership Channel</p>
+          <h3 className="mt-2 text-xl font-bold tracking-[-0.02em] text-gray-950">Separate officer coordination</h3>
           <p className="mt-3 text-sm leading-6 text-gray-600">
-            Open docs and guidance without losing your management view when you need a quick reference.
+            Keep leadership-only conversations separate from the member chat when you need a private coordination thread.
           </p>
         </Link>
       </section>
