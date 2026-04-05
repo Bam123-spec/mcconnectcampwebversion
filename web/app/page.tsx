@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LogIn, Users, Search, ExternalLink } from "lucide-react";
+import { Users, Search, ExternalLink } from "lucide-react";
 import { EventCard } from "@/components/events/EventCard";
 import { CampusAccessPanel } from "@/components/home/campus-access-panel";
 import { AUTH_ENABLED } from "@/lib/features";
@@ -103,30 +103,28 @@ export default async function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-[#f5f6f8]">
       {/* Hero Section */}
-      <section className="relative w-full h-[400px] md:h-[500px]">
-        {/* Background Image */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2670&auto=format&fit=crop')" }}
-        />
-        {/* Overlay gradient for readability */}
-        <div className="absolute inset-0 bg-black/40" />
-        
-        {/* Hero Content */}
-        <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4 max-w-4xl mx-auto">
-          <h1 className="text-white text-5xl md:text-6xl font-bold mb-4 drop-shadow-lg">
-            Welcome to Raptor Connect!
-          </h1>
-          <p className="text-white text-xl md:text-2xl mb-8 font-medium drop-shadow-md">
-            The official campus community platform at Montgomery College
-          </p>
-          <Link 
-            href="/events" 
-            className="flex items-center gap-2 bg-[#51237f] hover:bg-[#51237f]/90 text-white px-8 py-3 rounded-full font-semibold transition-colors shadow-lg"
-          >
-            <LogIn size={18} />
-            Explore Events
-          </Link>
+      <section className="w-full border-b border-gray-200 bg-white">
+        <div className="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-10 md:px-6 md:py-12 lg:px-8">
+          <div className="max-w-3xl">
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#51237f]">
+              Montgomery College
+            </p>
+            <h1 className="mt-3 text-4xl font-black tracking-tight text-gray-900 md:text-5xl">
+              What&apos;s happening this week at Montgomery College.
+            </h1>
+            <p className="mt-4 max-w-2xl text-base leading-7 text-gray-600 md:text-lg">
+              Discover upcoming events, explore active clubs, and find the communities and programs students are joining right now.
+            </p>
+          </div>
+
+          <div>
+            <Link 
+              href="/events" 
+              className="inline-flex items-center rounded-md bg-[#51237f] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#45206b]"
+            >
+              Explore Events
+            </Link>
+          </div>
         </div>
       </section>
 
