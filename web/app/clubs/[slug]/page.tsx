@@ -2,23 +2,72 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { slugifyClubName } from "@/lib/club-utils";
 import { ClubProfilePanel } from "@/components/clubs/club-profile-panel";
-import { previewClubs, previewClubEvents } from "@/lib/preview-data";
+import { createServerSupabaseClient } from "@/lib/supabase";
+import { formatOfficerRole } from "@/lib/live-data";
+
+type OfficerRow = {
+  role?: string | null;
+  profiles?:
+    | {
+        full_name?: string | null;
+      }
+    | {
+        full_name?: string | null;
+      }[]
+    | null;
+};
 
 const getClubBySlug = async (slug: string) => {
-  const club = previewClubs.find((entry) => slugifyClubName(entry.name || "") === slug);
+  const supabase = createServerSupabaseClient();
+  const { data: clubs } = await supabase
+    .from("clubs")
+    .select("id, name, description, cover_image_url, member_count, meeting_time")
+    .order("name", { ascending: true });
+
+  const club = (clubs ?? []).find((entry) => slugifyClubName(entry.name || "") === slug);
   if (!club?.id) return null;
+
+  const [{ data: events }, { data: officers }] = await Promise.all([
+    supabase
+      .from("events")
+      .select("id, name, date, day, time, location")
+      .eq("club_id", club.id)
+      .order("date", { ascending: true, nullsFirst: false })
+      .order("day", { ascending: true, nullsFirst: false })
+      .limit(8),
+    supabase
+      .from("officers")
+      .select("role, profiles!user_id(full_name)")
+      .eq("club_id", club.id)
+      .limit(6),
+  ]);
+
+  const officerNames = ((officers ?? []) as OfficerRow[])
+    .map((officer) => {
+      const profile = Array.isArray(officer.profiles) ? officer.profiles[0] : officer.profiles;
+      if (!profile?.full_name) return null;
+      return `${profile.full_name} · ${formatOfficerRole(officer.role)}`;
+    })
+    .filter(Boolean) as string[];
 
   return {
     club: {
       id: club.id,
       name: club.name,
-      description: club.description,
-      coverImageUrl: club.coverImageUrl,
-      memberCount: club.members,
-      meetingTime: club.meetingTime,
+      description: club.description ?? "",
+      coverImageUrl: club.cover_image_url ?? null,
+      memberCount: club.member_count ?? 0,
+      meetingTime: club.meeting_time ?? "TBA",
       slug: slugifyClubName(club.name),
     },
-    events: previewClubEvents[slug] || [],
+    events: (events ?? []).map((event) => ({
+      id: event.id,
+      name: event.name,
+      date: event.date || event.day || "",
+      time: event.time || "TBA",
+      location: event.location || "Location TBA",
+    })),
+    officerNames,
   };
 };
 
@@ -54,5 +103,5 @@ export default async function ClubProfilePage({
     notFound();
   }
 
-  return <ClubProfilePanel initialClub={data.club} initialEvents={data.events} />;
+  return <ClubProfilePanel initialClub={data.club} initialEvents={data.events} officerNames={data.officerNames} />;
 }

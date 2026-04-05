@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Award, Clock, Clock3, LoaderCircle, QrCode, ShieldCheck, Ticket, Users, MapPin } from "lucide-react";
+import { Award, Bookmark, Clock, Clock3, LoaderCircle, QrCode, ShieldCheck, Ticket, Users, MapPin } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { formatEventDateLabel, formatJoinedLabel, formatOfficerRole, getClubInitials } from "@/lib/live-data";
+import { slugifyClubName } from "@/lib/club-utils";
 
 type ActivityRegistration = {
   id: string;
@@ -23,6 +24,13 @@ type ActivityMembership = {
   joinedLabel: string;
   initials: string;
   badgeTone: "officer" | "member";
+};
+
+type SavedEvent = {
+  id: string;
+  name: string;
+  dateLabel: string;
+  location: string;
 };
 
 type RegistrationRow = {
@@ -86,6 +94,7 @@ export function ActivityPanel() {
   const [signedIn, setSignedIn] = useState(false);
   const [registrations, setRegistrations] = useState<ActivityRegistration[]>([]);
   const [memberships, setMemberships] = useState<ActivityMembership[]>([]);
+  const [savedEvents, setSavedEvents] = useState<SavedEvent[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -104,6 +113,7 @@ export function ActivityPanel() {
           setSignedIn(false);
           setRegistrations([]);
           setMemberships([]);
+          setSavedEvents([]);
           setLoading(false);
         }
         return;
@@ -113,7 +123,7 @@ export function ActivityPanel() {
         setSignedIn(true);
       }
 
-      const [registrationsResult, membershipsResult, officersResult] = await Promise.all([
+      const [registrationsResult, membershipsResult, officersResult, savedEventsResult] = await Promise.all([
         supabase
           .from("event_registrations")
           .select("id, created_at, event:events(name, location, date, day, time, clubs(name))")
@@ -131,14 +141,20 @@ export function ActivityPanel() {
           .from("officers")
           .select("club_id, role")
           .eq("user_id", user.id),
+        supabase
+          .from("event_saved")
+          .select("id, event:events(name, location, date, day, time)")
+          .eq("user_id", user.id)
+          .limit(6),
       ]);
 
-      if (registrationsResult.error || membershipsResult.error || officersResult.error) {
+      if (registrationsResult.error || membershipsResult.error || officersResult.error || savedEventsResult.error) {
         if (!cancelled) {
           setError(
             registrationsResult.error?.message ||
               membershipsResult.error?.message ||
               officersResult.error?.message ||
+              savedEventsResult.error?.message ||
               "Unable to load your activity right now."
           );
           setLoading(false);
@@ -193,9 +209,41 @@ export function ActivityPanel() {
         })
         .filter(Boolean) as ActivityMembership[];
 
+      const nextSavedEvents: SavedEvent[] = ((savedEventsResult.data ?? []) as Array<{
+        id: string;
+        event:
+          | {
+              name?: string | null;
+              location?: string | null;
+              date?: string | null;
+              day?: string | null;
+              time?: string | null;
+            }
+          | {
+              name?: string | null;
+              location?: string | null;
+              date?: string | null;
+              day?: string | null;
+              time?: string | null;
+            }[]
+          | null;
+      }>)
+        .map((saved) => {
+          const event = firstItem(saved.event);
+          if (!event?.name) return null;
+          return {
+            id: saved.id,
+            name: event.name,
+            dateLabel: formatEventDateLabel(event.date || event.day || null, event.time),
+            location: event.location || "Location TBA",
+          };
+        })
+        .filter(Boolean) as SavedEvent[];
+
       if (!cancelled) {
         setRegistrations(nextRegistrations);
         setMemberships(nextMemberships);
+        setSavedEvents(nextSavedEvents);
         setLoading(false);
       }
     };
@@ -316,6 +364,34 @@ export function ActivityPanel() {
             <section className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
               <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
                 <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                  <Bookmark size={20} className="text-[#51237f]" />
+                  Saved Events
+                </h2>
+                <Link href="/events" className="text-sm font-semibold text-[#51237f] hover:underline">
+                  Explore Events
+                </Link>
+              </div>
+              <div className="p-6 flex flex-col gap-3">
+                {savedEvents.length ? (
+                  savedEvents.map((event) => (
+                    <div key={event.id} className="rounded-lg border border-gray-200 px-4 py-4">
+                      <div className="font-bold text-gray-900">{event.name}</div>
+                      <div className="mt-2 text-sm text-gray-500">{event.dateLabel}</div>
+                      <div className="mt-1 text-sm text-gray-500">{event.location}</div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 px-5 py-8 text-center">
+                    <h3 className="text-lg font-bold text-gray-900">No saved events yet</h3>
+                    <p className="text-sm text-gray-500 mt-2">Save events from the campus feed to come back to them later.</p>
+                  </div>
+                )}
+              </div>
+            </section>
+
+            <section className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+                <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                   <Award size={20} className="text-[#51237f]" />
                   My Memberships
                 </h2>
@@ -330,7 +406,12 @@ export function ActivityPanel() {
                       {membership.initials}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-base font-bold text-gray-900 truncate">{membership.name}</h3>
+                      <Link
+                        href={`/clubs/${slugifyClubName(membership.name)}`}
+                        className="text-base font-bold text-gray-900 truncate hover:text-[#51237f]"
+                      >
+                        {membership.name}
+                      </Link>
                       <div className="text-sm text-gray-500 mt-0.5">{membership.joinedLabel}</div>
                     </div>
                     <div className="shrink-0 text-right">

@@ -36,10 +36,6 @@ export function OtherCollegeLogin() {
       return;
     }
 
-    await fetch("/auth/session", {
-      method: "POST",
-    });
-
     router.push("/");
     router.refresh();
   };

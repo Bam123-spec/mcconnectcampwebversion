@@ -23,18 +23,18 @@ export function Footer() {
           <div>
             <h4 className="font-bold text-gray-900 mb-4 tracking-wide uppercase text-xs">Resources</h4>
             <ul className="space-y-2.5 text-gray-500">
-               <li><Link href="#" className="hover:text-[#51237f] transition-colors">Campus Directory</Link></li>
-               <li><Link href="#" className="hover:text-[#51237f] transition-colors">MyMC Portal</Link></li>
-               <li><Link href="#" className="hover:text-[#51237f] transition-colors">Library Information</Link></li>
+               <li><Link href="/clubs" className="hover:text-[#51237f] transition-colors">Campus Directory</Link></li>
+               <li><Link href="/docs" className="hover:text-[#51237f] transition-colors">Getting Started</Link></li>
+               <li><Link href="/docs/navigating" className="hover:text-[#51237f] transition-colors">Campus Navigation</Link></li>
             </ul>
           </div>
           
           <div>
             <h4 className="font-bold text-gray-900 mb-4 tracking-wide uppercase text-xs">Platform Support</h4>
             <ul className="space-y-2.5 text-gray-500">
-               <li><Link href="#" className="hover:text-[#51237f] transition-colors">Help Center & FAQ</Link></li>
-               <li><Link href="#" className="hover:text-[#51237f] transition-colors">Contact Student Life</Link></li>
-               <li><Link href="#" className="hover:text-[#51237f] transition-colors">Accessibility Statement</Link></li>
+               <li><Link href="/docs" className="hover:text-[#51237f] transition-colors">Help Center & FAQ</Link></li>
+               <li><Link href="/docs/events" className="hover:text-[#51237f] transition-colors">Event Registration Help</Link></li>
+               <li><Link href="/docs/privacy" className="hover:text-[#51237f] transition-colors">Accessibility & Privacy</Link></li>
             </ul>
           </div>
         </div>

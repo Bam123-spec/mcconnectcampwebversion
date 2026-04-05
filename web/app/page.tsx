@@ -5,35 +5,33 @@ import { AUTH_ENABLED } from "@/lib/features";
 import { createServerSupabaseClient } from "@/lib/supabase";
 import { getClubColor, getClubInitials, inferCampus, inferClubCategory, normalizeEventForWeb } from "@/lib/live-data";
 
-const LATEST_NEWS = [
-  {
-    id: "n1",
-    title: "MC Newsletter - Spring Highlights",
-    date: "Wednesday, February 18",
-    author: "Jane Doe",
-    group: "Student Life Office"
-  },
-  {
-    id: "n2",
-    title: "Launching Your Career: A Professional Session",
-    date: "Monday, February 16",
-    author: "John Smith",
-    group: "Career Services"
-  }
-];
+type NewsRow = {
+  id: string;
+  title?: string | null;
+  created_at?: string | null;
+  category?: string | null;
+  author?:
+    | {
+        full_name?: string | null;
+      }
+    | {
+        full_name?: string | null;
+      }[]
+    | null;
+};
 
 const QUICK_LINKS = [
-  { id: "q1", name: "Blackboard Learning", url: "#" },
-  { id: "q2", name: "MyMC Portal", url: "#" },
-  { id: "q3", name: "Interactive Campus Map", url: "#" },
-  { id: "q4", name: "Library Services", url: "#" },
+  { id: "q1", name: "Events Guide", url: "/docs/events" },
+  { id: "q2", name: "Getting Started", url: "/docs" },
+  { id: "q3", name: "Interactive Campus Map", url: "/docs/navigating" },
+  { id: "q4", name: "Privacy & Access", url: "/docs/privacy" },
 ];
 
 export default async function Home() {
   const isAuthenticated = false;
   const supabase = createServerSupabaseClient();
 
-  const [{ data: eventsData }, { data: clubsData }] = await Promise.all([
+  const [{ data: eventsData }, { data: clubsData }, { data: newsData }] = await Promise.all([
     supabase
       .from("events")
       .select("id, name, description, location, date, day, time, cover_image_url")
@@ -46,6 +44,12 @@ export default async function Home() {
       .order("member_count", { ascending: false, nullsFirst: false })
       .order("name", { ascending: true })
       .limit(3),
+    supabase
+      .from("forum_posts")
+      .select("id, title, created_at, category, author:author_id(full_name)")
+      .eq("category", "announcements")
+      .order("created_at", { ascending: false })
+      .limit(2),
   ]);
 
   const featuredEvents = (eventsData ?? []).map((event) => normalizeEventForWeb(event));
@@ -58,6 +62,23 @@ export default async function Home() {
     initials: getClubInitials(club.name),
     color: getClubColor(club.id),
   }));
+  const latestNews = ((newsData ?? []) as NewsRow[]).map((news) => {
+    const author = Array.isArray(news.author) ? news.author[0] : news.author;
+    const date = news.created_at ? new Date(news.created_at) : null;
+    return {
+      id: news.id,
+      title: news.title || "Campus announcement",
+      date: date
+        ? date.toLocaleDateString("en-US", {
+            weekday: "long",
+            month: "short",
+            day: "numeric",
+          })
+        : "Recently posted",
+      author: author?.full_name || "Montgomery College",
+      group: news.category ? news.category.charAt(0).toUpperCase() + news.category.slice(1) : "Announcement",
+    };
+  });
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f5f6f8]">
@@ -137,10 +158,10 @@ export default async function Home() {
             </div>
 
             <div className="bg-white border text-left border-gray-200 rounded-lg overflow-hidden flex flex-col">
-              {LATEST_NEWS.map((news, index) => (
+              {latestNews.length ? latestNews.map((news, index) => (
                 <div 
                   key={news.id} 
-                  className={`flex items-stretch ${index !== LATEST_NEWS.length - 1 ? 'border-b border-gray-200' : ''}`}
+                  className={`flex items-stretch ${index !== latestNews.length - 1 ? 'border-b border-gray-200' : ''}`}
                 >
                   <div className="w-32 md:w-48 bg-black text-white shrink-0 p-4 flex items-center justify-center font-bold text-center border-r border-gray-200">
                     <span className="text-base md:text-lg">MC NEWS</span>
@@ -153,12 +174,19 @@ export default async function Home() {
                         <Users size={14} /> {news.group}
                       </div>
                     </div>
-                    <button className="px-4 py-2 border border-gray-300 rounded font-semibold text-sm hover:bg-gray-50 flex items-center gap-2 w-full sm:w-auto justify-center">
+                    <Link
+                      href="/docs/messaging"
+                      className="px-4 py-2 border border-gray-300 rounded font-semibold text-sm hover:bg-gray-50 flex items-center gap-2 w-full sm:w-auto justify-center"
+                    >
                       Read
-                    </button>
+                    </Link>
                   </div>
                 </div>
-              ))}
+              )) : (
+                <div className="p-8 text-center text-sm text-gray-500">
+                  No announcement posts are available yet.
+                </div>
+              )}
             </div>
           </section>
         </div>

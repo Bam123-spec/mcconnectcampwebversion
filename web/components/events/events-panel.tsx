@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { EventCard, type WebEventCardEvent } from "@/components/events/EventCard";
 import { AUTH_ENABLED } from "@/lib/features";
+import { supabase } from "@/lib/supabase";
 
 const parseLocalDate = (value?: string | null) => {
   if (!value) return null;
@@ -13,6 +14,68 @@ const parseLocalDate = (value?: string | null) => {
 };
 
 export function EventsPanel({ initialEvents }: { initialEvents: WebEventCardEvent[] }) {
+  const [hasSession, setHasSession] = useState(false);
+  const [registeredIds, setRegisteredIds] = useState<Set<string>>(new Set());
+  const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadRegistrationState = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        if (!cancelled) {
+          setHasSession(false);
+          setRegisteredIds(new Set());
+        }
+        return;
+      }
+
+      const eventIds = initialEvents.map((event) => event.id);
+      if (eventIds.length === 0) {
+        if (!cancelled) {
+          setHasSession(true);
+          setRegisteredIds(new Set());
+        }
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("event_registrations")
+        .select("event_id")
+        .eq("user_id", user.id)
+        .in("event_id", eventIds);
+
+      if (cancelled) return;
+
+      if (error) {
+        console.error("Error loading RSVP state:", error);
+        setHasSession(true);
+        setRegisteredIds(new Set());
+        return;
+      }
+
+      setHasSession(true);
+      setRegisteredIds(new Set((data ?? []).map((row) => row.event_id)));
+    };
+
+    loadRegistrationState();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(() => {
+      loadRegistrationState();
+    });
+
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
+  }, [initialEvents]);
+
   const { upcomingEvents, pastEvents } = useMemo(() => {
     const now = new Date();
 
@@ -33,6 +96,53 @@ export function EventsPanel({ initialEvents }: { initialEvents: WebEventCardEven
       pastEvents: past,
     };
   }, [initialEvents]);
+
+  const handleToggleRsvp = async (eventId: string, isRegistered: boolean) => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      window.location.href = "/login";
+      return;
+    }
+
+    setPendingIds((current) => new Set(current).add(eventId));
+
+    try {
+      if (isRegistered) {
+        const { error } = await supabase
+          .from("event_registrations")
+          .delete()
+          .eq("event_id", eventId)
+          .eq("user_id", user.id);
+
+        if (error) throw error;
+
+        setRegisteredIds((current) => {
+          const next = new Set(current);
+          next.delete(eventId);
+          return next;
+        });
+      } else {
+        const { error } = await supabase
+          .from("event_registrations")
+          .insert([{ event_id: eventId, user_id: user.id }]);
+
+        if (error) throw error;
+
+        setRegisteredIds((current) => new Set(current).add(eventId));
+      }
+    } catch (error) {
+      console.error("Error updating RSVP:", error);
+    } finally {
+      setPendingIds((current) => {
+        const next = new Set(current);
+        next.delete(eventId);
+        return next;
+      });
+    }
+  };
 
   return (
     <div className="p-8 md:p-12 max-w-7xl mx-auto">
@@ -56,7 +166,15 @@ export function EventsPanel({ initialEvents }: { initialEvents: WebEventCardEven
         {upcomingEvents.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {upcomingEvents.map((event) => (
-              <EventCard key={event.id} event={event} authEnabled={AUTH_ENABLED} />
+              <EventCard
+                key={event.id}
+                event={event}
+                authEnabled={AUTH_ENABLED}
+                hasSession={hasSession}
+                isRegistered={registeredIds.has(event.id)}
+                isPending={pendingIds.has(event.id)}
+                onToggleRsvp={handleToggleRsvp}
+              />
             ))}
           </div>
         ) : (
@@ -78,7 +196,13 @@ export function EventsPanel({ initialEvents }: { initialEvents: WebEventCardEven
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {pastEvents.map((event) => (
-            <EventCard key={event.id} event={event} isPast authEnabled={AUTH_ENABLED} />
+            <EventCard
+              key={event.id}
+              event={event}
+              isPast
+              authEnabled={AUTH_ENABLED}
+              hasSession={hasSession}
+            />
           ))}
         </div>
       </section>

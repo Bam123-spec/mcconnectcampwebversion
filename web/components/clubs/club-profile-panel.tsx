@@ -2,7 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { CalendarDays, MapPin, ShieldCheck, Users } from "lucide-react";
+import { useEffect, useState } from "react";
+import { CalendarDays, LoaderCircle, MapPin, ShieldCheck, Users } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 type ClubProfile = {
   id: string;
@@ -40,10 +42,134 @@ const formatEventDate = (value: string) => {
 export function ClubProfilePanel({
   initialClub,
   initialEvents,
+  officerNames,
 }: {
   initialClub: ClubProfile;
   initialEvents: ClubEvent[];
+  officerNames: string[];
 }) {
+  const [hasSession, setHasSession] = useState(false);
+  const [isMember, setIsMember] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [isBusy, setIsBusy] = useState<"join" | "follow" | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadViewerState = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        if (!cancelled) {
+          setHasSession(false);
+          setIsMember(false);
+          setIsFollowing(false);
+        }
+        return;
+      }
+
+      const [{ data: membership }, { data: following }] = await Promise.all([
+        supabase
+          .from("club_members")
+          .select("id")
+          .eq("club_id", initialClub.id)
+          .eq("user_id", user.id)
+          .eq("status", "approved")
+          .maybeSingle(),
+        supabase
+          .from("club_followers")
+          .select("id")
+          .eq("club_id", initialClub.id)
+          .eq("user_id", user.id)
+          .maybeSingle(),
+      ]);
+
+      if (!cancelled) {
+        setHasSession(true);
+        setIsMember(Boolean(membership));
+        setIsFollowing(Boolean(following));
+      }
+    };
+
+    loadViewerState();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(() => {
+      loadViewerState();
+    });
+
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
+  }, [initialClub.id]);
+
+  const ensureSignedIn = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      window.location.href = "/login";
+      return null;
+    }
+    return user;
+  };
+
+  const handleJoin = async () => {
+    const user = await ensureSignedIn();
+    if (!user) return;
+
+    setIsBusy("join");
+    try {
+      const { error } = await supabase.from("club_members").insert({
+        club_id: initialClub.id,
+        user_id: user.id,
+        status: "approved",
+      });
+
+      if (error) throw error;
+      setIsMember(true);
+    } catch (error) {
+      console.error("Error joining club:", error);
+    } finally {
+      setIsBusy(null);
+    }
+  };
+
+  const handleFollowToggle = async () => {
+    const user = await ensureSignedIn();
+    if (!user) return;
+
+    setIsBusy("follow");
+    try {
+      if (isFollowing) {
+        const { error } = await supabase
+          .from("club_followers")
+          .delete()
+          .eq("club_id", initialClub.id)
+          .eq("user_id", user.id);
+
+        if (error) throw error;
+        setIsFollowing(false);
+      } else {
+        const { error } = await supabase.from("club_followers").insert({
+          club_id: initialClub.id,
+          user_id: user.id,
+        });
+
+        if (error) throw error;
+        setIsFollowing(true);
+      }
+    } catch (error) {
+      console.error("Error updating follow state:", error);
+    } finally {
+      setIsBusy(null);
+    }
+  };
+
   const clubBadge = initialClub.name
     .split(/\s+/)
     .filter(Boolean)
@@ -55,12 +181,12 @@ export function ClubProfilePanel({
   return (
     <div className="bg-[#f5f6f8] min-h-screen py-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-6 flex items-center justify-between gap-4">
+          <div className="mb-6 flex items-center justify-between gap-4">
           <Link href="/clubs" className="text-sm font-semibold text-[#51237f] hover:underline">
             Back to clubs
           </Link>
           <span className="rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-500">
-            Preview page
+            Live club page
           </span>
         </div>
 
@@ -102,6 +228,12 @@ export function ClubProfilePanel({
                     {initialClub.meetingTime || "TBA"}
                   </div>
                 </div>
+                <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">Access</div>
+                  <div className="mt-1 font-bold text-gray-900">
+                    {hasSession ? (isMember ? "Member" : "Signed in") : "Guest"}
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -115,6 +247,26 @@ export function ClubProfilePanel({
                   <p className="max-w-3xl leading-7 text-gray-600">
                     {initialClub.description || "This club has not added a public description yet."}
                   </p>
+                </section>
+
+                <section>
+                  <h2 className="mb-4 text-lg font-bold text-gray-900">Club leadership</h2>
+                  {officerNames.length ? (
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {officerNames.map((officer) => (
+                        <div
+                          key={officer}
+                          className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm"
+                        >
+                          {officer}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50 px-5 py-6 text-sm text-gray-600">
+                      No officer roles are published for this club yet.
+                    </div>
+                  )}
                 </section>
 
                 <section>
@@ -151,6 +303,32 @@ export function ClubProfilePanel({
                 <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
                   <h2 className="text-base font-bold text-gray-900">Quick Actions</h2>
                   <div className="mt-4 space-y-3">
+                    <button
+                      type="button"
+                      onClick={handleJoin}
+                      disabled={isMember || isBusy === "join"}
+                      className="block w-full rounded-md border border-[#51237f] bg-[#51237f] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#45206b] disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {isBusy === "join" ? (
+                        <span className="inline-flex items-center gap-2">
+                          <LoaderCircle size={14} className="animate-spin" />
+                          Joining...
+                        </span>
+                      ) : isMember ? "Joined Club" : "Join Club"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleFollowToggle}
+                      disabled={isBusy === "follow"}
+                      className="block w-full rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-semibold text-gray-700 transition hover:border-[#51237f] hover:text-[#51237f] disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {isBusy === "follow" ? (
+                        <span className="inline-flex items-center gap-2">
+                          <LoaderCircle size={14} className="animate-spin" />
+                          Updating...
+                        </span>
+                      ) : isFollowing ? "Following" : "Follow Club"}
+                    </button>
                     <Link
                       href="/events"
                       className="block rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-semibold text-gray-700 hover:border-[#51237f] hover:text-[#51237f] transition-colors"
@@ -167,9 +345,9 @@ export function ClubProfilePanel({
                 </section>
 
                 <section className="rounded-xl border border-purple-200 bg-purple-50 p-5">
-                  <h2 className="text-base font-bold text-[#51237f]">Static preview mode</h2>
+                  <h2 className="text-base font-bold text-[#51237f]">Connected to campus data</h2>
                   <p className="mt-2 text-sm leading-6 text-[#51237f]/80">
-                    This club page is currently running on preview content only. Live officer editing and database-backed profile updates will be reconnected later.
+                    This profile is reading the live club record, current officer assignments, and linked events from Supabase.
                   </p>
                 </section>
               </aside>

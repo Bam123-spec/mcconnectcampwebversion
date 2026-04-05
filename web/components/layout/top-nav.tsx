@@ -45,7 +45,6 @@ export function TopNav() {
   const handleSignOut = async () => {
     setIsSigningOut(true);
     await supabase.auth.signOut();
-    await fetch("/auth/session", { method: "DELETE" });
     setUserEmail(null);
     router.push("/");
     router.refresh();
