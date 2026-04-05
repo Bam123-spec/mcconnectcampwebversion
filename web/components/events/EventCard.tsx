@@ -46,7 +46,7 @@ export function EventCard({
 
   return (
     <div
-      className={`overflow-hidden rounded-lg border bg-white flex flex-col h-full shadow-sm ${
+      className={`flex h-full flex-col overflow-hidden rounded-xl border bg-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg ${
         isPast ? "border-gray-150 opacity-90" : "border-gray-200"
       }`}
     >
@@ -60,34 +60,39 @@ export function EventCard({
         <div className="absolute top-2 left-2 bg-gray-800/60 text-white text-[11px] font-semibold px-2 py-0.5 rounded shadow-sm">
           {isPast ? "Past" : "Campus"}
         </div>
-        <div className="absolute top-2 right-2 bg-gray-800/60 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm flex items-center gap-1">
-          <Users size={12} /> {event.rsvp_count ?? 0}
+        <div className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-white/92 px-3 py-1 text-xs font-semibold text-gray-800 shadow-sm backdrop-blur-sm">
+          <Users size={12} className="text-[#51237f]" /> {(event.rsvp_count ?? 0).toLocaleString()}
         </div>
       </div>
       
-      <div className="p-5 flex flex-col flex-1">
-        <h3 className="font-bold text-[#51237f] text-lg mb-4 line-clamp-2 leading-tight">
+      <div className="flex flex-1 flex-col p-6">
+        <h3 className="mb-3 line-clamp-2 text-xl font-bold leading-tight text-gray-900">
           {event.name}
         </h3>
-        
-        <div className="mt-auto space-y-2">
-          <div className="flex items-start gap-2 text-sm text-gray-600">
-            <Clock size={16} className="text-gray-400 shrink-0 mt-0.5" />
+
+        <div className="mb-4 flex items-center gap-2 text-sm font-medium text-gray-700">
+          <Users size={15} className="text-[#51237f]" />
+          <span>{(event.rsvp_count ?? 0).toLocaleString()} going</span>
+        </div>
+
+        <div className="mt-auto space-y-3">
+          <div className="flex items-start gap-2 text-sm text-gray-700">
+            <Clock size={16} className="mt-0.5 shrink-0 text-gray-400" />
             <span>
               {dateString} At {(event.time || "TBA").split(" - ")[0]}
             </span>
           </div>
-          <div className="flex items-start gap-2 text-sm text-gray-600">
-            <MapPin size={16} className="text-gray-400 shrink-0 mt-0.5" />
+          <div className="flex items-start gap-2 text-sm text-gray-700">
+            <MapPin size={16} className="mt-0.5 shrink-0 text-gray-400" />
             <span className="line-clamp-2">{event.location}</span>
           </div>
-          <div className="flex items-center gap-2 mt-4 pt-4 border-t border-gray-100 text-xs font-semibold text-gray-500">
+          <div className="mt-4 flex items-center gap-2 border-t border-gray-100 pt-4 text-sm font-medium text-gray-600">
             <Users size={14} className="text-gray-400" />
             {event.organizer_name || "Campus Event"}
           </div>
 
-          <div className="mt-4 flex items-center justify-between gap-3">
-            <span className="text-xs font-medium text-gray-500">
+          <div className="mt-5 flex items-center justify-between gap-3">
+            <span className="text-sm font-medium text-gray-600">
               {isPast
                 ? "Event closed"
                 : !authEnabled
@@ -112,7 +117,7 @@ export function EventCard({
                 type="button"
                 onClick={() => onToggleRsvp(event.id, isRegistered)}
                 disabled={isPending}
-                className={`inline-flex items-center rounded-md px-3 py-2 text-xs font-semibold transition-colors ${
+                className={`inline-flex items-center rounded-md px-3.5 py-2.5 text-sm font-semibold transition-colors ${
                   isRegistered
                     ? "border border-[#51237f] text-[#51237f] hover:bg-purple-50"
                     : "bg-[#51237f] text-white hover:bg-[#45206b]"
@@ -123,7 +128,7 @@ export function EventCard({
             ) : (
               <Link
                 href="/login"
-                className="inline-flex items-center rounded-md bg-[#51237f] px-3 py-2 text-xs font-semibold text-white hover:bg-[#45206b] transition-colors"
+                className="inline-flex items-center rounded-md bg-[#51237f] px-3.5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#45206b]"
               >
                 Sign in
               </Link>

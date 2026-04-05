@@ -187,7 +187,7 @@ export default async function Home() {
                   <Link
                     key={event.id}
                     href="/events"
-                    className="min-w-[270px] max-w-[320px] flex-1 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-transform hover:-translate-y-0.5"
+                    className="min-w-[270px] max-w-[320px] flex-1 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
                   >
                     <div className="relative h-40 w-full bg-gray-100">
                       <Image
@@ -197,20 +197,20 @@ export default async function Home() {
                         className="object-cover"
                       />
                     </div>
-                    <div className="space-y-3 p-4">
+                    <div className="space-y-4 p-5">
                       <div className="flex items-center justify-between gap-3">
                         <span className="inline-flex items-center rounded-full bg-[#fff3e8] px-2.5 py-1 text-[11px] font-semibold text-[#8a3c00]">
                           🔥 Trending
                         </span>
-                        <span className="text-xs font-medium text-gray-500">
+                        <span className="text-sm font-medium text-gray-700">
                           {event.rsvp_count ?? 0} going
                         </span>
                       </div>
                       <div>
-                        <h3 className="line-clamp-2 text-lg font-bold leading-tight text-gray-900">
+                        <h3 className="line-clamp-2 text-xl font-bold leading-tight text-gray-900">
                           {event.name}
                         </h3>
-                        <p className="mt-2 text-sm text-gray-600">
+                        <p className="mt-2 text-sm font-medium text-gray-700">
                           {formatEventDateLabel(event.date, event.time)}
                         </p>
                       </div>
