@@ -4,6 +4,7 @@ import { Users, Search, ExternalLink } from "lucide-react";
 import { EventCard } from "@/components/events/EventCard";
 import { ForYouSection } from "@/components/home/for-you-section";
 import { CampusAccessPanel } from "@/components/home/campus-access-panel";
+import { FromYourClubsSection } from "@/components/home/from-your-clubs-section";
 import { AUTH_ENABLED } from "@/lib/features";
 import { createServerSupabaseClient } from "@/lib/supabase";
 import { getClubPath } from "@/lib/club-utils";
@@ -162,6 +163,8 @@ export default async function Home() {
           <div className="hidden lg:block">
             <ForYouSection />
           </div>
+
+          <FromYourClubsSection />
 
           {trendingEvents.length ? (
             <section>
