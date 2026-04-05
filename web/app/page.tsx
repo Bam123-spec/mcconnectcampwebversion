@@ -86,6 +86,7 @@ export default async function Home() {
       rsvp_count: registrationCounts.get(event.id) ?? 0,
     })
   );
+  const spotlightEvent = homepageEvents[0] ?? null;
   const featuredEvents = homepageEvents.slice(0, 3);
   const trendingEvents = [...homepageEvents]
     .sort((left, right) => {
@@ -125,74 +126,160 @@ export default async function Home() {
   });
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#f5f6f8]">
-      {/* Hero Section */}
-      <section className="w-full border-b border-gray-200 bg-white">
-        <div className="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-10 md:px-6 md:py-12 lg:px-8">
-          <div className="max-w-3xl">
+    <div className="min-h-screen bg-white">
+      <section className="border-b border-gray-200 bg-white">
+        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-10 md:px-6 md:py-12 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.9fr)] lg:px-8">
+          <div className="flex flex-col justify-center">
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#51237f]">
               Montgomery College
             </p>
-            <h1 className="mt-3 text-4xl font-black tracking-tight text-gray-900 md:text-5xl">
+            <h1 className="mt-3 max-w-3xl text-4xl font-black tracking-tight text-gray-950 md:text-5xl">
               What&apos;s happening this week at Montgomery College.
             </h1>
             <p className="mt-4 max-w-2xl text-base leading-7 text-gray-600 md:text-lg">
-              Discover upcoming events, explore active clubs, and find the communities and programs students are joining right now.
+              See what students are joining, discover events worth your time, and keep up with the clubs shaping campus this week.
             </p>
+
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Link
+                href="/events"
+                className="inline-flex items-center rounded-md bg-[#51237f] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#45206b]"
+              >
+                Explore Events
+              </Link>
+              <Link
+                href="/clubs"
+                className="inline-flex items-center rounded-md border border-gray-300 px-6 py-3 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50"
+              >
+                Browse Clubs
+              </Link>
+            </div>
+
+            <div className="mt-8 flex flex-wrap gap-6 text-sm">
+              <div>
+                <p className="font-semibold text-gray-900">{homepageEvents.length}</p>
+                <p className="text-gray-500">events on deck</p>
+              </div>
+              <div>
+                <p className="font-semibold text-gray-900">{featuredClubs.length}</p>
+                <p className="text-gray-500">active clubs featured</p>
+              </div>
+              <div>
+                <p className="font-semibold text-gray-900">
+                  {(trendingEvents[0]?.rsvp_count ?? 0).toLocaleString()}
+                </p>
+                <p className="text-gray-500">students in the top event</p>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <Link 
-              href="/events" 
-              className="inline-flex items-center rounded-md bg-[#51237f] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#45206b]"
+          {spotlightEvent ? (
+            <Link
+              href="/events"
+              className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
             >
-              Explore Events
+              <div className="relative h-64 w-full bg-gray-100">
+                <Image
+                  src={spotlightEvent.cover_image_url || fallbackEventCover}
+                  alt={spotlightEvent.name}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div className="space-y-4 p-6">
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="inline-flex items-center rounded-full bg-[#ede7f6] px-3 py-1 text-[11px] font-semibold text-[#51237f]">
+                    Happening This Week
+                  </span>
+                  <span className="text-sm font-medium text-gray-600">
+                    {(spotlightEvent.rsvp_count ?? 0).toLocaleString()} going
+                  </span>
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold leading-tight text-gray-950">
+                    {spotlightEvent.name}
+                  </h2>
+                  <p className="mt-3 text-sm font-medium text-gray-700">
+                    {formatEventDateLabel(spotlightEvent.date, spotlightEvent.time)}
+                  </p>
+                  <p className="mt-2 text-sm text-gray-600">{spotlightEvent.location}</p>
+                </div>
+                <div className="flex items-center justify-between border-t border-gray-100 pt-4">
+                  <p className="text-sm text-gray-600">
+                    {spotlightEvent.organizer_name || "Campus event"}
+                  </p>
+                  <span className="text-sm font-semibold text-[#51237f]">View details</span>
+                </div>
+              </div>
             </Link>
-          </div>
+          ) : null}
         </div>
       </section>
 
-      {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto w-full px-4 py-8 md:py-12 flex flex-col lg:flex-row gap-8">
-        <div className="w-full lg:hidden">
-          <ForYouSection />
-        </div>
-        
-        {/* Left Column: Events & News */}
-        <div className="flex-1 space-y-12">
-          <div className="hidden lg:block">
-            <ForYouSection />
+      <main className="mx-auto max-w-7xl space-y-14 px-4 py-10 md:px-6 md:py-12 lg:px-8">
+        <ForYouSection />
+
+        <section>
+          <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">
+                Happening This Week
+              </p>
+              <h2 className="mt-2 text-3xl font-bold tracking-tight text-gray-950">
+                Start with the events students are actually showing up for
+              </h2>
+            </div>
+
+            <form action="/events" className="flex items-center gap-2">
+              <div className="relative">
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  name="q"
+                  placeholder="Search events..."
+                  className="w-full rounded-md border border-gray-300 py-2 pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#51237f] md:w-64"
+                />
+              </div>
+              <button className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50">
+                Search
+              </button>
+            </form>
           </div>
 
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {featuredEvents.map((event) => (
+              <EventCard key={event.id} event={event} authEnabled={AUTH_ENABLED} />
+            ))}
+          </div>
+        </section>
+
+        <div className="grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
           <FromYourClubsSection />
 
           {trendingEvents.length ? (
-            <section>
+            <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
               <div className="mb-6 flex items-end justify-between gap-4">
                 <div>
                   <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">
                     Trending Now
                   </p>
-                  <h2 className="mt-2 text-2xl font-semibold text-gray-800">
-                    Popular events students are joining this week
+                  <h2 className="mt-2 text-2xl font-bold tracking-tight text-gray-950">
+                    Popular events moving fastest
                   </h2>
                 </div>
-                <Link
-                  href="/events"
-                  className="text-sm font-semibold text-[#51237f] hover:underline"
-                >
-                  Browse all events
+                <Link href="/events" className="text-sm font-semibold text-[#51237f] hover:underline">
+                  All events
                 </Link>
               </div>
 
-              <div className="-mx-1 flex gap-5 overflow-x-auto px-1 pb-2">
+              <div className="space-y-4">
                 {trendingEvents.map((event) => (
                   <Link
                     key={event.id}
                     href="/events"
-                    className="min-w-[270px] max-w-[320px] flex-1 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
+                    className="flex items-center gap-4 rounded-xl border border-gray-200 p-3 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
                   >
-                    <div className="relative h-40 w-full bg-gray-100">
+                    <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-gray-100">
                       <Image
                         src={event.cover_image_url || fallbackEventCover}
                         alt={event.name}
@@ -200,153 +287,147 @@ export default async function Home() {
                         className="object-cover"
                       />
                     </div>
-                    <div className="space-y-4 p-5">
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="inline-flex items-center rounded-full bg-[#fff3e8] px-2.5 py-1 text-[11px] font-semibold text-[#8a3c00]">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center rounded-full bg-[#fff3e8] px-2 py-0.5 text-[11px] font-semibold text-[#8a3c00]">
                           🔥 Trending
                         </span>
-                        <span className="text-sm font-medium text-gray-700">
+                        <span className="text-xs font-medium text-gray-500">
                           {event.rsvp_count ?? 0} going
                         </span>
                       </div>
-                      <div>
-                        <h3 className="line-clamp-2 text-xl font-bold leading-tight text-gray-900">
-                          {event.name}
-                        </h3>
-                        <p className="mt-2 text-sm font-medium text-gray-700">
-                          {formatEventDateLabel(event.date, event.time)}
-                        </p>
-                      </div>
+                      <h3 className="mt-2 line-clamp-2 text-base font-bold leading-tight text-gray-900">
+                        {event.name}
+                      </h3>
+                      <p className="mt-1 text-sm text-gray-600">
+                        {formatEventDateLabel(event.date, event.time)}
+                      </p>
                     </div>
                   </Link>
                 ))}
               </div>
             </section>
           ) : null}
-          
-          {/* Upcoming Events */}
-          <section>
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
-              <h2 className="text-2xl font-semibold text-gray-800">
-                Upcoming Events <span className="text-gray-500 font-normal text-lg">({featuredEvents.length})</span>
-              </h2>
-              
-              <form action="/events" className="flex items-center gap-2">
-                <div className="relative">
-                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input 
-                    type="text" 
-                    name="q"
-                    placeholder="Search events..." 
-                    className="pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#51237f] w-full md:w-64"
-                  />
-                </div>
-                <button className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-md text-sm font-semibold hover:bg-gray-50 transition-colors">
-                  Search
-                </button>
-              </form>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {featuredEvents.map(event => (
-                <EventCard key={event.id} event={event} authEnabled={AUTH_ENABLED} />
-              ))}
-            </div>
-          </section>
+        </div>
 
-          {/* Latest News */}
+        <section className="grid grid-cols-1 gap-8 lg:grid-cols-2">
           <section>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-semibold text-gray-800">Latest News</h2>
-              <Link href="/announcements" className="flex items-center gap-2 px-4 py-1.5 bg-gray-200 text-gray-700 rounded-md text-sm font-semibold hover:bg-gray-300 transition-colors">
+            <div className="mb-6 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">
+                  Campus Updates
+                </p>
+                <h2 className="mt-2 text-2xl font-bold tracking-tight text-gray-950">
+                  News and announcements worth checking
+                </h2>
+              </div>
+              <Link
+                href="/announcements"
+                className="rounded-md border border-gray-300 px-4 py-1.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+              >
                 All News
               </Link>
             </div>
 
-            <div className="bg-white border text-left border-gray-200 rounded-lg overflow-hidden flex flex-col">
-              {latestNews.length ? latestNews.map((news, index) => (
-                <div 
-                  key={news.id} 
-                  className={`flex items-stretch ${index !== latestNews.length - 1 ? 'border-b border-gray-200' : ''}`}
-                >
-                  <div className="w-32 md:w-48 bg-black text-white shrink-0 p-4 flex items-center justify-center font-bold text-center border-r border-gray-200">
-                    <span className="text-base md:text-lg">MC NEWS</span>
-                  </div>
-                  <div className="flex-1 p-4 md:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div>
-                      <h3 className="text-lg font-bold text-[#51237f] mb-1">{news.title}</h3>
-                      <p className="text-sm text-gray-500">{news.date} - <span className="font-medium text-gray-700">{news.author}</span></p>
-                      <div className="mt-2 flex items-center gap-2 text-sm text-gray-500">
-                        <Users size={14} /> {news.group}
-                      </div>
-                    </div>
+            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+              {latestNews.length ? (
+                latestNews.map((news, index) => (
+                  <div
+                    key={news.id}
+                    className={`p-5 ${index !== latestNews.length - 1 ? "border-b border-gray-100" : ""}`}
+                  >
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#51237f]">
+                      {news.group}
+                    </p>
+                    <h3 className="mt-2 text-lg font-bold text-gray-900">{news.title}</h3>
+                    <p className="mt-2 text-sm text-gray-600">
+                      {news.date} · <span className="font-medium text-gray-700">{news.author}</span>
+                    </p>
                     <Link
                       href={`/announcements/${news.id}`}
-                      className="px-4 py-2 border border-gray-300 rounded font-semibold text-sm hover:bg-gray-50 flex items-center gap-2 w-full sm:w-auto justify-center"
+                      className="mt-4 inline-flex items-center text-sm font-semibold text-[#51237f] hover:underline"
                     >
-                      Read
+                      Read update
                     </Link>
                   </div>
-                </div>
-              )) : (
+                ))
+              ) : (
                 <div className="p-8 text-center text-sm text-gray-500">
                   No announcement posts are available yet.
                 </div>
               )}
             </div>
           </section>
-        </div>
 
-        {/* Right Column: Sidebars */}
-        <aside className="w-full lg:w-80 space-y-8 shrink-0">
-          <CampusAccessPanel />
-          
-          {/* Featured Clubs */}
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
-            <div className="bg-[#51237f] px-5 py-4">
-              <h3 className="text-white font-bold text-lg">Featured Groups</h3>
-            </div>
-            <div className="p-5 flex flex-col gap-4">
-              {featuredClubs.map(club => (
-                <div key={club.id} className="flex flex-col border-b border-gray-100 last:border-0 pb-4 last:pb-0">
-                  <Link href={getClubPath(club.id)} className="font-bold text-[#51237f] hover:underline mb-1 flex items-center gap-3">
-                    <span className={`inline-flex h-8 w-8 items-center justify-center rounded-md text-xs font-black text-white ${club.color}`}>
-                      {club.initials}
-                    </span>
-                    <span>{club.name}</span>
-                  </Link>
-                  <div className="flex items-center justify-between text-xs text-gray-500">
-                    <span className="bg-gray-100 px-2 py-0.5 rounded text-gray-600">{club.category}</span>
-                    <span className="flex items-center gap-1"><Users size={12}/> {club.members} members</span>
-                  </div>
+          <div className="space-y-8">
+            <CampusAccessPanel />
+
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+              <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                <div className="mb-5">
+                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">
+                    Featured Clubs
+                  </p>
+                  <h3 className="mt-2 text-xl font-bold tracking-tight text-gray-950">
+                    Communities students are finding first
+                  </h3>
                 </div>
-              ))}
-              <Link href="/clubs" className="w-full py-2 border border-gray-300 rounded text-center text-sm font-semibold hover:bg-gray-50 transition-colors mt-2 text-gray-700">
-                View All Groups
-              </Link>
+                <div className="space-y-4">
+                  {featuredClubs.map((club) => (
+                    <div key={club.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                      <Link
+                        href={getClubPath(club.id)}
+                        className="mb-1 flex items-center gap-3 font-bold text-[#51237f] hover:underline"
+                      >
+                        <span
+                          className={`inline-flex h-8 w-8 items-center justify-center rounded-md text-xs font-black text-white ${club.color}`}
+                        >
+                          {club.initials}
+                        </span>
+                        <span>{club.name}</span>
+                      </Link>
+                      <div className="flex items-center justify-between text-xs text-gray-500">
+                        <span className="rounded bg-gray-100 px-2 py-0.5 text-gray-600">{club.category}</span>
+                        <span className="flex items-center gap-1">
+                          <Users size={12} /> {club.members} members
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                  <Link
+                    href="/clubs"
+                    className="inline-flex items-center text-sm font-semibold text-[#51237f] hover:underline"
+                  >
+                    View all groups
+                  </Link>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                <div className="mb-5">
+                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">
+                    Campus Resources
+                  </p>
+                  <h3 className="mt-2 text-xl font-bold tracking-tight text-gray-950">
+                    Helpful links when you need them
+                  </h3>
+                </div>
+                <div className="space-y-3">
+                  {QUICK_LINKS.map((link) => (
+                    <Link
+                      key={link.id}
+                      href={link.url}
+                      className="flex items-center justify-between rounded-lg border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 hover:text-[#51237f]"
+                    >
+                      {link.name}
+                      <ExternalLink size={16} className="text-gray-400" />
+                    </Link>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
-
-          {/* Quick Links */}
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
-            <div className="bg-[#51237f] px-5 py-4">
-              <h3 className="text-white font-bold text-lg">Campus Resources</h3>
-            </div>
-            <div className="flex flex-col">
-              {QUICK_LINKS.map((link, index) => (
-                <Link 
-                  key={link.id} 
-                  href={link.url}
-                  className={`px-5 py-4 flex items-center justify-between text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-[#51237f] transition-colors ${index !== QUICK_LINKS.length -1 ? 'border-b border-gray-100' : ''}`}
-                >
-                  {link.name}
-                  <ExternalLink size={16} className="text-gray-400" />
-                </Link>
-              ))}
-            </div>
-          </div>
-        </aside>
-
+        </section>
       </main>
     </div>
   );

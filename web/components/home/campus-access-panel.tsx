@@ -133,12 +133,17 @@ export function CampusAccessPanel() {
   const leadershipCount = memberships.filter((membership) => membership.isLeadership).length;
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
-      <div className="bg-[#51237f] px-5 py-4">
-        <h3 className="text-white font-bold text-lg">Your Campus Access</h3>
+    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+      <div className="mb-5">
+        <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">
+          Your Campus Access
+        </p>
+        <h3 className="mt-2 text-xl font-bold tracking-tight text-gray-950">
+          Clubs, roles, and shortcuts tied to your account
+        </h3>
       </div>
 
-      <div className="p-5">
+      <div>
         {loading ? (
           <div className="flex items-center gap-3 text-sm text-gray-500">
             <LoaderCircle size={16} className="animate-spin text-[#51237f]" />
