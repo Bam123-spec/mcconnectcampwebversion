@@ -72,7 +72,6 @@ type RegistrationRow = {
 
 type MembershipRow = {
   id: string;
-  joined_at?: string | null;
   club_id: string;
   clubs?:
     | {
@@ -132,10 +131,9 @@ export function ActivityPanel() {
           .limit(8),
         supabase
           .from("club_members")
-          .select("id, joined_at, club_id, clubs(name)")
+          .select("id, club_id, clubs(name)")
           .eq("user_id", user.id)
           .eq("status", "approved")
-          .order("joined_at", { ascending: false })
           .limit(8),
         supabase
           .from("officers")
@@ -202,7 +200,7 @@ export function ActivityPanel() {
             id: membership.id,
             name: clubName,
             role: officerRole ? `${formatOfficerRole(officerRole)} (Officer)` : "Member",
-            joinedLabel: formatJoinedLabel(membership.joined_at),
+            joinedLabel: formatJoinedLabel(),
             initials: getClubInitials(clubName),
             badgeTone: officerRole ? "officer" : "member",
           };

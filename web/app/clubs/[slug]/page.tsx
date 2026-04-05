@@ -19,10 +19,14 @@ type OfficerRow = {
 
 const getClubBySlug = async (slug: string) => {
   const supabase = createServerSupabaseClient();
-  const { data: clubs } = await supabase
+  const { data: clubs, error: clubsError } = await supabase
     .from("clubs")
-    .select("id, name, description, cover_image_url, member_count, meeting_time")
+    .select("id, name, description, cover_image_url, member_count")
     .order("name", { ascending: true });
+
+  if (clubsError) {
+    return null;
+  }
 
   const club = (clubs ?? []).find((entry) => slugifyClubName(entry.name || "") === slug);
   if (!club?.id) return null;
@@ -57,7 +61,7 @@ const getClubBySlug = async (slug: string) => {
       description: club.description ?? "",
       coverImageUrl: club.cover_image_url ?? null,
       memberCount: club.member_count ?? 0,
-      meetingTime: club.meeting_time ?? "TBA",
+      meetingTime: "TBA",
       slug: slugifyClubName(club.name),
     },
     events: (events ?? []).map((event) => ({

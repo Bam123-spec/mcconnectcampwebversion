@@ -10,7 +10,6 @@ import { slugifyClubName } from "@/lib/club-utils";
 type MembershipRow = {
   id: string;
   club_id: string;
-  joined_at?: string | null;
   clubs?:
     | {
         name?: string | null;
@@ -73,10 +72,9 @@ export function CampusAccessPanel() {
         supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
         supabase
           .from("club_members")
-          .select("id, club_id, joined_at, clubs(name)")
+          .select("id, club_id, clubs(name)")
           .eq("user_id", user.id)
           .eq("status", "approved")
-          .order("joined_at", { ascending: false })
           .limit(6),
         supabase.from("officers").select("club_id, role").eq("user_id", user.id),
       ]);
@@ -102,7 +100,7 @@ export function CampusAccessPanel() {
             name: clubName,
             slug: slugifyClubName(clubName),
             initials: getClubInitials(clubName),
-            joinedLabel: formatJoinedLabel(membership.joined_at),
+            joinedLabel: formatJoinedLabel(),
             roleLabel: officerRole ? formatOfficerRole(officerRole) : "Member",
             isLeadership: Boolean(officerRole),
           };

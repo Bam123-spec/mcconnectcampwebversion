@@ -2,6 +2,7 @@ import Link from "next/link";
 import { LogIn, Users, Search, Filter, ExternalLink } from "lucide-react";
 import { EventCard } from "@/components/events/EventCard";
 import { CampusAccessPanel } from "@/components/home/campus-access-panel";
+import { AUTH_ENABLED } from "@/lib/features";
 import { createServerSupabaseClient } from "@/lib/supabase";
 import { slugifyClubName } from "@/lib/club-utils";
 import { getClubColor, getClubInitials, inferCampus, inferClubCategory, normalizeEventForWeb } from "@/lib/live-data";
