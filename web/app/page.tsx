@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Users, Search, ExternalLink } from "lucide-react";
 import { EventCard } from "@/components/events/EventCard";
+import { ForYouSection } from "@/components/home/for-you-section";
 import { CampusAccessPanel } from "@/components/home/campus-access-panel";
 import { AUTH_ENABLED } from "@/lib/features";
 import { createServerSupabaseClient } from "@/lib/supabase";
@@ -130,9 +131,15 @@ export default async function Home() {
 
       {/* Main Content Area */}
       <main className="max-w-7xl mx-auto w-full px-4 py-8 md:py-12 flex flex-col lg:flex-row gap-8">
+        <div className="w-full lg:hidden">
+          <ForYouSection />
+        </div>
         
         {/* Left Column: Events & News */}
         <div className="flex-1 space-y-12">
+          <div className="hidden lg:block">
+            <ForYouSection />
+          </div>
           
           {/* Upcoming Events */}
           <section>
