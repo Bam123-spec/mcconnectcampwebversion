@@ -33,10 +33,16 @@ type MemberRow = {
 
 type FeedPostRow = {
   id: string;
-  title?: string | null;
   content?: string | null;
   created_at?: string | null;
-  category?: string | null;
+};
+
+const derivePostTitle = (value?: string | null) => {
+  const content = (value || "").trim();
+  if (!content) return "Club update";
+
+  const firstSentence = content.split(/[.!?]/)[0]?.trim() || content;
+  return firstSentence.length > 64 ? `${firstSentence.slice(0, 61).trim()}…` : firstSentence;
 };
 
 const getClubBySlug = async (slug: string) => {
@@ -84,8 +90,8 @@ const getClubBySlug = async (slug: string) => {
       .eq("status", "approved")
       .limit(24),
     supabase
-      .from("forum_posts")
-      .select("id, title, content, created_at, category")
+      .from("posts")
+      .select("id, content, created_at")
       .eq("club_id", club.id)
       .order("created_at", { ascending: false })
       .limit(12),
@@ -123,10 +129,10 @@ const getClubBySlug = async (slug: string) => {
     ? []
     : ((postsResult.data ?? []) as FeedPostRow[]).map((post) => ({
         id: post.id,
-        title: post.title || "Club update",
+        title: derivePostTitle(post.content),
         content: post.content || "A new club update is available.",
         createdAt: post.created_at ?? null,
-        category: post.category || "post",
+        category: "post",
       }));
 
   return {
