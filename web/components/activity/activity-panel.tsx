@@ -23,6 +23,7 @@ import { supabase } from "@/lib/supabase";
 import { formatEventDateLabel, formatJoinedLabel, formatOfficerRole, getClubInitials } from "@/lib/live-data";
 import { getClubPath } from "@/lib/club-utils";
 import { downloadEventCertificate } from "@/lib/event-certificate";
+import { EventPassButton } from "@/components/events/event-pass-button";
 
 type ProfileRow = {
   full_name?: string | null;
@@ -36,6 +37,7 @@ type ProfileRow = {
 
 type ActivityRegistration = {
   id: string;
+  eventId: string;
   eventName: string;
   clubName: string;
   dateLabel: string;
@@ -70,6 +72,7 @@ type RegistrationRow = {
   created_at?: string | null;
   event:
     | {
+        id: string;
         name: string;
         location?: string | null;
         date?: string | null;
@@ -85,6 +88,7 @@ type RegistrationRow = {
           | null;
       }
     | {
+        id: string;
         name: string;
         location?: string | null;
         date?: string | null;
@@ -227,7 +231,7 @@ export function ActivityPanel() {
         supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
         supabase
           .from("event_registrations")
-          .select("id, created_at, event:events(name, location, date, day, time, clubs(name))")
+          .select("id, created_at, event:events(id, name, location, date, day, time, clubs(name))")
           .eq("user_id", user.id)
           .order("created_at", { ascending: false })
           .limit(8),
@@ -273,7 +277,7 @@ export function ActivityPanel() {
       const nextRegistrations: ActivityRegistration[] = ((registrationsResult.data ?? []) as RegistrationRow[])
         .map((registration) => {
           const event = firstItem(registration.event);
-          if (!event?.name) return null;
+          if (!event?.id || !event?.name) return null;
           const eventClub = firstItem(event.clubs);
 
           const eventDate = event.date || event.day || null;
@@ -281,6 +285,7 @@ export function ActivityPanel() {
 
           return {
             id: registration.id,
+            eventId: event.id,
             eventName: event.name,
             clubName: eventClub?.name || "Campus Event",
             dateLabel: formatEventDateLabel(eventDate, event.time),
@@ -684,9 +689,18 @@ export function ActivityPanel() {
                           {registration.isUpcoming ? <QrCode size={28} /> : <Clock3 size={28} />}
                         </div>
                         <div className="flex flex-col gap-2">
-                          <span className="text-sm font-semibold text-[#51237f]">
-                            {registration.isUpcoming ? "Event Pass" : "Attended"}
-                          </span>
+                          {registration.isUpcoming ? (
+                            <EventPassButton
+                              eventId={registration.eventId}
+                              eventName={registration.eventName}
+                              eventDate={registration.eventDate || registration.dateLabel}
+                              eventTime={registration.eventTime || "Time TBA"}
+                              eventLocation={registration.location}
+                              className="inline-flex items-center gap-2 rounded-xl border border-[#d8c8ea] bg-[#f7f2fb] px-3.5 py-2 text-sm font-semibold text-[#51237f] transition-colors hover:bg-[#efe6f8]"
+                            />
+                          ) : (
+                            <span className="text-sm font-semibold text-[#51237f]">Attended</span>
+                          )}
                           {!registration.isUpcoming ? (
                             <button
                               type="button"
