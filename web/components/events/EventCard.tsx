@@ -1,7 +1,7 @@
-import Image from "next/image";
 import { Users } from "lucide-react";
 import Link from "next/link";
 import { EventPassButton } from "@/components/events/event-pass-button";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 
 export type WebEventCardEvent = {
   id: string;
@@ -72,8 +72,9 @@ export function EventCard({
       }`}
     >
       <div className="relative h-56 w-full bg-gray-100">
-        <Image
-          src={event.cover_image_url || fallbackCover}
+        <ImageWithFallback
+          src={event.cover_image_url}
+          fallbackSrc={fallbackCover}
           alt={event.name}
           fill
           className="object-cover transition duration-500 hover:scale-[1.03]"

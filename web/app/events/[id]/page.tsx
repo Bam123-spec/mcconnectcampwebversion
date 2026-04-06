@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CalendarDays, ChevronLeft, MapPin, Users } from "lucide-react";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { getDisplayEventTurnout } from "@/lib/demo-analytics";
 import { createServerSupabaseClient } from "@/lib/supabase";
 
@@ -134,8 +134,9 @@ export default async function EventDetailPage({
 
       <article className="overflow-hidden rounded-[30px] border border-gray-200 bg-white shadow-[0_24px_70px_-48px_rgba(17,24,39,0.24)]">
         <div className="relative h-72 w-full bg-gray-100">
-          <Image
-            src={event.cover_image_url || fallbackCover}
+          <ImageWithFallback
+            src={event.cover_image_url}
+            fallbackSrc={fallbackCover}
             alt={event.name || "Campus event"}
             fill
             className="object-cover"

@@ -1,8 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { LoaderCircle } from "lucide-react";
+import { ImagePlus, LoaderCircle, X } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 type ClubRow = {
@@ -18,6 +19,8 @@ export function ClubEditPanel({ clubId }: { clubId: string }) {
   const [allowed, setAllowed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -67,6 +70,7 @@ export function ClubEditPanel({ clubId }: { clubId: string }) {
       if (!cancelled) {
         const typedClub = club as ClubRow;
         setAllowed(true);
+        setImagePreviewUrl(typedClub.cover_image_url || null);
         setForm({
           name: typedClub.name || "",
           description: typedClub.description || "",
@@ -82,6 +86,30 @@ export function ClubEditPanel({ clubId }: { clubId: string }) {
     };
   }, [clubId]);
 
+  const handleImageSelection = (file: File | null) => {
+    if (imagePreviewUrl?.startsWith("blob:")) {
+      URL.revokeObjectURL(imagePreviewUrl);
+    }
+
+    if (!file) {
+      setSelectedImage(null);
+      setImagePreviewUrl(form.coverImageUrl || null);
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(file);
+    setSelectedImage(file);
+    setImagePreviewUrl(previewUrl);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (imagePreviewUrl?.startsWith("blob:")) {
+        URL.revokeObjectURL(imagePreviewUrl);
+      }
+    };
+  }, [imagePreviewUrl]);
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!allowed) return;
@@ -90,12 +118,40 @@ export function ClubEditPanel({ clubId }: { clubId: string }) {
     setError(null);
     setSuccess(null);
 
+    let coverImageUrl = form.coverImageUrl || null;
+
+    if (selectedImage) {
+      const fileExtension = selectedImage.name.split(".").pop()?.toLowerCase() || "jpg";
+      const safeExtension = fileExtension.replace(/[^a-z0-9]/g, "") || "jpg";
+      const filePath = `clubs/${clubId}/${Date.now()}-${form.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.${safeExtension}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("clubconnect-assets")
+        .upload(filePath, selectedImage, {
+          cacheControl: "3600",
+          contentType: selectedImage.type || undefined,
+          upsert: false,
+        });
+
+      if (uploadError) {
+        setError(uploadError.message || "We couldn't upload that club image right now.");
+        setSubmitting(false);
+        return;
+      }
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("clubconnect-assets").getPublicUrl(filePath);
+
+      coverImageUrl = publicUrl;
+    }
+
     const { error: updateError } = await supabase
       .from("clubs")
       .update({
         name: form.name,
         description: form.description || null,
-        cover_image_url: form.coverImageUrl || null,
+        cover_image_url: coverImageUrl,
       })
       .eq("id", clubId);
 
@@ -105,6 +161,9 @@ export function ClubEditPanel({ clubId }: { clubId: string }) {
       return;
     }
 
+    setForm((current) => ({ ...current, coverImageUrl: coverImageUrl || "" }));
+    setSelectedImage(null);
+    setImagePreviewUrl(coverImageUrl || null);
     setSuccess("Club details updated.");
     setSubmitting(false);
   };
@@ -165,15 +224,47 @@ export function ClubEditPanel({ clubId }: { clubId: string }) {
             />
           </label>
           <label className="space-y-2">
-            <span className="text-sm font-semibold text-gray-900">Cover image URL</span>
-            <input
-              value={form.coverImageUrl}
-              onChange={(event) => setForm((current) => ({ ...current, coverImageUrl: event.target.value }))}
-              className="w-full rounded-2xl border border-gray-300 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-[#51237f]"
-              placeholder="https://..."
-            />
+            <span className="text-sm font-semibold text-gray-900">Club cover image</span>
+            <label className="flex min-h-12 cursor-pointer items-center justify-between gap-3 rounded-2xl border border-dashed border-gray-300 bg-white px-4 py-3 text-sm text-gray-700 transition hover:border-[#51237f] hover:bg-[#faf7fd]">
+              <span className="inline-flex items-center gap-2">
+                <ImagePlus size={16} className="text-[#51237f]" />
+                {selectedImage ? selectedImage.name : "Upload a cover image"}
+              </span>
+              <span className="rounded-full bg-[#f4ecfb] px-3 py-1 text-xs font-semibold text-[#51237f]">
+                Choose file
+              </span>
+              <input
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                onChange={(event) => handleImageSelection(event.target.files?.[0] || null)}
+              />
+            </label>
+            <p className="text-xs text-gray-500">Use a strong cover image so the club profile looks complete to members.</p>
           </label>
         </div>
+
+        {imagePreviewUrl ? (
+          <div className="mt-6 rounded-[24px] border border-gray-200 bg-[#fafafa] p-4">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold text-gray-900">Cover preview</p>
+                <p className="text-xs text-gray-500">This will appear on the club profile and discovery cards.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleImageSelection(null)}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-500 transition hover:bg-gray-50"
+                aria-label="Remove uploaded club image"
+              >
+                <X size={15} />
+              </button>
+            </div>
+            <div className="relative h-52 overflow-hidden rounded-[20px] border border-gray-200 bg-white">
+              <Image src={imagePreviewUrl} alt="Club cover preview" fill className="object-cover" unoptimized />
+            </div>
+          </div>
+        ) : null}
 
         {error ? (
           <p className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
