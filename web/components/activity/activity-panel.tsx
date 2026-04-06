@@ -7,6 +7,16 @@ import { supabase } from "@/lib/supabase";
 import { formatEventDateLabel, formatJoinedLabel, formatOfficerRole, getClubInitials } from "@/lib/live-data";
 import { getClubPath } from "@/lib/club-utils";
 
+type ProfileRow = {
+  full_name?: string | null;
+  username?: string | null;
+  major?: string | null;
+  year?: string | null;
+  role?: string | null;
+  officer_title?: string | null;
+  bio?: string | null;
+};
+
 type ActivityRegistration = {
   id: string;
   eventName: string;
@@ -92,6 +102,8 @@ const firstItem = <T,>(value: T | T[] | null | undefined): T | null => {
 export function ActivityPanel() {
   const [loading, setLoading] = useState(true);
   const [signedIn, setSignedIn] = useState(false);
+  const [email, setEmail] = useState<string | null>(null);
+  const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [registrations, setRegistrations] = useState<ActivityRegistration[]>([]);
   const [memberships, setMemberships] = useState<ActivityMembership[]>([]);
   const [savedEvents, setSavedEvents] = useState<SavedEvent[]>([]);
@@ -111,6 +123,8 @@ export function ActivityPanel() {
       if (!user) {
         if (!cancelled) {
           setSignedIn(false);
+          setEmail(null);
+          setProfile(null);
           setRegistrations([]);
           setMemberships([]);
           setSavedEvents([]);
@@ -123,7 +137,8 @@ export function ActivityPanel() {
         setSignedIn(true);
       }
 
-      const [registrationsResult, membershipsResult, officersResult, savedEventsResult] = await Promise.all([
+      const [profileResult, registrationsResult, membershipsResult, officersResult, savedEventsResult] = await Promise.all([
+        supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
         supabase
           .from("event_registrations")
           .select("id, created_at, event:events(name, location, date, day, time, clubs(name))")
@@ -147,10 +162,11 @@ export function ActivityPanel() {
           .limit(6),
       ]);
 
-      if (registrationsResult.error || membershipsResult.error || officersResult.error || savedEventsResult.error) {
+      if (profileResult.error || registrationsResult.error || membershipsResult.error || officersResult.error || savedEventsResult.error) {
         if (!cancelled) {
           setError(
-            registrationsResult.error?.message ||
+            profileResult.error?.message ||
+              registrationsResult.error?.message ||
               membershipsResult.error?.message ||
               officersResult.error?.message ||
               savedEventsResult.error?.message ||
@@ -241,6 +257,8 @@ export function ActivityPanel() {
         .filter(Boolean) as SavedEvent[];
 
       if (!cancelled) {
+        setEmail(user.email ?? null);
+        setProfile((profileResult.data as ProfileRow | null) ?? null);
         setRegistrations(nextRegistrations);
         setMemberships(nextMemberships);
         setSavedEvents(nextSavedEvents);
@@ -263,6 +281,15 @@ export function ActivityPanel() {
   }, []);
 
   const leadershipCount = memberships.filter((membership) => membership.badgeTone === "officer").length;
+  const displayName = profile?.full_name || email?.split("@")[0] || "Student";
+  const subtitleParts = [profile?.major, profile?.year].filter(Boolean);
+  const initials = displayName
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
 
   if (loading) {
     return (
@@ -283,7 +310,7 @@ export function ActivityPanel() {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-10 text-center">
             <h1 className="text-3xl font-black text-gray-900 tracking-tight">Sign in to view your activity</h1>
             <p className="text-gray-600 mt-3 max-w-xl mx-auto">
-              Your Montgomery College memberships, RSVPs, and officer access will appear here once you sign in.
+              Your Montgomery College profile, memberships, RSVPs, and officer access will appear here once you sign in.
             </p>
             <Link
               href="/login"
@@ -300,9 +327,48 @@ export function ActivityPanel() {
   return (
     <div className="bg-[#f5f6f8] min-h-screen py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-black text-gray-900 tracking-tight">My Activity</h1>
-          <p className="text-gray-600 mt-2">Preview your memberships, event registrations, and campus involvement in one place.</p>
+        <div className="mb-8 rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
+          <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+            <div className="flex items-start gap-4">
+              <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-[#51237f] text-xl font-black text-white">
+                {initials}
+              </div>
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Activity &amp; Profile</p>
+                <h1 className="mt-1 text-3xl font-black tracking-tight text-gray-900">{displayName}</h1>
+                <p className="mt-2 text-sm text-gray-500">
+                  {subtitleParts.length ? subtitleParts.join(" · ") : "Montgomery College account"}
+                </p>
+                {email ? <p className="mt-1 text-sm text-gray-500">{email}</p> : null}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {profile?.role === "admin" ? (
+                <span className="rounded-full bg-[#fff4d6] px-3 py-1 text-xs font-semibold text-[#8a6116]">
+                  Platform admin
+                </span>
+              ) : null}
+              {profile?.officer_title ? (
+                <span className="rounded-full bg-[#ede7f6] px-3 py-1 text-xs font-semibold text-[#51237f]">
+                  {profile.officer_title}
+                </span>
+              ) : null}
+              {profile?.username ? (
+                <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">
+                  @{profile.username}
+                </span>
+              ) : null}
+            </div>
+          </div>
+
+          {profile?.bio ? (
+            <p className="mt-6 max-w-3xl text-sm leading-7 text-gray-600">{profile.bio}</p>
+          ) : (
+            <p className="mt-6 max-w-3xl text-sm leading-7 text-gray-600">
+              Preview your memberships, event registrations, saved events, and leadership access in one place.
+            </p>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
