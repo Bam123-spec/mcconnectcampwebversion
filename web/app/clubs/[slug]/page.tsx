@@ -80,6 +80,7 @@ const getClubBySlug = async (slug: string) => {
       .from("events")
       .select("id, name, date, day, time, location")
       .eq("club_id", club.id)
+      .eq("approved", true)
       .order("date", { ascending: true, nullsFirst: false })
       .order("day", { ascending: true, nullsFirst: false })
       .limit(8),

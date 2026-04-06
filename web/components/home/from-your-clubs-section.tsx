@@ -96,6 +96,7 @@ export function FromYourClubsSection() {
         .from("events")
         .select("id, name, date, day, time, club_id")
         .in("club_id", clubIds)
+        .eq("approved", true)
         .order("date", { ascending: true, nullsFirst: false })
         .order("day", { ascending: true, nullsFirst: false })
         .limit(6);

@@ -152,6 +152,7 @@ export default async function HomePage() {
       supabase
         .from("events")
         .select("id, name, description, location, date, day, time, cover_image_url, clubs(name)")
+        .eq("approved", true)
         .order("date", { ascending: true, nullsFirst: false })
         .order("day", { ascending: true, nullsFirst: false })
         .limit(6),

@@ -57,6 +57,7 @@ const getEventDetails = async (id: string) => {
   const { data: event } = await supabase
     .from("events")
     .select("id, name, description, location, date, day, time, cover_image_url, club_id, clubs(name)")
+    .eq("approved", true)
     .eq("id", id)
     .maybeSingle();
 
