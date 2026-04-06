@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CalendarDays, Clock3, Flame, Search } from "lucide-react";
 import { EventCard, type WebEventCardEvent } from "@/components/events/EventCard";
+import { getClientCache, setClientCache } from "@/lib/client-cache";
 import { AUTH_ENABLED } from "@/lib/features";
 import { supabase } from "@/lib/supabase";
 
@@ -129,6 +130,17 @@ export function EventsPanel({
         }
         return;
       }
+      const cacheKey = `events-state:${user.id}:${eventIds.join(",")}`;
+      const cachedState = getClientCache<{
+        registeredIds: string[];
+        preferredClubNames: string[];
+      }>(cacheKey);
+
+      if (cachedState && !cancelled) {
+        setHasSession(true);
+        setRegisteredIds(new Set(cachedState.registeredIds));
+        setPreferredClubNames(new Set(cachedState.preferredClubNames));
+      }
 
       const [{ data, error }, membershipsResult, followersResult, interactionsResult] = await Promise.all([
         supabase
@@ -164,7 +176,8 @@ export function EventsPanel({
       }
 
       setHasSession(true);
-      setRegisteredIds(new Set((data ?? []).map((row) => row.event_id)));
+      const nextRegisteredIds = new Set((data ?? []).map((row) => row.event_id));
+      setRegisteredIds(nextRegisteredIds);
 
       const nextPreferredNames = new Set<string>();
 
@@ -184,6 +197,10 @@ export function EventsPanel({
         if (club?.name?.trim()) nextPreferredNames.add(club.name.trim().toLowerCase());
       }
 
+      setClientCache(cacheKey, {
+        registeredIds: [...nextRegisteredIds],
+        preferredClubNames: [...nextPreferredNames],
+      });
       setPreferredClubNames(nextPreferredNames);
     };
 

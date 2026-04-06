@@ -2,6 +2,8 @@ import { EventsPanel } from "@/components/events/events-panel";
 import { createServerSupabaseClient } from "@/lib/supabase";
 import { normalizeEventForWeb } from "@/lib/live-data";
 
+export const revalidate = 300;
+
 export default async function EventsPage({
   searchParams,
 }: {

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ChevronRight, ShieldCheck, Users } from "lucide-react";
 import { getClubPath } from "@/lib/club-utils";
+import { getClientCache, setClientCache } from "@/lib/client-cache";
 import { supabase } from "@/lib/supabase";
 
 type ClubCardData = {
@@ -54,6 +55,12 @@ export function ClubsDirectory({ initialClubs }: { initialClubs: ClubCardData[] 
 
       const clubIds = initialClubs.map((club) => club.id);
       if (!clubIds.length) return;
+      const cacheKey = `clubs-membership:${user.id}:${clubIds.join(",")}`;
+      const cachedState = getClientCache<Record<string, ClubMembershipState>>(cacheKey);
+
+      if (cachedState && !cancelled) {
+        setMembershipState(cachedState);
+      }
 
       const [membershipsResult, officersResult] = await Promise.all([
         supabase
@@ -87,6 +94,7 @@ export function ClubsDirectory({ initialClubs }: { initialClubs: ClubCardData[] 
         };
       }
 
+      setClientCache(cacheKey, nextState);
       setMembershipState(nextState);
     };
 

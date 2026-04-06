@@ -4,6 +4,8 @@ import { CalendarDays, Clock3, MapPin } from "lucide-react";
 import { createServerSupabaseClient } from "@/lib/supabase";
 import { getClubPath } from "@/lib/club-utils";
 
+export const revalidate = 300;
+
 type EventRow = {
   id: string;
   name: string;

@@ -17,6 +17,7 @@ import {
   UserPlus,
   Users,
 } from "lucide-react";
+import { getClientCache, setClientCache } from "@/lib/client-cache";
 import { supabase } from "@/lib/supabase";
 import { formatEventDateLabel, formatJoinedLabel, formatOfficerRole, getClubInitials } from "@/lib/live-data";
 import { getClubPath } from "@/lib/club-utils";
@@ -134,6 +135,15 @@ type ActivityFeedItem = {
   timestamp: number;
 };
 
+type ActivityCachePayload = {
+  email: string | null;
+  profile: ProfileRow | null;
+  registrations: ActivityRegistration[];
+  memberships: ActivityMembership[];
+  savedEvents: SavedEvent[];
+  activityFeed: ActivityFeedItem[];
+};
+
 const firstItem = <T,>(value: T | T[] | null | undefined): T | null => {
   if (Array.isArray(value)) return value[0] ?? null;
   return value ?? null;
@@ -193,6 +203,19 @@ export function ActivityPanel() {
 
       if (!cancelled) {
         setSignedIn(true);
+      }
+
+      const cacheKey = `activity:${user.id}`;
+      const cachedActivity = getClientCache<ActivityCachePayload>(cacheKey);
+
+      if (cachedActivity && !cancelled) {
+        setEmail(cachedActivity.email);
+        setProfile(cachedActivity.profile);
+        setRegistrations(cachedActivity.registrations);
+        setMemberships(cachedActivity.memberships);
+        setSavedEvents(cachedActivity.savedEvents);
+        setActivityFeed(cachedActivity.activityFeed);
+        setLoading(false);
       }
 
       const [profileResult, registrationsResult, membershipsResult, officersResult, savedEventsResult] = await Promise.all([
@@ -365,15 +388,29 @@ export function ActivityPanel() {
         });
       }
 
+      const nextActivityFeed = feedItems.sort((a, b) => b.timestamp - a.timestamp);
+      const nextProfile = (profileResult.data as ProfileRow | null) ?? null;
+      const nextEmail = user.email ?? null;
+      const nextPayload: ActivityCachePayload = {
+        email: nextEmail,
+        profile: nextProfile,
+        registrations: nextRegistrations,
+        memberships: nextMemberships,
+        savedEvents: nextSavedEvents,
+        activityFeed: nextActivityFeed,
+      };
+
       if (!cancelled) {
-        setEmail(user.email ?? null);
-        setProfile((profileResult.data as ProfileRow | null) ?? null);
+        setEmail(nextEmail);
+        setProfile(nextProfile);
         setRegistrations(nextRegistrations);
         setMemberships(nextMemberships);
         setSavedEvents(nextSavedEvents);
-        setActivityFeed(feedItems.sort((a, b) => b.timestamp - a.timestamp));
+        setActivityFeed(nextActivityFeed);
         setLoading(false);
       }
+
+      setClientCache(cacheKey, nextPayload);
     };
 
     loadActivity();

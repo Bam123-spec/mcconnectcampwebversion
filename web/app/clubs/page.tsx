@@ -4,6 +4,8 @@ import { ClubsDirectory } from "@/components/clubs/clubs-directory";
 import { createServerSupabaseClient } from "@/lib/supabase";
 import { getClubColor, getClubInitials, inferCampus, inferClubCategory } from "@/lib/live-data";
 
+export const revalidate = 300;
+
 export const metadata = {
   title: "Clubs & Organizations | Raptor Connect",
   description: "Browse and join student organizations at Montgomery College.",
