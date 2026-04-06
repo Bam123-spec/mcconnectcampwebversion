@@ -5,6 +5,7 @@ import { EventCard } from "@/components/events/EventCard";
 import { ForYouSection } from "@/components/home/for-you-section";
 import { CampusAccessPanel } from "@/components/home/campus-access-panel";
 import { FromYourClubsSection } from "@/components/home/from-your-clubs-section";
+import { SpotlightCarousel } from "@/components/home/spotlight-carousel";
 import { AUTH_ENABLED } from "@/lib/features";
 import { createServerSupabaseClient } from "@/lib/supabase";
 import { getClubPath } from "@/lib/club-utils";
@@ -86,7 +87,7 @@ export default async function Home() {
       rsvp_count: registrationCounts.get(event.id) ?? 0,
     })
   );
-  const spotlightEvent = homepageEvents[0] ?? null;
+  const spotlightEvents = homepageEvents.slice(0, 4);
   const featuredEvents = homepageEvents.slice(0, 3);
   const trendingEvents = [...homepageEvents]
     .sort((left, right) => {
@@ -174,46 +175,8 @@ export default async function Home() {
             </div>
           </div>
 
-          {spotlightEvent ? (
-            <Link
-              href="/events"
-              className="group overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-[0_20px_60px_-40px_rgba(17,24,39,0.4)] transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_30px_80px_-40px_rgba(17,24,39,0.45)]"
-            >
-              <div className="relative h-64 w-full bg-gray-100">
-                <Image
-                  src={spotlightEvent.cover_image_url || fallbackEventCover}
-                  alt={spotlightEvent.name}
-                  fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
-              </div>
-              <div className="space-y-5 p-7">
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className="inline-flex items-center rounded-full bg-[#ede7f6] px-3 py-1 text-[11px] font-semibold text-[#51237f]">
-                    Happening This Week
-                  </span>
-                  <span className="text-sm font-medium text-gray-700">
-                    {(spotlightEvent.rsvp_count ?? 0).toLocaleString()} going
-                  </span>
-                </div>
-                <div>
-                  <h2 className="text-[1.9rem] font-bold leading-tight tracking-[-0.02em] text-gray-950">
-                    {spotlightEvent.name}
-                  </h2>
-                  <p className="mt-3 text-sm font-semibold text-gray-700">
-                    {formatEventDateLabel(spotlightEvent.date, spotlightEvent.time)}
-                  </p>
-                  <p className="mt-2 text-sm text-gray-600">{spotlightEvent.location}</p>
-                </div>
-                <div className="flex items-center justify-between border-t border-gray-100 pt-4">
-                  <p className="text-sm text-gray-600">
-                    {spotlightEvent.organizer_name || "Campus event"}
-                  </p>
-                  <span className="text-sm font-semibold text-[#51237f]">View details</span>
-                </div>
-              </div>
-            </Link>
+          {spotlightEvents.length ? (
+            <SpotlightCarousel events={spotlightEvents} fallbackCover={fallbackEventCover} />
           ) : null}
         </div>
       </section>
