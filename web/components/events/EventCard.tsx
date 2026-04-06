@@ -99,7 +99,9 @@ export function EventCard({
         <div className="absolute inset-x-0 bottom-0 p-5">
           <p className="text-sm font-medium text-white/85">{event.organizer_name || "Montgomery College"}</p>
           <h3 className="mt-2 line-clamp-2 text-2xl font-bold leading-tight text-white">
-            {event.name}
+            <Link href="/events" className="transition hover:text-white/85 focus:outline-none focus:text-white/85">
+              {event.name}
+            </Link>
           </h3>
         </div>
       </div>

@@ -609,7 +609,11 @@ export function EventsPanel({
                     </div>
                     <div className="absolute inset-x-0 bottom-0 p-4">
                       <p className="text-sm font-medium text-white/85">{event.organizer_name || "Campus Event"}</p>
-                      <h3 className="mt-2 text-xl font-bold leading-tight text-white">{event.name}</h3>
+                      <h3 className="mt-2 text-xl font-bold leading-tight text-white">
+                        <Link href="/events" className="transition hover:text-white/85 focus:outline-none focus:text-white/85">
+                          {event.name}
+                        </Link>
+                      </h3>
                     </div>
                   </div>
 
