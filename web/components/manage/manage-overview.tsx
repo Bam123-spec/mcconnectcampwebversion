@@ -20,6 +20,7 @@ import {
   UserPlus,
   Users,
 } from "lucide-react";
+import { getDisplayEventTurnout } from "@/lib/demo-analytics";
 import { supabase } from "@/lib/supabase";
 import { getClubPath } from "@/lib/club-utils";
 import { formatEventDateLabel, formatOfficerRole, getClubColor, getClubInitials } from "@/lib/live-data";
@@ -299,7 +300,11 @@ export function ManageOverview() {
           name: event.name || "Club event",
           dateLabel: formatEventDateLabel(resolvedDate, event.time || null),
           status: isUpcoming ? ("Upcoming" as const) : ("Past" as const),
-          rsvps: registrationCounts.get(event.id) ?? 0,
+          rsvps: getDisplayEventTurnout({
+            eventId: event.id,
+            eventName: event.name,
+            realCount: registrationCounts.get(event.id) ?? 0,
+          }),
           createdAt: event.created_at || null,
         };
       });

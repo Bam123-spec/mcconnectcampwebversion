@@ -1,4 +1,5 @@
 import { EventsPanel } from "@/components/events/events-panel";
+import { getDisplayEventTurnout } from "@/lib/demo-analytics";
 import { createServerSupabaseClient } from "@/lib/supabase";
 import { normalizeEventForWeb } from "@/lib/live-data";
 
@@ -42,7 +43,11 @@ export default async function EventsPage({
   const events = (data ?? []).map((event) =>
     normalizeEventForWeb({
       ...event,
-      rsvp_count: registrationCounts.get(event.id) ?? 0,
+      rsvp_count: getDisplayEventTurnout({
+        eventId: event.id,
+        eventName: event.name,
+        realCount: registrationCounts.get(event.id) ?? 0,
+      }),
     })
   );
 

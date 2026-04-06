@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { CalendarDays, ChevronDown, Clock3, Flame, Search } from "lucide-react";
 import { EventCard, type WebEventCardEvent } from "@/components/events/EventCard";
 import { getClientCache, setClientCache } from "@/lib/client-cache";
+import { getDisplayEventTurnout } from "@/lib/demo-analytics";
 import { AUTH_ENABLED } from "@/lib/features";
 import { supabase } from "@/lib/supabase";
 
@@ -254,7 +255,11 @@ export function EventsPanel({
       setEvents((current) =>
         current.map((event) => ({
           ...event,
-          rsvp_count: nextCounts.get(event.id) ?? 0,
+          rsvp_count: getDisplayEventTurnout({
+            eventId: event.id,
+            eventName: event.name,
+            realCount: nextCounts.get(event.id) ?? 0,
+          }),
         }))
       );
     };

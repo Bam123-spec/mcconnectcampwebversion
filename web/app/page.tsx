@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { CalendarDays, Clock3, MapPin } from "lucide-react";
+import { getDisplayEventTurnout } from "@/lib/demo-analytics";
 import { createServerSupabaseClient } from "@/lib/supabase";
 import { getClubPath } from "@/lib/club-utils";
 
@@ -282,11 +283,27 @@ export default async function HomePage() {
     .slice(0, 6);
 
   const trendingEvents: TrendingItem[] = [...(eventsData ?? [])]
-    .sort((left, right) => (registrationCounts.get(right.id) ?? 0) - (registrationCounts.get(left.id) ?? 0))
+    .sort(
+      (left, right) =>
+        getDisplayEventTurnout({
+          eventId: right.id,
+          eventName: right.name,
+          realCount: registrationCounts.get(right.id) ?? 0,
+        }) -
+        getDisplayEventTurnout({
+          eventId: left.id,
+          eventName: left.name,
+          realCount: registrationCounts.get(left.id) ?? 0,
+        })
+    )
     .slice(0, 2)
     .map((event: EventRow) => {
       const club = firstItem(event.clubs);
-      const rsvpCount = registrationCounts.get(event.id) ?? 0;
+      const rsvpCount = getDisplayEventTurnout({
+        eventId: event.id,
+        eventName: event.name,
+        realCount: registrationCounts.get(event.id) ?? 0,
+      });
 
       return {
         id: `trend-event-${event.id}`,

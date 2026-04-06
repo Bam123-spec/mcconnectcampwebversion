@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { slugifyClubName } from "@/lib/club-utils";
 import { ClubProfilePanel } from "@/components/clubs/club-profile-panel";
+import { getDisplayEventTurnout } from "@/lib/demo-analytics";
 import { createServerSupabaseClient } from "@/lib/supabase";
 import { formatOfficerRole, inferClubCategory } from "@/lib/live-data";
 
@@ -168,7 +169,11 @@ const getClubBySlug = async (slug: string) => {
       date: event.date || event.day || "",
       time: event.time || "TBA",
       location: event.location || "Location TBA",
-      rsvpCount: registrationCounts.get(event.id) ?? 0,
+      rsvpCount: getDisplayEventTurnout({
+        eventId: event.id,
+        eventName: event.name,
+        realCount: registrationCounts.get(event.id) ?? 0,
+      }),
     })),
     officerNames,
     members: memberPreview,
