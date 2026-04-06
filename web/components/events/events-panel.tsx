@@ -96,6 +96,7 @@ export function EventsPanel({
   initialQuery?: string;
 }) {
   const router = useRouter();
+  const [events, setEvents] = useState(initialEvents);
   const [hasSession, setHasSession] = useState(false);
   const [registeredIds, setRegisteredIds] = useState<Set<string>>(new Set());
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
@@ -108,6 +109,10 @@ export function EventsPanel({
   const [currentPage, setCurrentPage] = useState(1);
   const optionsRef = useRef<HTMLDivElement | null>(null);
   const upcomingSectionRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    setEvents(initialEvents);
+  }, [initialEvents]);
 
   useEffect(() => {
     let cancelled = false;
@@ -224,6 +229,44 @@ export function EventsPanel({
   }, [initialEvents]);
 
   useEffect(() => {
+    let cancelled = false;
+
+    const loadLiveCounts = async () => {
+      const eventIds = initialEvents.map((event) => event.id);
+      if (!eventIds.length) return;
+
+      const { data, error } = await supabase
+        .from("event_registrations")
+        .select("event_id")
+        .in("event_id", eventIds)
+        .limit(5000);
+
+      if (cancelled || error) {
+        if (error) console.error("Error loading live RSVP counts:", error);
+        return;
+      }
+
+      const nextCounts = new Map<string, number>();
+      for (const row of data ?? []) {
+        nextCounts.set(row.event_id, (nextCounts.get(row.event_id) ?? 0) + 1);
+      }
+
+      setEvents((current) =>
+        current.map((event) => ({
+          ...event,
+          rsvp_count: nextCounts.get(event.id) ?? 0,
+        }))
+      );
+    };
+
+    loadLiveCounts();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [initialEvents]);
+
+  useEffect(() => {
     if (!isOptionsOpen) return undefined;
 
     const handlePointerDown = (event: MouseEvent) => {
@@ -245,12 +288,12 @@ export function EventsPanel({
     const weekFromNow = new Date();
     weekFromNow.setDate(weekFromNow.getDate() + 7);
 
-    const upcoming = initialEvents.filter((event) => {
+    const upcoming = events.filter((event) => {
       const parsed = parseEventDateTime(event.date, event.time);
       return parsed ? parsed >= now : false;
     });
 
-    const past = initialEvents
+    const past = events
       .filter((event) => {
         const parsed = parseEventDateTime(event.date, event.time) ?? parseLocalDate(event.date);
         return parsed ? parsed < now : false;
@@ -314,7 +357,7 @@ export function EventsPanel({
       pastEvents: past,
       popularThisWeek: weeklyPopular,
     };
-  }, [activeFilter, initialEvents, preferredClubNames, searchValue, viewMode]);
+  }, [activeFilter, events, preferredClubNames, searchValue, viewMode]);
 
   const totalPages = Math.max(1, Math.ceil(filteredUpcomingEvents.length / EVENTS_PER_PAGE));
   const paginatedUpcomingEvents = filteredUpcomingEvents.slice(
@@ -356,6 +399,13 @@ export function EventsPanel({
           next.delete(eventId);
           return next;
         });
+        setEvents((current) =>
+          current.map((event) =>
+            event.id === eventId
+              ? { ...event, rsvp_count: Math.max((event.rsvp_count ?? 0) - 1, 0) }
+              : event
+          )
+        );
       } else {
         const { error } = await supabase
           .from("event_registrations")
@@ -364,6 +414,13 @@ export function EventsPanel({
         if (error) throw error;
 
         setRegisteredIds((current) => new Set(current).add(eventId));
+        setEvents((current) =>
+          current.map((event) =>
+            event.id === eventId
+              ? { ...event, rsvp_count: (event.rsvp_count ?? 0) + 1 }
+              : event
+          )
+        );
       }
     } catch (error) {
       console.error("Error updating RSVP:", error);
