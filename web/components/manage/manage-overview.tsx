@@ -2,7 +2,24 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { LoaderCircle, ShieldCheck, Pencil, Plus, Users, Trash2 } from "lucide-react";
+import {
+  Activity,
+  ArrowRight,
+  BarChart3,
+  BellDot,
+  CalendarDays,
+  LayoutDashboard,
+  LoaderCircle,
+  MessageSquare,
+  Megaphone,
+  Pencil,
+  Plus,
+  ShieldCheck,
+  Trash2,
+  TrendingUp,
+  UserPlus,
+  Users,
+} from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { getClubPath } from "@/lib/club-utils";
 import { formatEventDateLabel, formatOfficerRole, getClubColor, getClubInitials } from "@/lib/live-data";
@@ -29,6 +46,7 @@ type OfficerRow = {
 
 type MemberRow = {
   user_id?: string | null;
+  created_at?: string | null;
   profiles?:
     | {
         full_name?: string | null;
@@ -45,11 +63,49 @@ type ClubEventRow = {
   date?: string | null;
   day?: string | null;
   time?: string | null;
+  created_at?: string | null;
+};
+
+type RegistrationRow = {
+  event_id: string;
+  created_at?: string | null;
+};
+
+type ActivityItem = {
+  id: string;
+  kind: "member" | "event" | "rsvp" | "system";
+  title: string;
+  detail: string;
+  timeLabel: string;
 };
 
 const firstItem = <T,>(value: T | T[] | null | undefined): T | null => {
   if (Array.isArray(value)) return value[0] ?? null;
   return value ?? null;
+};
+
+const formatRelativeLabel = (value?: string | null) => {
+  if (!value) return "Recently";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Recently";
+
+  const diffMs = Date.now() - date.getTime();
+  const diffHours = Math.max(1, Math.round(diffMs / (1000 * 60 * 60)));
+
+  if (diffHours < 24) return `${diffHours}h ago`;
+  const diffDays = Math.round(diffHours / 24);
+  if (diffDays < 7) return `${diffDays}d ago`;
+  const diffWeeks = Math.round(diffDays / 7);
+  if (diffWeeks < 5) return `${diffWeeks}w ago`;
+  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+};
+
+const isWithinDays = (value: string | null | undefined, days: number, anchorTime: number) => {
+  if (!value) return false;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return false;
+  const threshold = anchorTime - days * 24 * 60 * 60 * 1000;
+  return date.getTime() >= threshold;
 };
 
 export function ManageOverview() {
@@ -61,6 +117,7 @@ export function ManageOverview() {
   const [selectedClubId, setSelectedClubId] = useState("");
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+  const [renderTime] = useState(() => Date.now());
   const [officerClubs, setOfficerClubs] = useState<
     Array<{ id: string; name: string; role: string; roleLabel: string; initials: string; color: string }>
   >([]);
@@ -68,12 +125,12 @@ export function ManageOverview() {
   const [eventCount, setEventCount] = useState(0);
   const [upcomingRsvpCount, setUpcomingRsvpCount] = useState(0);
   const [managedEvents, setManagedEvents] = useState<
-    Array<{ id: string; name: string; dateLabel: string; status: "Upcoming" | "Past"; rsvps: number }>
+    Array<{ id: string; name: string; dateLabel: string; status: "Upcoming" | "Past"; rsvps: number; createdAt: string | null }>
   >([]);
   const [managedMembers, setManagedMembers] = useState<
-    Array<{ userId: string; name: string; isOfficer: boolean; roleLabel: string; isSelf: boolean }>
+    Array<{ userId: string; name: string; isOfficer: boolean; roleLabel: string; isSelf: boolean; createdAt: string | null }>
   >([]);
-  const [recentActivity, setRecentActivity] = useState<string[]>([]);
+  const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -178,14 +235,14 @@ export function ManageOverview() {
       const [membersResult, officersResult, eventsResult] = await Promise.all([
         supabase
           .from("club_members")
-          .select("user_id, profiles:user_id(full_name)")
+          .select("user_id, created_at, profiles:user_id(full_name)")
           .eq("club_id", selectedClubId)
           .eq("status", "approved")
           .limit(200),
         supabase.from("officers").select("user_id, role").eq("club_id", selectedClubId),
         supabase
           .from("events")
-          .select("id, name, date, day, time")
+          .select("id, name, date, day, time, created_at")
           .eq("club_id", selectedClubId)
           .order("date", { ascending: true, nullsFirst: false })
           .order("day", { ascending: true, nullsFirst: false })
@@ -210,6 +267,7 @@ export function ManageOverview() {
             isOfficer: Boolean(rawRole),
             roleLabel: rawRole ? "Officer" : "Member",
             isSelf: member.user_id === user.id,
+            createdAt: member.created_at || null,
           };
         });
 
@@ -218,10 +276,10 @@ export function ManageOverview() {
       const { data: registrations } = eventIds.length
         ? await supabase
             .from("event_registrations")
-            .select("event_id")
+            .select("event_id, created_at")
             .in("event_id", eventIds)
             .limit(5000)
-        : { data: [] as Array<{ event_id: string }> };
+        : { data: [] as RegistrationRow[] };
 
       const registrationCounts = new Map<string, number>();
       for (const row of registrations ?? []) {
@@ -242,21 +300,91 @@ export function ManageOverview() {
           dateLabel: formatEventDateLabel(resolvedDate, event.time || null),
           status: isUpcoming ? ("Upcoming" as const) : ("Past" as const),
           rsvps: registrationCounts.get(event.id) ?? 0,
+          createdAt: event.created_at || null,
         };
       });
 
-      const nextActivity: string[] = [];
-      if (events[0]) {
-        nextActivity.push(`Latest event on the board: "${events[0].name}"`);
-      }
       const upcomingRsvpsTotal = events
         .filter((event) => event.status === "Upcoming")
         .reduce((total, event) => total + event.rsvps, 0);
-      if (upcomingRsvpsTotal > 0) {
-        nextActivity.push(`${upcomingRsvpsTotal} RSVPs across upcoming events`);
+      const recentRegistrations = [...(registrations ?? [])]
+        .filter((row) => row.created_at)
+        .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
+      const registrationByEvent = new Map<string, RegistrationRow[]>();
+      for (const row of recentRegistrations) {
+        const rows = registrationByEvent.get(row.event_id) ?? [];
+        rows.push(row);
+        registrationByEvent.set(row.event_id, rows);
       }
-      if (members.length > 0) {
-        nextActivity.push(`${members.length} approved members currently in this club`);
+
+      const activityItems: Array<ActivityItem & { sortKey: number }> = [];
+
+      const newestMembers = [...members]
+        .filter((member) => member.createdAt)
+        .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
+        .slice(0, 2);
+      for (const member of newestMembers) {
+        activityItems.push({
+          id: `member-${member.userId}`,
+          kind: "member",
+          title: `${member.name} joined the club`,
+          detail: member.isOfficer ? "They currently appear in the officer roster." : "They are now part of the approved member list.",
+          timeLabel: formatRelativeLabel(member.createdAt),
+          sortKey: new Date(member.createdAt || 0).getTime(),
+        });
+      }
+
+      const newestEvents = [...events]
+        .filter((event) => event.createdAt)
+        .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
+        .slice(0, 2);
+      for (const event of newestEvents) {
+        activityItems.push({
+          id: `event-${event.id}`,
+          kind: "event",
+          title: `Created "${event.name}"`,
+          detail: `${event.dateLabel} is now on the club calendar.`,
+          timeLabel: formatRelativeLabel(event.createdAt),
+          sortKey: new Date(event.createdAt || 0).getTime(),
+        });
+      }
+
+      const rsvpHighlights = [...registrationByEvent.entries()]
+        .map(([eventId, rows]) => {
+          const event = events.find((item) => item.id === eventId);
+          return event && rows[0]?.created_at
+            ? {
+                id: eventId,
+                count: rows.length,
+                name: event.name,
+                createdAt: rows[0].created_at,
+              }
+            : null;
+        })
+        .filter(Boolean)
+        .sort((a, b) => new Date(b!.createdAt || 0).getTime() - new Date(a!.createdAt || 0).getTime())
+        .slice(0, 2);
+
+      for (const item of rsvpHighlights) {
+        activityItems.push({
+          id: `rsvp-${item!.id}`,
+          kind: "rsvp",
+          title: `${item!.count} new RSVP${item!.count === 1 ? "" : "s"} on "${item!.name}"`,
+          detail: "Momentum is building around this event.",
+          timeLabel: formatRelativeLabel(item!.createdAt),
+          sortKey: new Date(item!.createdAt || 0).getTime(),
+        });
+      }
+
+      if (!activityItems.length) {
+        activityItems.push({
+          id: "system-default",
+          kind: "system",
+          title: "Club analytics will build up here",
+          detail: "As members join, events are created, and RSVPs come in, this feed will surface what needs attention.",
+          timeLabel: "Waiting",
+          sortKey: 0,
+        });
       }
 
       if (!cancelled) {
@@ -265,7 +393,7 @@ export function ManageOverview() {
         setUpcomingRsvpCount(upcomingRsvpsTotal);
         setManagedEvents(events);
         setManagedMembers(members);
-        setRecentActivity(nextActivity.slice(0, 3));
+        setRecentActivity(activityItems.sort((a, b) => b.sortKey - a.sortKey).slice(0, 5));
         setDashboardLoading(false);
       }
     };
@@ -401,85 +529,182 @@ export function ManageOverview() {
     );
   }
 
+  const selectedRoleLabel = selectedClub?.roleLabel || (isPlatformAdmin ? "Platform Admin" : "Officer");
+  const capabilityChips = [
+    { label: "Create events", enabled: canCreateEvents },
+    { label: "Manage members", enabled: canManageMembers },
+    { label: "Assign roles", enabled: canManageRoles },
+    { label: "Edit profile", enabled: canEditClub },
+  ];
+  const upcomingEventsCount = managedEvents.filter((event) => event.status === "Upcoming").length;
+  const averageRsvpCount = eventCount
+    ? Math.round((managedEvents.reduce((sum, event) => sum + event.rsvps, 0) / eventCount) * 10) / 10
+    : 0;
+  const officerCount = managedMembers.filter((member) => member.isOfficer).length;
+  const memberGrowthCount = managedMembers.filter((member) => isWithinDays(member.createdAt, 30, renderTime)).length;
+  const rsvpGrowthCount = managedEvents
+    .filter((event) => event.status === "Upcoming")
+    .reduce((sum, event) => sum + event.rsvps, 0);
+  const leadershipCoverage = memberCount ? Math.round((officerCount / memberCount) * 100) : 0;
+  const memberGrowthBars = Array.from({ length: 6 }, (_, index) => {
+    const daysAgoStart = (5 - index) * 7;
+    const weekStart = renderTime - (daysAgoStart + 7) * 24 * 60 * 60 * 1000;
+    const weekEnd = renderTime - daysAgoStart * 24 * 60 * 60 * 1000;
+    return managedMembers.filter((member) => {
+      if (!member.createdAt) return false;
+      const timestamp = new Date(member.createdAt).getTime();
+      return timestamp >= weekStart && timestamp < weekEnd;
+    }).length;
+  });
+  const maxMemberGrowth = Math.max(...memberGrowthBars, 1);
+  const upcomingEventBars = managedEvents
+    .filter((event) => event.status === "Upcoming")
+    .slice(0, 5)
+    .map((event) => ({ label: event.name, value: event.rsvps }));
+  const maxUpcomingRsvps = Math.max(...upcomingEventBars.map((event) => event.value), 1);
+
   return (
-    <div className="space-y-8">
-      <section className="rounded-[24px] border border-gray-200 bg-white p-8 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#51237f]">Manage</p>
-        <h1 className="mt-3 text-3xl font-bold tracking-[-0.02em] text-gray-950">
-          Leadership access for {displayName}
-        </h1>
-        <p className="mt-4 max-w-2xl text-sm leading-7 text-gray-600">
-          Run your club from one place with event controls, member management, and officer messaging tied to the club you lead.
-        </p>
-        <div className="mt-6 flex flex-wrap gap-2">
-          {officerClubs.length ? (
-            <span className="rounded-full bg-[#ede7f6] px-3 py-1 text-xs font-semibold text-[#51237f]">
-              {officerClubs.length} leadership role{officerClubs.length === 1 ? "" : "s"}
-            </span>
-          ) : null}
-          {isPlatformAdmin ? (
-            <span className="rounded-full bg-[#fff4d6] px-3 py-1 text-xs font-semibold text-[#8a6116]">
-              Platform admin
-            </span>
-          ) : null}
+    <div className="space-y-6">
+      <section className="rounded-[28px] border border-gray-200 bg-white p-5 shadow-[0_22px_70px_-48px_rgba(17,24,39,0.3)] md:p-6">
+        <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="inline-flex items-center gap-2 rounded-full bg-[#f4ecfb] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#51237f]">
+                <LayoutDashboard size={13} />
+                Club Dashboard
+              </span>
+              <span className="rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-semibold text-gray-700">
+                {selectedRoleLabel}
+              </span>
+              {isPlatformAdmin ? (
+                <span className="rounded-full bg-[#fff4d6] px-3 py-1 text-xs font-semibold text-[#8a6116]">
+                  Platform admin
+                </span>
+              ) : null}
+            </div>
+
+            <div className="mt-4 flex items-start gap-4">
+              {selectedClub ? (
+                <div
+                  className={cn(
+                    "flex h-16 w-16 shrink-0 items-center justify-center rounded-3xl text-lg font-black text-white shadow-sm",
+                    selectedClub.color
+                  )}
+                >
+                  {selectedClub.initials}
+                </div>
+              ) : null}
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                  <h1 className="text-3xl font-black tracking-[-0.03em] text-gray-950">
+                    {selectedClub?.name || "Leadership Workspace"}
+                  </h1>
+                  <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">
+                    {selectedRoleLabel}
+                  </span>
+                </div>
+                <p className="mt-2 text-sm leading-6 text-gray-600">
+                  Welcome back, {displayName}. This control center keeps your club’s people, events, and activity in one fast-moving view.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="w-full max-w-xl space-y-4">
+            {officerClubs.length > 1 ? (
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Active club</label>
+                <select
+                  value={selectedClub?.id || ""}
+                  onChange={(event) => setSelectedClubId(event.target.value)}
+                  className="mt-2 h-11 w-full rounded-2xl border border-gray-300 bg-white px-4 text-sm text-gray-800 outline-none transition focus:border-[#51237f]"
+                >
+                  {officerClubs.map((club) => (
+                    <option key={club.id} value={club.id}>
+                      {club.name} · {club.roleLabel}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : null}
+
+            <div className="grid grid-cols-3 gap-3">
+              <div className="rounded-2xl border border-gray-200 bg-[#fafafa] px-4 py-4">
+                <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500">
+                  <Users size={14} className="text-[#51237f]" />
+                  Members
+                </div>
+                <div className="mt-2 text-3xl font-black text-gray-950">{dashboardLoading ? "..." : memberCount}</div>
+              </div>
+              <div className="rounded-2xl border border-gray-200 bg-[#fafafa] px-4 py-4">
+                <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500">
+                  <CalendarDays size={14} className="text-[#51237f]" />
+                  Events
+                </div>
+                <div className="mt-2 text-3xl font-black text-gray-950">{dashboardLoading ? "..." : eventCount}</div>
+              </div>
+              <div className="rounded-2xl border border-gray-200 bg-[#fafafa] px-4 py-4">
+                <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500">
+                  <ShieldCheck size={14} className="text-[#51237f]" />
+                  RSVPs
+                </div>
+                <div className="mt-2 text-3xl font-black text-gray-950">{dashboardLoading ? "..." : upcomingRsvpCount}</div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {officerClubs.length > 1 ? (
-          <div className="mt-6 max-w-sm">
-            <label className="block text-sm font-semibold text-gray-900">Active club</label>
-            <select
-              value={selectedClub?.id || ""}
-              onChange={(event) => setSelectedClubId(event.target.value)}
-              className="mt-2 w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-[#51237f]"
-            >
-              {officerClubs.map((club) => (
-                <option key={club.id} value={club.id}>
-                  {club.name} · {club.roleLabel}
-                </option>
-              ))}
-            </select>
+        <div className="mt-5 grid gap-3 border-t border-gray-200 pt-5 lg:grid-cols-[1.2fr_0.8fr]">
+          <div className="flex flex-wrap gap-3">
+            {selectedClub ? (
+              <>
+                <Link
+                  href={canCreateEvents ? `/manage/events/new?clubId=${selectedClub.id}` : "/manage/events/new"}
+                  className={cn(
+                    "inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition-colors",
+                    canCreateEvents
+                      ? "bg-[#51237f] text-white hover:bg-[#45206b]"
+                      : "cursor-not-allowed border border-gray-200 bg-white text-gray-400"
+                  )}
+                >
+                  <Plus size={15} />
+                  Create event
+                </Link>
+                <Link
+                  href={canEditClub ? `/manage/clubs/${selectedClub.id}/edit` : getClubPath(selectedClub.id)}
+                  className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50"
+                >
+                  <Pencil size={15} />
+                  Edit club
+                </Link>
+                <a
+                  href="#manage-members"
+                  className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50"
+                >
+                  <Users size={15} />
+                  Manage members
+                </a>
+              </>
+            ) : null}
           </div>
-        ) : null}
 
-        {selectedClub ? (
-          <>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href={canCreateEvents ? `/manage/events/new?clubId=${selectedClub.id}` : "/manage/events/new"}
-                className={cn(
-                  "inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold transition-colors",
-                  canCreateEvents ? "bg-[#51237f] text-white hover:bg-[#45206b]" : "border border-gray-300 text-gray-400"
-                )}
-              >
-                <Plus size={16} />
-                Create Event
-              </Link>
-              <Link
-                href={canEditClub ? `/manage/clubs/${selectedClub.id}/edit` : getClubPath(selectedClub.id)}
-                className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-5 py-3 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50"
-              >
-                <Pencil size={16} />
-                Edit Club
-              </Link>
-              <a
-                href="#manage-members"
-                className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-5 py-3 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50"
-              >
-                <Users size={16} />
-                Manage Members
-              </a>
-            </div>
-
-            <div className="mt-4 flex flex-wrap gap-5 text-sm">
-              <Link href="/manage/chats/members" className="font-semibold text-[#51237f] hover:underline">
-                Open member chat
-              </Link>
-              <Link href="/manage/chats/leadership" className="font-semibold text-[#51237f] hover:underline">
-                Open leadership chat
-              </Link>
-            </div>
-          </>
-        ) : null}
+          <div className="flex flex-wrap justify-start gap-2 lg:justify-end">
+            <Link
+              href="/manage/chats/members"
+              className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50"
+            >
+              <MessageSquare size={15} />
+              Member chat
+            </Link>
+            <Link
+              href="/manage/chats/leadership"
+              className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50"
+            >
+              <ShieldCheck size={15} />
+              Leadership chat
+            </Link>
+          </div>
+        </div>
       </section>
 
       {actionError ? (
@@ -493,199 +718,450 @@ export function ManageOverview() {
         </p>
       ) : null}
 
-      <section className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <div className="rounded-[24px] border border-gray-200 bg-white p-6 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
-          <div className="flex items-center gap-3">
-            <Users size={18} className="text-[#51237f]" />
-            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Members</p>
-          </div>
-          <p className="mt-4 text-4xl font-bold tracking-[-0.03em] text-gray-950">
-            {dashboardLoading ? "..." : memberCount}
-          </p>
-          <p className="mt-2 text-sm text-gray-600">Approved members in the selected club.</p>
-        </div>
-        <div className="rounded-[24px] border border-gray-200 bg-white p-6 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
-          <div className="flex items-center gap-3">
-            <Plus size={18} className="text-[#51237f]" />
-            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Events Hosted</p>
-          </div>
-          <p className="mt-4 text-4xl font-bold tracking-[-0.03em] text-gray-950">
-            {dashboardLoading ? "..." : eventCount}
-          </p>
-          <p className="mt-2 text-sm text-gray-600">Current events tied to this club.</p>
-        </div>
-        <div className="rounded-[24px] border border-gray-200 bg-white p-6 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
-          <div className="flex items-center gap-3">
-            <ShieldCheck size={18} className="text-[#51237f]" />
-            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Upcoming RSVPs</p>
-          </div>
-          <p className="mt-4 text-4xl font-bold tracking-[-0.03em] text-gray-950">
-            {dashboardLoading ? "..." : upcomingRsvpCount}
-          </p>
-          <p className="mt-2 text-sm text-gray-600">Confirmed interest across upcoming events.</p>
-        </div>
-      </section>
+      <section className="grid grid-cols-1 gap-6 xl:grid-cols-[1.4fr_1fr]">
+        <div className="space-y-6">
+          <section className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-[0_22px_70px_-48px_rgba(17,24,39,0.3)]">
+            <div className="mb-5 flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Club Pulse</p>
+                <h2 className="mt-2 text-2xl font-bold tracking-[-0.02em] text-gray-950">
+                  Events and turnout at a glance
+                </h2>
+              </div>
+              {selectedClub ? (
+                <Link
+                  href={`/manage/events/new?clubId=${selectedClub.id}`}
+                  className="inline-flex items-center rounded-full border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50"
+                >
+                  New event
+                </Link>
+              ) : null}
+            </div>
 
-      <section className="rounded-[24px] border border-gray-200 bg-white p-6 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
-        <div className="mb-5 flex items-center justify-between gap-4">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Events</p>
-            <h2 className="mt-2 text-2xl font-bold tracking-[-0.02em] text-gray-950">
-              Events you are managing
-            </h2>
-          </div>
-          {selectedClub ? (
-            <Link
-              href={`/manage/events/new?clubId=${selectedClub.id}`}
-              className="inline-flex items-center rounded-full border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50"
-            >
-              New event
-            </Link>
-          ) : null}
-        </div>
-        <div className="overflow-hidden rounded-2xl border border-gray-200">
-          <table className="min-w-full divide-y divide-gray-200">
-            <caption className="sr-only">Events managed by the selected club</caption>
-            <thead className="bg-[#faf8fd]">
-              <tr>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Event Name</th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Date</th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">RSVPs</th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Status</th>
-                <th scope="col" className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 bg-white">
-              {managedEvents.length ? (
-                managedEvents.map((event) => (
-                  <tr key={event.id}>
-                    <td className="px-4 py-4 text-sm font-semibold text-gray-950">{event.name}</td>
-                    <td className="px-4 py-4 text-sm text-gray-600">{event.dateLabel}</td>
-                    <td className="px-4 py-4 text-sm text-gray-600">{event.rsvps}</td>
-                    <td className="px-4 py-4">
-                      <span
-                        className={cn(
-                          "rounded-full px-2.5 py-1 text-xs font-semibold",
-                          event.status === "Upcoming"
-                            ? "bg-emerald-50 text-emerald-700"
-                            : "bg-gray-100 text-gray-600"
-                        )}
-                      >
-                        {event.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="flex justify-end gap-2">
-                        <Link
-                          href={`/manage/events/${event.id}/edit`}
-                          aria-label={`Edit ${event.name}`}
-                          className="inline-flex items-center gap-1 rounded-full border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-800 transition-colors hover:bg-gray-50"
-                        >
-                          <Pencil size={13} />
-                          Edit
-                        </Link>
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteEvent(event.id)}
-                          aria-label={`Delete ${event.name}`}
-                          className="inline-flex items-center gap-1 rounded-full border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-700 transition-colors hover:bg-red-50"
-                        >
-                          <Trash2 size={13} />
-                          Delete
-                        </button>
+            <div className="grid gap-4 lg:grid-cols-3">
+              <div className="rounded-2xl border border-gray-200 bg-[#fafafa] p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500">Member growth</p>
+                    <p className="mt-2 text-2xl font-black text-gray-950">{dashboardLoading ? "..." : memberGrowthCount}</p>
+                  </div>
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-[#51237f] shadow-sm">
+                    <TrendingUp size={18} />
+                  </span>
+                </div>
+                <p className="mt-1 text-sm text-gray-600">New approved members in the last 30 days.</p>
+                <div className="mt-4 flex h-14 items-end gap-2">
+                  {memberGrowthBars.map((value, index) => (
+                    <div key={`member-growth-${index}`} className="flex-1 rounded-full bg-white/0">
+                      <div
+                        className="w-full rounded-full bg-[#51237f]/85"
+                        style={{ height: `${Math.max(10, (value / maxMemberGrowth) * 100)}%` }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-gray-200 bg-[#fafafa] p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500">RSVP trend</p>
+                    <p className="mt-2 text-2xl font-black text-gray-950">{dashboardLoading ? "..." : rsvpGrowthCount}</p>
+                  </div>
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-[#51237f] shadow-sm">
+                    <BarChart3 size={18} />
+                  </span>
+                </div>
+                <p className="mt-1 text-sm text-gray-600">Current RSVP pressure across upcoming events.</p>
+                <div className="mt-4 space-y-2">
+                  {upcomingEventBars.length ? (
+                    upcomingEventBars.map((event) => (
+                      <div key={event.label} className="space-y-1">
+                        <div className="flex items-center justify-between gap-3 text-xs text-gray-500">
+                          <span className="truncate">{event.label}</span>
+                          <span>{event.value}</span>
+                        </div>
+                        <div className="h-2 rounded-full bg-white">
+                          <div
+                            className="h-full rounded-full bg-[#51237f]"
+                            style={{ width: `${Math.max(10, (event.value / maxUpcomingRsvps) * 100)}%` }}
+                          />
+                        </div>
                       </div>
-                    </td>
+                    ))
+                  ) : (
+                    <div className="rounded-2xl border border-dashed border-gray-200 bg-white px-4 py-5 text-sm text-gray-500">
+                      Upcoming RSVP bars will appear once your club has active events.
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-gray-200 bg-[#fafafa] p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500">Leadership coverage</p>
+                    <p className="mt-2 text-2xl font-black text-gray-950">{dashboardLoading ? "..." : `${leadershipCoverage}%`}</p>
+                  </div>
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-[#51237f] shadow-sm">
+                    <ShieldCheck size={18} />
+                  </span>
+                </div>
+                <p className="mt-1 text-sm text-gray-600">Officer coverage across the current member roster.</p>
+                <div className="mt-4 h-3 rounded-full bg-white">
+                  <div
+                    className="h-full rounded-full bg-[#51237f]"
+                    style={{ width: `${Math.max(8, leadershipCoverage)}%` }}
+                  />
+                </div>
+                <div className="mt-3 grid grid-cols-3 gap-2 text-sm text-gray-600">
+                  <div>
+                    <p className="text-[11px] uppercase tracking-[0.12em] text-gray-500">Officers</p>
+                    <p className="mt-1 font-semibold text-gray-950">{officerCount}</p>
+                  </div>
+                  <div>
+                    <p className="text-[11px] uppercase tracking-[0.12em] text-gray-500">Upcoming</p>
+                    <p className="mt-1 font-semibold text-gray-950">{upcomingEventsCount}</p>
+                  </div>
+                  <div>
+                    <p className="text-[11px] uppercase tracking-[0.12em] text-gray-500">Avg RSVPs</p>
+                    <p className="mt-1 font-semibold text-gray-950">{averageRsvpCount}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 overflow-hidden rounded-2xl border border-gray-200">
+              <table className="min-w-full divide-y divide-gray-200">
+                <caption className="sr-only">Events managed by the selected club</caption>
+                <thead className="bg-[#faf8fd]">
+                  <tr>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Event</th>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">When</th>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">RSVPs</th>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Status</th>
+                    <th scope="col" className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Actions</th>
                   </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 bg-white">
+                  {managedEvents.length ? (
+                    managedEvents.map((event) => (
+                      <tr key={event.id}>
+                        <td className="px-4 py-4 text-sm font-semibold text-gray-950">{event.name}</td>
+                        <td className="px-4 py-4 text-sm text-gray-600">{event.dateLabel}</td>
+                        <td className="px-4 py-4 text-sm text-gray-600">{event.rsvps}</td>
+                        <td className="px-4 py-4">
+                          <span
+                            className={cn(
+                              "rounded-full px-2.5 py-1 text-xs font-semibold",
+                              event.status === "Upcoming"
+                                ? "bg-emerald-50 text-emerald-700"
+                                : "bg-gray-100 text-gray-600"
+                            )}
+                          >
+                            {event.status}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4">
+                          <div className="flex justify-end gap-2">
+                            <Link
+                              href={`/manage/events/${event.id}/edit`}
+                              aria-label={`Edit ${event.name}`}
+                              className="inline-flex items-center gap-1 rounded-full border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-800 transition-colors hover:bg-gray-50"
+                            >
+                              <Pencil size={13} />
+                              Edit
+                            </Link>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteEvent(event.id)}
+                              aria-label={`Delete ${event.name}`}
+                              className="inline-flex items-center gap-1 rounded-full border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-700 transition-colors hover:bg-red-50"
+                            >
+                              <Trash2 size={13} />
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={5} className="px-4 py-8 text-center text-sm text-gray-500">
+                        No events for this club yet.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-[0_22px_70px_-48px_rgba(17,24,39,0.3)]">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Recent Activity</p>
+                <h2 className="mt-2 text-xl font-bold tracking-[-0.02em] text-gray-950">
+                  What just happened
+                </h2>
+              </div>
+              {dashboardLoading ? <span className="text-sm text-gray-400">Updating…</span> : null}
+            </div>
+            <div className="mt-5 space-y-3">
+              {recentActivity.length ? (
+                recentActivity.map((item) => (
+                  <div key={item.id} className="flex items-start gap-4 rounded-2xl border border-gray-200 bg-[#fafafa] px-4 py-4">
+                    <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-[#51237f] shadow-sm">
+                      {item.kind === "member" ? (
+                        <UserPlus size={18} />
+                      ) : item.kind === "event" ? (
+                        <CalendarDays size={18} />
+                      ) : item.kind === "rsvp" ? (
+                        <BellDot size={18} />
+                      ) : (
+                        <Activity size={18} />
+                      )}
+                    </span>
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                        <p className="text-sm font-semibold text-gray-950">{item.title}</p>
+                        <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-500">
+                          {item.timeLabel}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-sm leading-6 text-gray-600">{item.detail}</p>
+                    </div>
+                  </div>
                 ))
               ) : (
-                <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-sm text-gray-500">
-                    No events for this club yet.
-                  </td>
-                </tr>
+                <div className="rounded-2xl border border-dashed border-gray-200 bg-[#fafafa] px-5 py-6 text-sm text-gray-600">
+                  Activity will appear here as your club grows events and members.
+                </div>
               )}
-            </tbody>
-          </table>
+            </div>
+          </section>
         </div>
-      </section>
 
-      <section id="manage-members" className="rounded-[24px] border border-gray-200 bg-white p-6 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
-        <div className="mb-5">
-          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Members</p>
-          <h2 className="mt-2 text-2xl font-bold tracking-[-0.02em] text-gray-950">
-            Manage people quickly
-          </h2>
-        </div>
-        <div className="space-y-3">
-          {managedMembers.length ? (
-            managedMembers.map((member) => (
-              <div
-                key={member.userId}
-                className="flex flex-col gap-3 rounded-2xl border border-gray-200 px-4 py-4 md:flex-row md:items-center md:justify-between"
+        <div className="space-y-6">
+          <section className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-[0_22px_70px_-48px_rgba(17,24,39,0.3)]">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Quick Actions</p>
+                <h2 className="mt-2 text-xl font-bold tracking-[-0.02em] text-gray-950">
+                  Move the club forward
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-gray-600">
+                  Start with the most important actions first, then use the capability states below to see what your current role can do.
+                </p>
+              </div>
+            </div>
+
+            {selectedClub ? (
+              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                <Link
+                  href={canCreateEvents ? `/manage/events/new?clubId=${selectedClub.id}` : "/manage/events/new"}
+                  className={cn(
+                    "rounded-[24px] border px-5 py-5 transition-all",
+                    canCreateEvents
+                      ? "border-[#51237f] bg-[#51237f] text-white shadow-[0_18px_40px_-32px_rgba(81,35,127,0.85)] hover:bg-[#45206b]"
+                      : "cursor-not-allowed border-gray-200 bg-white text-gray-400"
+                  )}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <span
+                        className={cn(
+                          "inline-flex h-11 w-11 items-center justify-center rounded-2xl",
+                          canCreateEvents ? "bg-white/14 text-white" : "bg-gray-100 text-gray-400"
+                        )}
+                      >
+                        <Plus size={18} />
+                      </span>
+                      <h3 className="mt-4 text-lg font-bold tracking-[-0.02em]">Create Event</h3>
+                      <p className={cn("mt-1 text-sm leading-6", canCreateEvents ? "text-white/80" : "text-gray-500")}>
+                        Launch a new event and start collecting RSVPs quickly.
+                      </p>
+                    </div>
+                    <ArrowRight size={18} className={cn("mt-1 shrink-0", canCreateEvents ? "text-white" : "text-gray-400")} />
+                  </div>
+                </Link>
+                <a
+                  href="#manage-members"
+                  className="group rounded-[24px] border border-gray-200 bg-[#fafafa] px-5 py-5 transition-colors hover:border-gray-300 hover:bg-white"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-[#51237f] shadow-sm">
+                        <Users size={18} />
+                      </span>
+                      <h3 className="mt-4 text-lg font-bold tracking-[-0.02em] text-gray-950">Manage Members</h3>
+                      <p className="mt-1 text-sm leading-6 text-gray-600">
+                        Approve, promote, and remove people from your community.
+                      </p>
+                    </div>
+                    <ArrowRight size={18} className="mt-1 shrink-0 text-gray-400 transition-colors group-hover:text-gray-700" />
+                  </div>
+                </a>
+                <Link
+                  href={canEditClub ? `/manage/clubs/${selectedClub.id}/edit` : getClubPath(selectedClub.id)}
+                  className="group rounded-[24px] border border-gray-200 bg-[#fafafa] px-5 py-5 transition-colors hover:border-gray-300 hover:bg-white"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-[#51237f] shadow-sm">
+                        <Pencil size={18} />
+                      </span>
+                      <h3 className="mt-4 text-lg font-bold tracking-[-0.02em] text-gray-950">Edit Club</h3>
+                      <p className="mt-1 text-sm leading-6 text-gray-600">
+                        Update branding, details, and the public face of your club.
+                      </p>
+                    </div>
+                    <ArrowRight size={18} className="mt-1 shrink-0 text-gray-400 transition-colors group-hover:text-gray-700" />
+                  </div>
+                </Link>
+                <Link
+                  href="/announcements"
+                  className="group rounded-[24px] border border-gray-200 bg-[#fafafa] px-5 py-5 transition-colors hover:border-gray-300 hover:bg-white"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-[#51237f] shadow-sm">
+                        <Megaphone size={18} />
+                      </span>
+                      <h3 className="mt-4 text-lg font-bold tracking-[-0.02em] text-gray-950">Send Announcement</h3>
+                      <p className="mt-1 text-sm leading-6 text-gray-600">
+                        Broadcast updates and important notes to your club audience.
+                      </p>
+                    </div>
+                    <ArrowRight size={18} className="mt-1 shrink-0 text-gray-400 transition-colors group-hover:text-gray-700" />
+                  </div>
+                </Link>
+              </div>
+            ) : null}
+
+            <div className="mt-5 grid gap-3">
+              {capabilityChips.map((chip) => (
+                <div
+                  key={chip.label}
+                  className={cn(
+                    "flex items-center justify-between rounded-2xl border px-4 py-3 text-sm",
+                    chip.enabled ? "border-emerald-200 bg-emerald-50/60" : "border-gray-200 bg-[#fafafa]"
+                  )}
+                >
+                  <span className="font-semibold text-gray-900">{chip.label}</span>
+                  <span
+                    className={cn(
+                      "rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em]",
+                      chip.enabled ? "bg-emerald-100 text-emerald-700" : "bg-gray-200 text-gray-600"
+                    )}
+                  >
+                    {chip.enabled ? "Enabled" : "Limited"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section id="manage-members" className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-[0_22px_70px_-48px_rgba(17,24,39,0.3)]">
+            <div className="mb-5 flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Members</p>
+                <h2 className="mt-2 text-2xl font-bold tracking-[-0.02em] text-gray-950">
+                  People in your club
+                </h2>
+              </div>
+              <span className="rounded-full bg-[#f4ecfb] px-3 py-1 text-xs font-semibold text-[#51237f]">
+                {memberCount} total
+              </span>
+            </div>
+            <div className="space-y-3">
+              {managedMembers.length ? (
+                managedMembers.map((member) => (
+                  <div
+                    key={member.userId}
+                    className="flex flex-col gap-3 rounded-2xl border border-gray-200 px-4 py-4 md:flex-row md:items-center md:justify-between"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-base font-semibold text-gray-950">{member.name}</p>
+                      <div className="mt-1 flex flex-wrap items-center gap-2">
+                        <p className="text-sm text-gray-600">{member.roleLabel}</p>
+                        {member.isSelf ? (
+                          <span className="rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-semibold text-gray-600">
+                            You
+                          </span>
+                        ) : null}
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        disabled={!canManageRoles || member.isOfficer || member.isSelf}
+                        onClick={() => handlePromote(member.userId)}
+                        aria-label={`Promote ${member.name} to officer`}
+                        className={cn(
+                          "inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold transition-colors",
+                          !canManageRoles || member.isOfficer || member.isSelf
+                            ? "cursor-not-allowed border border-gray-200 text-gray-400"
+                            : "border border-gray-300 text-gray-800 hover:bg-gray-50"
+                        )}
+                      >
+                        Promote
+                      </button>
+                      <button
+                        type="button"
+                        disabled={!canManageMembers || member.isSelf}
+                        onClick={() => handleRemoveMember(member.userId)}
+                        aria-label={`Remove ${member.name} from club`}
+                        className={cn(
+                          "inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold transition-colors",
+                          !canManageMembers || member.isSelf
+                            ? "cursor-not-allowed border border-gray-200 text-gray-400"
+                            : "border border-red-200 text-red-700 hover:bg-red-50"
+                        )}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="rounded-2xl border border-dashed border-gray-200 bg-[#fafafa] px-5 py-6 text-sm text-gray-600">
+                  No approved members found for this club.
+                </div>
+              )}
+            </div>
+          </section>
+
+          <section className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-[0_22px_70px_-48px_rgba(17,24,39,0.3)]">
+            <div className="mb-5">
+              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Comms</p>
+              <h2 className="mt-2 text-xl font-bold tracking-[-0.02em] text-gray-950">
+                Stay in contact with your team
+              </h2>
+            </div>
+            <div className="grid gap-3">
+              <Link
+                href="/manage/chats/members"
+                className="flex items-center justify-between rounded-2xl border border-gray-300 bg-white px-4 py-4 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50"
               >
-                <div>
-                  <p className="text-base font-semibold text-gray-950">{member.name}</p>
-                  <p className="mt-1 text-sm text-gray-600">{member.roleLabel}</p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    disabled={!canManageRoles || member.isOfficer || member.isSelf}
-                    onClick={() => handlePromote(member.userId)}
-                    aria-label={`Promote ${member.name} to officer`}
-                    className={cn(
-                      "inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold transition-colors",
-                      !canManageRoles || member.isOfficer || member.isSelf
-                        ? "cursor-not-allowed border border-gray-200 text-gray-400"
-                        : "border border-gray-300 text-gray-800 hover:bg-gray-50"
-                    )}
-                  >
-                    Promote
-                  </button>
-                  <button
-                    type="button"
-                    disabled={!canManageMembers || member.isSelf}
-                    onClick={() => handleRemoveMember(member.userId)}
-                    aria-label={`Remove ${member.name} from club`}
-                    className={cn(
-                      "inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold transition-colors",
-                      !canManageMembers || member.isSelf
-                        ? "cursor-not-allowed border border-gray-200 text-gray-400"
-                        : "border border-red-200 text-red-700 hover:bg-red-50"
-                    )}
-                  >
-                    Remove
-                  </button>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="rounded-2xl border border-dashed border-gray-200 bg-[#fafafa] px-5 py-6 text-sm text-gray-600">
-              No approved members found for this club.
+                <span className="inline-flex items-center gap-2">
+                  <MessageSquare size={16} />
+                  Member Chat
+                </span>
+                <ArrowRight size={16} />
+              </Link>
+              <Link
+                href="/manage/chats/leadership"
+                className="flex items-center justify-between rounded-2xl border border-gray-300 bg-white px-4 py-4 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <ShieldCheck size={16} />
+                  Leadership Chat
+                </span>
+                <ArrowRight size={16} />
+              </Link>
             </div>
-          )}
-        </div>
-      </section>
-
-      <section className="rounded-[24px] border border-gray-200 bg-white p-6 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
-        <div className="mb-5">
-          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Recent Activity</p>
-          <h2 className="mt-2 text-2xl font-bold tracking-[-0.02em] text-gray-950">
-            Progress inside your club
-          </h2>
-        </div>
-        <div className="space-y-3">
-          {recentActivity.length ? (
-            recentActivity.map((item) => (
-              <div key={item} className="rounded-2xl border border-gray-200 bg-[#fafafa] px-4 py-4 text-sm text-gray-700">
-                {item}
-              </div>
-            ))
-          ) : (
-            <div className="rounded-2xl border border-dashed border-gray-200 bg-[#fafafa] px-5 py-6 text-sm text-gray-600">
-              Activity will appear here as you grow events and members in this club.
-            </div>
-          )}
+          </section>
         </div>
       </section>
     </div>
