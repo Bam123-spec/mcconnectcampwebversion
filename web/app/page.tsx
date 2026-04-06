@@ -1,26 +1,31 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Users, Search, ExternalLink } from "lucide-react";
-import { EventCard } from "@/components/events/EventCard";
-import { ForYouSection } from "@/components/home/for-you-section";
-import { CampusAccessPanel } from "@/components/home/campus-access-panel";
-import { FromYourClubsSection } from "@/components/home/from-your-clubs-section";
-import { SpotlightCarousel } from "@/components/home/spotlight-carousel";
-import { AUTH_ENABLED } from "@/lib/features";
+import { CalendarDays, Clock3, Search, Sparkles } from "lucide-react";
 import { createServerSupabaseClient } from "@/lib/supabase";
-import { getClubPath } from "@/lib/club-utils";
-import {
-  formatEventDateLabel,
-  getClubColor,
-  getClubInitials,
-  inferCampus,
-  inferClubCategory,
-  normalizeEventForWeb,
-} from "@/lib/live-data";
 
-type NewsRow = {
+type EventRow = {
+  id: string;
+  name: string;
+  description?: string | null;
+  location?: string | null;
+  date?: string | null;
+  day?: string | null;
+  time?: string | null;
+  cover_image_url?: string | null;
+  clubs?:
+    | {
+        name?: string | null;
+      }
+    | {
+        name?: string | null;
+      }[]
+    | null;
+};
+
+type AnnouncementRow = {
   id: string;
   title?: string | null;
+  content?: string | null;
   created_at?: string | null;
   category?: string | null;
   author?:
@@ -33,369 +38,282 @@ type NewsRow = {
     | null;
 };
 
-const QUICK_LINKS = [
-  { id: "q1", name: "Events Guide", url: "/docs/events" },
-  { id: "q2", name: "Getting Started", url: "/docs" },
-  { id: "q3", name: "Interactive Campus Map", url: "/docs/navigating" },
-  { id: "q4", name: "Privacy & Access", url: "/docs/privacy" },
-];
+type FeedItem =
+  | {
+      type: "event";
+      id: string;
+      title: string;
+      clubName: string;
+      when: string;
+      description: string;
+      href: string;
+      cta: string;
+    }
+  | {
+      type: "announcement";
+      id: string;
+      title: string;
+      clubName: string;
+      when: string;
+      description: string;
+      href: string;
+      cta: string;
+    };
 
 const fallbackEventCover =
   "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1600&auto=format&fit=crop";
 
-export default async function Home() {
+const firstItem = <T,>(value: T | T[] | null | undefined): T | null => {
+  if (Array.isArray(value)) return value[0] ?? null;
+  return value ?? null;
+};
+
+const formatEventDate = (dateValue?: string | null, time?: string | null) => {
+  const source = dateValue ?? null;
+  if (!source) return time || "Date TBA";
+
+  const parsed = new Date(source);
+  if (Number.isNaN(parsed.getTime())) return time ? `${source} • ${time}` : source;
+
+  const label = parsed.toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
+
+  return time ? `${label} • ${time}` : label;
+};
+
+const formatAnnouncementDate = (value?: string | null) => {
+  if (!value) return "Recently posted";
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "Recently posted";
+
+  return parsed.toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
+};
+
+const trimText = (value: string, maxLength: number) =>
+  value.length > maxLength ? `${value.slice(0, maxLength).trim()}…` : value;
+
+export default async function HomePage() {
   const supabase = createServerSupabaseClient();
 
-  const [{ data: eventsData }, { data: clubsData }, { data: newsData }] = await Promise.all([
+  const [{ data: eventsData }, { data: announcementsData }] = await Promise.all([
     supabase
       .from("events")
       .select("id, name, description, location, date, day, time, cover_image_url, clubs(name)")
       .order("date", { ascending: true, nullsFirst: false })
       .order("day", { ascending: true, nullsFirst: false })
-      .limit(9),
-    supabase
-      .from("clubs")
-      .select("id, name, description, cover_image_url, member_count")
-      .order("member_count", { ascending: false, nullsFirst: false })
-      .order("name", { ascending: true })
-      .limit(3),
+      .limit(10),
     supabase
       .from("forum_posts")
-      .select("id, title, created_at, category, author:author_id(full_name)")
+      .select("id, title, content, created_at, category, author:author_id(full_name)")
       .eq("category", "announcements")
       .order("created_at", { ascending: false })
-      .limit(2),
+      .limit(6),
   ]);
 
-  const eventIds = (eventsData ?? []).map((event) => event.id);
-  const { data: registrations } = eventIds.length
-    ? await supabase
-        .from("event_registrations")
-        .select("event_id")
-        .in("event_id", eventIds)
-        .limit(1000)
-    : { data: [] as Array<{ event_id: string }> };
+  const upcomingEvents = (eventsData ?? []).slice(0, 6).map((event: EventRow) => {
+    const club = firstItem(event.clubs);
 
-  const registrationCounts = new Map<string, number>();
-  for (const row of registrations ?? []) {
-    registrationCounts.set(row.event_id, (registrationCounts.get(row.event_id) ?? 0) + 1);
-  }
-
-  const homepageEvents = (eventsData ?? []).map((event) =>
-    normalizeEventForWeb({
-      ...event,
-      rsvp_count: registrationCounts.get(event.id) ?? 0,
-    })
-  );
-  const spotlightEvents = homepageEvents.slice(0, 4);
-  const featuredEvents = homepageEvents.slice(0, 3);
-  const trendingEvents = [...homepageEvents]
-    .sort((left, right) => {
-      const countDelta = (right.rsvp_count ?? 0) - (left.rsvp_count ?? 0);
-      if (countDelta !== 0) {
-        return countDelta;
-      }
-
-      return new Date(left.date).getTime() - new Date(right.date).getTime();
-    })
-    .slice(0, Math.min(4, homepageEvents.length));
-  const featuredClubs = (clubsData ?? []).map((club) => ({
-    id: club.id,
-    name: club.name,
-    category: inferClubCategory(club),
-    members: club.member_count ?? 0,
-    campus: inferCampus(),
-    initials: getClubInitials(club.name),
-    color: getClubColor(club.id),
-  }));
-  const latestNews = ((newsData ?? []) as NewsRow[]).map((news) => {
-    const author = Array.isArray(news.author) ? news.author[0] : news.author;
-    const date = news.created_at ? new Date(news.created_at) : null;
     return {
-      id: news.id,
-      title: news.title || "Campus announcement",
-      date: date
-        ? date.toLocaleDateString("en-US", {
-            weekday: "long",
-            month: "short",
-            day: "numeric",
-          })
-        : "Recently posted",
-      author: author?.full_name || "Montgomery College",
-      group: news.category ? news.category.charAt(0).toUpperCase() + news.category.slice(1) : "Announcement",
+      id: event.id,
+      title: event.name,
+      clubName: club?.name || "Campus Event",
+      when: formatEventDate(event.date || event.day, event.time),
+      cover: event.cover_image_url || fallbackEventCover,
+      href: "/events",
     };
   });
 
+  const eventFeed: FeedItem[] = (eventsData ?? []).slice(0, 4).map((event: EventRow) => {
+    const club = firstItem(event.clubs);
+
+    return {
+      type: "event",
+      id: `event-${event.id}`,
+      title: event.name,
+      clubName: club?.name || "Campus Event",
+      when: formatEventDate(event.date || event.day, event.time),
+      description: trimText(event.description || event.location || "Campus event update", 140),
+      href: "/events",
+      cta: "View Event",
+    };
+  });
+
+  const announcementFeed: FeedItem[] = (announcementsData ?? []).slice(0, 4).map((announcement: AnnouncementRow) => {
+    const author = firstItem(announcement.author);
+
+    return {
+      type: "announcement",
+      id: `announcement-${announcement.id}`,
+      title: announcement.title || "Campus announcement",
+      clubName: author?.full_name || "Montgomery College",
+      when: formatAnnouncementDate(announcement.created_at),
+      description: trimText(announcement.content || "New update posted for the campus community.", 160),
+      href: `/announcements/${announcement.id}`,
+      cta: "Read Update",
+    };
+  });
+
+  const feedItems: FeedItem[] = [];
+  const maxLength = Math.max(eventFeed.length, announcementFeed.length);
+
+  for (let index = 0; index < maxLength; index += 1) {
+    if (eventFeed[index]) feedItems.push(eventFeed[index]);
+    if (announcementFeed[index]) feedItems.push(announcementFeed[index]);
+  }
+
   return (
-    <div className="min-h-screen bg-[#fcfcfd]">
-      <section aria-labelledby="homepage-hero-heading" className="relative overflow-hidden border-b border-gray-200 bg-white">
-        <div className="absolute inset-x-0 top-0 h-32 bg-[radial-gradient(circle_at_top_left,_rgba(81,35,127,0.08),_transparent_45%)]" />
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-10 md:px-6 md:py-14 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.9fr)] lg:px-8">
-          <div className="flex flex-col justify-center">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#51237f]">
-              Montgomery College
-            </p>
-            <h1 id="homepage-hero-heading" className="mt-4 max-w-3xl text-4xl font-black tracking-[-0.03em] text-gray-950 md:text-6xl">
-              What&apos;s happening this week at Montgomery College.
-            </h1>
-            <p className="mt-5 max-w-2xl text-base leading-7 text-gray-600 md:text-lg">
-              See what students are joining, discover events worth your time, and keep up with the clubs shaping campus this week.
-            </p>
+    <div className="min-h-screen bg-white">
+      <main className="mx-auto max-w-6xl px-4 py-8 md:px-6 md:py-10 lg:px-8">
+        <section className="border-b border-gray-200 pb-10 text-center">
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#51237f]">
+            Montgomery College Campus Life
+          </p>
+          <h1 className="mx-auto mt-4 max-w-3xl text-4xl font-black tracking-[-0.04em] text-gray-950 md:text-5xl">
+            Discover what&apos;s happening across campus.
+          </h1>
+          <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-gray-600">
+            Find events, follow club updates, and keep up with announcements in one clean feed.
+          </p>
 
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href="/events"
-                className="inline-flex items-center rounded-full bg-[#51237f] px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-[#45206b] hover:shadow-md"
-              >
-                Explore Events
-              </Link>
-              <Link
-                href="/clubs"
-                className="inline-flex items-center rounded-full border border-gray-300 bg-white px-6 py-3 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50"
-              >
-                Browse Clubs
-              </Link>
-            </div>
-
-            <div className="mt-10 flex flex-wrap gap-4 text-sm">
-              <div>
-                <p className="text-xl font-bold tracking-tight text-gray-950">{homepageEvents.length}</p>
-                <p className="text-gray-500">events on deck</p>
-              </div>
-              <div>
-                <p className="text-xl font-bold tracking-tight text-gray-950">{featuredClubs.length}</p>
-                <p className="text-gray-500">active clubs featured</p>
-              </div>
-              <div>
-                <p className="text-xl font-bold tracking-tight text-gray-950">
-                  {(trendingEvents[0]?.rsvp_count ?? 0).toLocaleString()}
-                </p>
-                <p className="text-gray-500">students in the top event</p>
-              </div>
-            </div>
-          </div>
-
-          {spotlightEvents.length ? (
-            <SpotlightCarousel events={spotlightEvents} fallbackCover={fallbackEventCover} />
-          ) : null}
-        </div>
-      </section>
-
-      <main className="mx-auto max-w-7xl space-y-16 px-4 py-10 md:px-6 md:py-14 lg:px-8">
-        <ForYouSection />
-
-        <section aria-labelledby="homepage-weekly-events-heading">
-          <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">
-                Happening This Week
-              </p>
-              <h2 id="homepage-weekly-events-heading" className="mt-2 text-3xl font-bold tracking-[-0.02em] text-gray-950">
-                Start with the events students are actually showing up for
-              </h2>
-            </div>
-
-            <form action="/events" role="search" aria-label="Search campus events" className="flex items-center gap-2">
-              <div className="relative">
-                <label htmlFor="homepage-event-search" className="sr-only">
-                  Search events
-                </label>
-                <Search aria-hidden="true" size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input
-                  id="homepage-event-search"
-                  type="text"
-                  name="q"
-                  placeholder="Search events..."
-                  className="w-full rounded-md border border-gray-300 py-2 pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#51237f] md:w-64"
-                />
-              </div>
-              <button type="submit" className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50">
-                Search
-              </button>
+          <div className="mx-auto mt-8 flex max-w-xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-center">
+            <form action="/events" className="relative flex-1">
+              <label htmlFor="homepage-search" className="sr-only">
+                Search campus events
+              </label>
+              <Search
+                aria-hidden="true"
+                size={16}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+              />
+              <input
+                id="homepage-search"
+                type="text"
+                name="q"
+                placeholder="Search events or clubs"
+                className="h-12 w-full rounded-full border border-gray-300 bg-white pl-11 pr-4 text-sm text-gray-900 outline-none transition focus:border-[#51237f] focus:ring-2 focus:ring-[#51237f]/15"
+              />
             </form>
-          </div>
-
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {featuredEvents.map((event) => (
-              <EventCard key={event.id} event={event} authEnabled={AUTH_ENABLED} />
-            ))}
+            <Link
+              href="/events"
+              className="inline-flex h-12 items-center justify-center rounded-full bg-[#51237f] px-6 text-sm font-semibold text-white transition hover:bg-[#45206b]"
+            >
+              Browse Events
+            </Link>
           </div>
         </section>
 
-        <div className="grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
-          <FromYourClubsSection />
-
-          {trendingEvents.length ? (
-            <section aria-labelledby="homepage-trending-heading" className="rounded-[24px] border border-gray-200 bg-white p-6 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
-              <div className="mb-6 flex items-end justify-between gap-4">
-                <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">
-                    Trending Now
-                  </p>
-                  <h2 id="homepage-trending-heading" className="mt-2 text-2xl font-bold tracking-[-0.02em] text-gray-950">
-                    Popular events moving fastest
-                  </h2>
-                </div>
-                <Link href="/events" className="text-sm font-semibold text-[#51237f] hover:underline">
-                  All events
-                </Link>
-              </div>
-
-              <div className="space-y-4">
-                {trendingEvents.map((event) => (
-                  <Link
-                    key={event.id}
-                    href="/events"
-                    aria-label={`View trending event ${event.name}`}
-                    className="flex items-center gap-4 rounded-2xl border border-gray-200 p-3 transition-all duration-200 hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-md"
-                  >
-                    <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-gray-100">
-                      <Image
-                        src={event.cover_image_url || fallbackEventCover}
-                        alt={event.name}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="inline-flex items-center rounded-full bg-[#fff3e8] px-2 py-0.5 text-[11px] font-semibold text-[#8a3c00]">
-                          🔥 Trending
-                        </span>
-                        <span className="text-xs font-medium text-gray-500">
-                          {event.rsvp_count ?? 0} going
-                        </span>
-                      </div>
-                      <h3 className="mt-2 line-clamp-2 text-[1.02rem] font-bold leading-tight text-gray-900">
-                        {event.name}
-                      </h3>
-                      <p className="mt-1 text-sm font-medium text-gray-600">
-                        {formatEventDateLabel(event.date, event.time)}
-                      </p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </section>
-          ) : null}
-        </div>
-
-        <section className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-          <section>
-            <div className="mb-6 flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">
-                  Campus Updates
-                </p>
-                <h2 className="mt-2 text-2xl font-bold tracking-tight text-gray-950">
-                  News and announcements worth checking
-                </h2>
-              </div>
-              <Link
-                href="/announcements"
-                className="rounded-md border border-gray-300 px-4 py-1.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
-              >
-                All News
-              </Link>
+        <section className="pt-10">
+          <div className="mb-5 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Upcoming Events</p>
+              <h2 className="mt-2 text-2xl font-bold tracking-[-0.03em] text-gray-950">
+                This week on campus
+              </h2>
             </div>
+            <Link href="/events" className="text-sm font-semibold text-[#51237f] hover:underline">
+              See all
+            </Link>
+          </div>
 
-            <div className="overflow-hidden rounded-[24px] border border-gray-200 bg-white shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
-              {latestNews.length ? (
-                latestNews.map((news, index) => (
-                  <div
-                    key={news.id}
-                    className={`p-5 ${index !== latestNews.length - 1 ? "border-b border-gray-100" : ""}`}
-                  >
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#51237f]">
-                      {news.group}
+          <div className="-mx-4 overflow-x-auto px-4 pb-2">
+            <div className="flex min-w-max gap-4">
+              {upcomingEvents.map((event) => (
+                <Link
+                  key={event.id}
+                  href={event.href}
+                  className="w-[280px] shrink-0 rounded-[24px] border border-gray-200 bg-white p-4 shadow-[0_10px_28px_-22px_rgba(17,24,39,0.35)] transition hover:-translate-y-0.5 hover:shadow-[0_14px_30px_-24px_rgba(17,24,39,0.45)]"
+                >
+                  <div className="relative h-36 overflow-hidden rounded-[18px] bg-gray-100">
+                    <Image src={event.cover} alt={event.title} fill className="object-cover" />
+                  </div>
+                  <div className="mt-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#51237f]">
+                      {event.clubName}
                     </p>
-                    <h3 className="mt-2 text-lg font-bold text-gray-900">{news.title}</h3>
-                    <p className="mt-2 text-sm text-gray-600">
-                      {news.date} · <span className="font-medium text-gray-700">{news.author}</span>
-                    </p>
+                    <h3 className="mt-2 text-lg font-bold leading-tight text-gray-950">{event.title}</h3>
+                    <div className="mt-3 flex items-center gap-2 text-sm text-gray-600">
+                      <CalendarDays size={15} className="text-gray-400" />
+                      <span>{event.when}</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="pt-10">
+          <div className="mb-5">
+            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Campus Feed</p>
+            <h2 className="mt-2 text-2xl font-bold tracking-[-0.03em] text-gray-950">
+              Events and announcements in one place
+            </h2>
+          </div>
+
+          <div className="space-y-4">
+            {feedItems.map((item) => (
+              <article
+                key={item.id}
+                className="rounded-[24px] border border-gray-200 bg-white p-5 shadow-[0_10px_24px_-24px_rgba(17,24,39,0.35)]"
+              >
+                <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] ${
+                          item.type === "event"
+                            ? "bg-[#f4ecfb] text-[#51237f]"
+                            : "bg-gray-100 text-gray-700"
+                        }`}
+                      >
+                        {item.type === "event" ? (
+                          <>
+                            <Sparkles size={12} className="mr-1.5" />
+                            Event
+                          </>
+                        ) : (
+                          "Announcement"
+                        )}
+                      </span>
+                    </div>
+
+                    <h3 className="mt-3 text-xl font-bold tracking-[-0.02em] text-gray-950">
+                      {item.title}
+                    </h3>
+
+                    <p className="mt-2 text-sm font-semibold text-[#51237f]">{item.clubName}</p>
+
+                    <div className="mt-3 flex items-center gap-2 text-sm text-gray-500">
+                      <Clock3 size={15} className="text-gray-400" />
+                      <span>{item.when}</span>
+                    </div>
+
+                    <p className="mt-4 max-w-3xl text-sm leading-6 text-gray-600">{item.description}</p>
+                  </div>
+
+                  <div className="md:pl-6">
                     <Link
-                      href={`/announcements/${news.id}`}
-                      className="mt-4 inline-flex items-center text-sm font-semibold text-[#51237f] hover:underline"
+                      href={item.href}
+                      className={`inline-flex h-11 items-center justify-center rounded-full px-5 text-sm font-semibold transition ${
+                        item.type === "event"
+                          ? "bg-[#51237f] text-white hover:bg-[#45206b]"
+                          : "border border-gray-300 bg-white text-gray-800 hover:bg-gray-50"
+                      }`}
                     >
-                      Read update
+                      {item.cta}
                     </Link>
                   </div>
-                ))
-              ) : (
-                <div className="p-8 text-center text-sm text-gray-500">
-                  No announcement posts are available yet.
                 </div>
-              )}
-            </div>
-          </section>
-
-          <div className="space-y-8">
-            <CampusAccessPanel />
-
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-              <div className="rounded-[24px] border border-gray-200 bg-white p-6 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
-                <div className="mb-5">
-                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">
-                    Featured Clubs
-                  </p>
-                  <h3 className="mt-2 text-xl font-bold tracking-tight text-gray-950">
-                    Communities students are finding first
-                  </h3>
-                </div>
-                <div className="space-y-4">
-                  {featuredClubs.map((club) => (
-                    <div key={club.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
-                      <Link
-                        href={getClubPath(club.id)}
-                        className="mb-1 flex items-center gap-3 font-bold text-[#51237f] hover:underline"
-                      >
-                        <span
-                          className={`inline-flex h-8 w-8 items-center justify-center rounded-md text-xs font-black text-white ${club.color}`}
-                        >
-                          {club.initials}
-                        </span>
-                        <span>{club.name}</span>
-                      </Link>
-                      <div className="flex items-center justify-between text-xs text-gray-500">
-                        <span className="rounded bg-gray-100 px-2 py-0.5 text-gray-600">{club.category}</span>
-                        <span className="flex items-center gap-1">
-                          <Users size={12} /> {club.members} members
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                  <Link
-                    href="/clubs"
-                    className="inline-flex items-center text-sm font-semibold text-[#51237f] hover:underline"
-                  >
-                    View all groups
-                  </Link>
-                </div>
-              </div>
-
-              <div className="rounded-[24px] border border-gray-200 bg-white p-6 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
-                <div className="mb-5">
-                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">
-                    Campus Resources
-                  </p>
-                  <h3 className="mt-2 text-xl font-bold tracking-tight text-gray-950">
-                    Helpful links when you need them
-                  </h3>
-                </div>
-                <div className="space-y-3">
-                  {QUICK_LINKS.map((link) => (
-                    <Link
-                      key={link.id}
-                      href={link.url}
-                      className="flex items-center justify-between rounded-lg border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 hover:text-[#51237f]"
-                    >
-                      {link.name}
-                      <ExternalLink size={16} className="text-gray-400" />
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
+              </article>
+            ))}
           </div>
         </section>
       </main>

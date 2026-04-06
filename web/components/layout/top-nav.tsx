@@ -4,14 +4,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { LogOut, ShieldCheck, Users } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AUTH_ENABLED } from "@/lib/features";
 import { supabase } from "@/lib/supabase";
 
 type ProfileRow = {
   full_name?: string | null;
-  role?: string | null;
 };
 
 export function TopNav() {
@@ -19,9 +18,6 @@ export function TopNav() {
   const router = useRouter();
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState<string | null>(null);
-  const [joinedClubCount, setJoinedClubCount] = useState(0);
-  const [leadershipCount, setLeadershipCount] = useState(0);
-  const [isPlatformAdmin, setIsPlatformAdmin] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   useEffect(() => {
@@ -36,30 +32,16 @@ export function TopNav() {
         if (!cancelled) {
           setUserEmail(null);
           setDisplayName(null);
-          setJoinedClubCount(0);
-          setLeadershipCount(0);
-          setIsPlatformAdmin(false);
         }
         return;
       }
 
-      const [profileResult, membershipsResult, officersResult] = await Promise.all([
-        supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
-        supabase
-          .from("club_members")
-          .select("id")
-          .eq("user_id", user.id)
-          .eq("status", "approved"),
-        supabase.from("officers").select("club_id").eq("user_id", user.id),
-      ]);
+      const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle();
 
       if (!cancelled) {
-        const profile = profileResult.data as ProfileRow | null;
+        const profileRow = profile as ProfileRow | null;
         setUserEmail(user.email ?? null);
-        setDisplayName(profile?.full_name || user.email?.split("@")[0] || null);
-        setJoinedClubCount(membershipsResult.data?.length ?? 0);
-        setLeadershipCount(officersResult.data?.length ?? 0);
-        setIsPlatformAdmin(profile?.role === "admin");
+        setDisplayName(profileRow?.full_name || user.email?.split("@")[0] || null);
       }
     };
 
@@ -82,26 +64,15 @@ export function TopNav() {
     await supabase.auth.signOut();
     setUserEmail(null);
     setDisplayName(null);
-    setJoinedClubCount(0);
-    setLeadershipCount(0);
-    setIsPlatformAdmin(false);
     router.push("/");
     router.refresh();
     setIsSigningOut(false);
   };
 
-  const isPathActive = (href: string) => {
-    if (href === "/") return pathname === "/";
-    return pathname === href || pathname.startsWith(`${href}/`);
-  };
-
-  const showManageNav = leadershipCount > 0 || isPlatformAdmin;
-
   return (
-    <header className="w-full h-[60px] bg-white border-b border-gray-300 flex items-stretch top-0 sticky z-50 shadow-sm">
-      {/* Institutional Logo Section */}
-      <div className="w-64 bg-white flex items-center shrink-0 h-full px-6 border-r border-gray-100">
-        <Link href="/" className="flex items-center h-full relative w-full">
+    <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/95 backdrop-blur">
+      <div className="mx-auto flex h-[68px] max-w-6xl items-center justify-between gap-6 px-4 md:px-6 lg:px-8">
+        <Link href="/" className="relative h-10 w-48 shrink-0">
           <Image
             src="/mc-logo.png"
             alt="Montgomery College Logo"
@@ -110,131 +81,108 @@ export function TopNav() {
             priority
           />
         </Link>
-      </div>
 
-      {/* Nav Links (White Background) */}
-      <nav aria-label="Primary" className="flex-1 flex items-stretch bg-white px-2">
+        <nav aria-label="Primary" className="hidden flex-1 items-center justify-center gap-8 md:flex">
+          <Link
+            href="/"
+            aria-current={pathname === "/" ? "page" : undefined}
+            className={cn(
+              "text-sm font-semibold transition-colors",
+              pathname === "/" ? "text-[#51237f]" : "text-gray-600 hover:text-gray-900"
+            )}
+          >
+            Explore
+          </Link>
+          <Link
+            href="/clubs"
+            aria-current={pathname === "/clubs" || pathname.startsWith("/clubs/") ? "page" : undefined}
+            className={cn(
+              "text-sm font-semibold transition-colors",
+              pathname === "/clubs" || pathname.startsWith("/clubs/") ? "text-[#51237f]" : "text-gray-600 hover:text-gray-900"
+            )}
+          >
+            Clubs
+          </Link>
+          <Link
+            href="/events"
+            aria-current={pathname === "/events" ? "page" : undefined}
+            className={cn(
+              "text-sm font-semibold transition-colors",
+              pathname === "/events" ? "text-[#51237f]" : "text-gray-600 hover:text-gray-900"
+            )}
+          >
+            Events
+          </Link>
+        </nav>
+
+        <div className="flex items-center gap-3">
+          {!AUTH_ENABLED ? (
+            <div className="text-sm font-medium text-gray-500">Preview</div>
+          ) : userEmail ? (
+            <>
+              <Link
+                href="/profile"
+                className="hidden text-sm font-semibold text-gray-800 transition-colors hover:text-[#51237f] sm:inline-flex"
+              >
+                {displayName || "Profile"}
+              </Link>
+              <button
+                type="button"
+                onClick={handleSignOut}
+                disabled={isSigningOut}
+                className="inline-flex h-10 items-center gap-2 rounded-full border border-gray-300 bg-white px-4 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <LogOut size={14} />
+                {isSigningOut ? "Signing out..." : "Sign out"}
+              </button>
+            </>
+          ) : (
+            <Link
+              href="/login"
+              className="inline-flex h-10 items-center rounded-full bg-[#51237f] px-5 text-sm font-semibold text-white transition hover:bg-[#45206b]"
+            >
+              Sign In
+            </Link>
+          )}
+        </div>
+      </div>
+      <div className="flex items-center justify-center gap-6 border-t border-gray-100 px-4 py-3 md:hidden">
         <Link 
           href="/" 
-          aria-current={isPathActive("/") ? "page" : undefined}
           className={cn(
-            "flex items-center px-6 h-full text-sm font-semibold border-b-2 transition-colors",
-            isPathActive("/") ? "border-[#51237f] text-gray-900" : "border-transparent text-gray-600 hover:text-gray-900"
+            "text-sm font-semibold transition-colors",
+            pathname === "/" ? "text-[#51237f]" : "text-gray-600 hover:text-gray-900"
           )}
         >
-          Home
+          Explore
         </Link>
         <Link 
           href="/clubs" 
-          aria-current={isPathActive("/clubs") ? "page" : undefined}
           className={cn(
-            "flex items-center px-6 h-full text-sm font-semibold border-b-2 transition-colors",
-            isPathActive("/clubs") ? "border-[#51237f] text-gray-900" : "border-transparent text-gray-600 hover:text-gray-900"
+            "text-sm font-semibold transition-colors",
+            pathname === "/clubs" || pathname.startsWith("/clubs/") ? "text-[#51237f]" : "text-gray-600 hover:text-gray-900"
           )}
         >
           Clubs
         </Link>
-        <Link 
-          href="/events" 
-          aria-current={isPathActive("/events") ? "page" : undefined}
+        <Link
+          href="/events"
           className={cn(
-            "flex items-center px-6 h-full text-sm font-semibold border-b-2 transition-colors",
-            isPathActive("/events") ? "border-[#51237f] text-gray-900" : "border-transparent text-gray-600 hover:text-gray-900"
+            "text-sm font-semibold transition-colors",
+            pathname === "/events" ? "text-[#51237f]" : "text-gray-600 hover:text-gray-900"
           )}
         >
           Events
         </Link>
-        <Link 
-          href="/activity" 
-          aria-current={isPathActive("/activity") ? "page" : undefined}
+        <Link
+          href={userEmail ? "/profile" : "/login"}
           className={cn(
-            "flex items-center px-6 h-full text-sm font-semibold border-b-2 transition-colors",
-            isPathActive("/activity") ? "border-[#51237f] text-gray-900" : "border-transparent text-gray-600 hover:text-gray-900"
+            "text-sm font-semibold transition-colors",
+            pathname === "/profile" || pathname === "/login" ? "text-[#51237f]" : "text-gray-600 hover:text-gray-900"
           )}
         >
-          Activity
+          {userEmail ? "Profile" : "Sign In"}
         </Link>
-        <Link 
-          href="/profile" 
-          aria-current={isPathActive("/profile") ? "page" : undefined}
-          className={cn(
-            "flex items-center px-6 h-full text-sm font-semibold border-b-2 transition-colors",
-            isPathActive("/profile") ? "border-[#51237f] text-gray-900" : "border-transparent text-gray-600 hover:text-gray-900"
-          )}
-        >
-          Profile
-        </Link>
-        {showManageNav ? (
-          <Link 
-            href="/manage" 
-            aria-current={isPathActive("/manage") ? "page" : undefined}
-            className={cn(
-              "flex items-center px-6 h-full text-sm font-semibold border-b-2 transition-colors",
-              isPathActive("/manage") ? "border-[#51237f] text-gray-900" : "border-transparent text-gray-600 hover:text-gray-900"
-            )}
-          >
-            Manage
-          </Link>
-        ) : (
-          <Link 
-            href="/docs" 
-            aria-current={isPathActive("/docs") ? "page" : undefined}
-            className={cn(
-              "flex items-center px-6 h-full text-sm font-semibold border-b-2 transition-colors",
-              isPathActive("/docs") ? "border-[#51237f] text-gray-900" : "border-transparent text-gray-600 hover:text-gray-900"
-            )}
-          >
-            Support & Help
-          </Link>
-        )}
-      </nav>
-
-      {/* Auth / Right Side */}
-      <div className="bg-[#51237f] flex items-center gap-3 px-6 h-full shrink-0">
-        {!AUTH_ENABLED ? (
-          <div className="text-white font-semibold text-sm">Sign-in unavailable</div>
-        ) : userEmail ? (
-          <>
-            <div className="text-right">
-              <Link href="/profile" className="text-white font-semibold text-sm leading-tight hover:underline">
-                {displayName || userEmail.split("@")[0]}
-              </Link>
-              <div className="flex flex-wrap justify-end gap-1.5 pt-1">
-                <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-medium text-white/90">
-                  <Users size={11} />
-                  {joinedClubCount} club{joinedClubCount === 1 ? "" : "s"}
-                </span>
-                {leadershipCount > 0 ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-medium text-white/90">
-                    <ShieldCheck size={11} />
-                    {leadershipCount} leadership
-                  </span>
-                ) : null}
-                {isPlatformAdmin ? (
-                  <span className="inline-flex items-center rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-medium text-white/90">
-                    Admin
-                  </span>
-                ) : null}
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={handleSignOut}
-              disabled={isSigningOut}
-              className="inline-flex items-center gap-2 rounded-md border border-white/20 px-3 py-2 text-xs font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <LogOut size={14} />
-              {isSigningOut ? "Signing out..." : "Sign out"}
-            </button>
-          </>
-        ) : (
-          <Link
-            href="/login"
-            className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-[#51237f] transition hover:bg-gray-100"
-          >
-            Sign In
-          </Link>
-        )}
       </div>
     </header>
   );
