@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CalendarDays, Clock3, Flame, Search } from "lucide-react";
+import { CalendarDays, ChevronDown, Clock3, Flame, Search } from "lucide-react";
 import { EventCard, type WebEventCardEvent } from "@/components/events/EventCard";
 import { getClientCache, setClientCache } from "@/lib/client-cache";
 import { AUTH_ENABLED } from "@/lib/features";
@@ -103,6 +103,8 @@ export function EventsPanel({
   const [searchValue, setSearchValue] = useState(initialQuery);
   const [viewMode, setViewMode] = useState<ViewMode>("for-you");
   const [activeFilter, setActiveFilter] = useState<FilterKey | null>(null);
+  const [isOptionsOpen, setIsOptionsOpen] = useState(false);
+  const optionsRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -217,6 +219,19 @@ export function EventsPanel({
       subscription.unsubscribe();
     };
   }, [initialEvents]);
+
+  useEffect(() => {
+    if (!isOptionsOpen) return undefined;
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (optionsRef.current && !optionsRef.current.contains(event.target as Node)) {
+        setIsOptionsOpen(false);
+      }
+    };
+
+    window.addEventListener("mousedown", handlePointerDown);
+    return () => window.removeEventListener("mousedown", handlePointerDown);
+  }, [isOptionsOpen]);
 
   const { filteredUpcomingEvents, pastEvents, popularThisWeek } = useMemo(() => {
     const now = new Date();
@@ -376,7 +391,7 @@ export function EventsPanel({
             </form>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="inline-flex rounded-full border border-gray-300 bg-gray-100 p-1">
               {VIEW_MODES.map((mode) => (
                 <button
@@ -393,20 +408,67 @@ export function EventsPanel({
                 </button>
               ))}
             </div>
-            {FILTERS.map((filter) => (
+
+            <div className="relative sm:ml-auto" ref={optionsRef}>
               <button
-                key={filter.key}
                 type="button"
-                onClick={() => setActiveFilter((current) => (current === filter.key ? null : filter.key))}
-                className={`inline-flex h-10 items-center rounded-full border px-4 text-sm font-semibold transition ${
-                  activeFilter === filter.key
-                    ? "border-[#51237f] bg-[#51237f] text-white"
-                    : "border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50"
-                }`}
+                onClick={() => setIsOptionsOpen((open) => !open)}
+                className="inline-flex h-10 items-center gap-2 rounded-full border border-gray-300 bg-white px-4 text-sm font-semibold text-gray-700 transition hover:border-gray-400 hover:bg-gray-50"
+                aria-haspopup="menu"
+                aria-expanded={isOptionsOpen}
               >
-                {filter.label}
+                Options
+                {activeFilter ? (
+                  <span className="rounded-full bg-[#f4ecfb] px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#51237f]">
+                    {FILTERS.find((filter) => filter.key === activeFilter)?.label}
+                  </span>
+                ) : null}
+                <ChevronDown size={16} className="text-gray-400" />
               </button>
-            ))}
+
+              {isOptionsOpen ? (
+                <div
+                  role="menu"
+                  className="absolute right-0 top-[calc(100%+0.75rem)] z-20 w-56 rounded-2xl border border-gray-200 bg-white p-2 shadow-[0_18px_36px_-24px_rgba(17,24,39,0.28)]"
+                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveFilter(null);
+                      setIsOptionsOpen(false);
+                    }}
+                    className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm font-medium transition ${
+                      activeFilter === null ? "bg-[#f4ecfb] text-[#51237f]" : "text-gray-700 hover:bg-gray-50"
+                    }`}
+                    role="menuitem"
+                  >
+                    All filters
+                    {activeFilter === null ? <span className="text-xs font-semibold uppercase tracking-[0.14em]">Active</span> : null}
+                  </button>
+                  {FILTERS.map((filter) => (
+                    <button
+                      key={filter.key}
+                      type="button"
+                      onClick={() => {
+                        setActiveFilter((current) => (current === filter.key ? null : filter.key));
+                        setIsOptionsOpen(false);
+                      }}
+                      className={`mt-1 flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm font-medium transition ${
+                        activeFilter === filter.key
+                          ? "bg-[#f4ecfb] text-[#51237f]"
+                          : "text-gray-700 hover:bg-gray-50"
+                      }`}
+                      role="menuitem"
+                    >
+                      {filter.label}
+                      {activeFilter === filter.key ? (
+                        <span className="text-xs font-semibold uppercase tracking-[0.14em]">Active</span>
+                      ) : null}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
           </div>
         </div>
 
