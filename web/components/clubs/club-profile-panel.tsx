@@ -248,6 +248,10 @@ export function ClubProfilePanel({
     .join("")
     .toUpperCase();
 
+  const clubSummary = initialClub.description?.trim()
+    ? trimText(initialClub.description.trim(), 180)
+    : `${initialClub.name} brings students together through community, campus events, and shared interests.`;
+
   const feedItems = useMemo(() => {
     const postItems = initialFeedPosts.map((post) => ({
       id: `post-${post.id}`,
@@ -283,83 +287,135 @@ export function ClubProfilePanel({
           <Link href="/clubs" className="text-sm font-semibold text-[#51237f] hover:underline">
             Back to clubs
           </Link>
-          <span className="rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-600">
+          <span className="rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-600 shadow-sm">
             {initialClub.category}
           </span>
         </div>
 
-        <section className="overflow-hidden rounded-[28px] border border-gray-200 bg-white shadow-[0_18px_50px_-40px_rgba(17,24,39,0.25)]">
-          <div className="relative h-56 w-full bg-gray-100">
+        <section className="overflow-hidden rounded-[30px] border border-gray-200 bg-white shadow-[0_22px_60px_-42px_rgba(17,24,39,0.24)]">
+          <div className="relative h-60 w-full bg-gray-100">
             <Image
               src={initialClub.coverImageUrl || fallbackCover}
               alt={initialClub.name}
               fill
               className="object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/15 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-black/10" />
+            <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-white via-white/90 to-transparent" />
           </div>
 
           <div className="px-6 pb-6 pt-0 md:px-8">
-            <div className="relative -mt-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-              <div className="flex items-end gap-4">
-                <div className="flex h-20 w-20 items-center justify-center rounded-2xl border-4 border-white bg-[#51237f] text-2xl font-black text-white shadow-md">
-                  {clubBadge}
-                </div>
-                <div className="pb-1">
-                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Community Hub</p>
-                  <h1 className="mt-1 text-3xl font-black tracking-tight text-gray-900 md:text-4xl">{initialClub.name}</h1>
-                  <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-gray-600">
-                    <span className="inline-flex items-center gap-1.5">
-                      <Users size={15} className="text-[#51237f]" />
-                      {initialClub.memberCount} members
-                    </span>
-                    <span className="inline-flex rounded-full bg-[#f4ecfb] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#51237f]">
-                      {initialClub.category}
-                    </span>
-                    {isMember ? (
-                      <span className="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-700">
-                        Joined
+            <div className="relative -mt-14 flex flex-col gap-6">
+              <div className="flex flex-col gap-5 rounded-[26px] border border-gray-200 bg-white/95 p-5 shadow-[0_20px_45px_-35px_rgba(17,24,39,0.22)] backdrop-blur md:p-6 lg:flex-row lg:items-end lg:justify-between">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-[22px] border-4 border-white bg-[#51237f] text-2xl font-black text-white shadow-md">
+                    {clubBadge}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#7b5aa6]">Student community</p>
+                    <h1 className="mt-2 max-w-3xl text-[2.15rem] font-black leading-[1.02] tracking-[-0.04em] text-gray-950 md:text-[2.6rem]">
+                      {initialClub.name}
+                    </h1>
+                    <p className="mt-3 max-w-3xl text-sm leading-7 text-gray-600 md:text-[15px]">{clubSummary}</p>
+                    <div className="mt-4 flex flex-wrap items-center gap-2.5 text-sm text-gray-600">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-[#f4ecfb] px-3 py-1.5 font-semibold text-[#51237f]">
+                        <Users size={15} className="text-[#51237f]" />
+                        {initialClub.memberCount} members
                       </span>
-                    ) : null}
+                      <span className="inline-flex rounded-full bg-gray-100 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-700">
+                        {initialClub.category}
+                      </span>
+                      <span className="inline-flex rounded-full bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-600">
+                        {initialEvents.length} upcoming events
+                      </span>
+                      <span className="inline-flex rounded-full bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-600">
+                        {initialFeedPosts.length} recent updates
+                      </span>
+                      {isMember ? (
+                        <span className="inline-flex rounded-full bg-emerald-50 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-700">
+                          Joined
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-3 lg:min-w-[15rem]">
+                  <div className="grid grid-cols-3 gap-2 rounded-2xl border border-gray-200 bg-[#fafafa] p-3 text-center">
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500">Members</p>
+                      <p className="mt-1 text-xl font-black text-gray-950">{initialClub.memberCount}</p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500">Events</p>
+                      <p className="mt-1 text-xl font-black text-gray-950">{initialEvents.length}</p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500">Leads</p>
+                      <p className="mt-1 text-xl font-black text-gray-950">{Math.max(officerNames.length, leadershipMembers.length)}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
+                    <button
+                      type="button"
+                      onClick={handleJoin}
+                      disabled={isMember || isBusy === "join"}
+                      className="inline-flex h-12 items-center justify-center rounded-2xl bg-[#51237f] px-5 text-sm font-semibold text-white transition hover:bg-[#45206b] disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {isBusy === "join" ? (
+                        <span className="inline-flex items-center gap-2">
+                          <LoaderCircle size={14} className="animate-spin" />
+                          Joining...
+                        </span>
+                      ) : isMember ? (
+                        "Joined Club"
+                      ) : (
+                        "Join Club"
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleFollowToggle}
+                      disabled={isBusy === "follow"}
+                      className="inline-flex h-12 items-center justify-center rounded-2xl border border-gray-300 bg-white px-5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {isBusy === "follow" ? (
+                        <span className="inline-flex items-center gap-2">
+                          <LoaderCircle size={14} className="animate-spin" />
+                          Updating...
+                        </span>
+                      ) : isFollowing ? (
+                        "Following"
+                      ) : (
+                        "Follow updates"
+                      )}
+                    </button>
                   </div>
                 </div>
               </div>
 
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <button
-                  type="button"
-                  onClick={handleJoin}
-                  disabled={isMember || isBusy === "join"}
-                  className="inline-flex h-11 items-center justify-center rounded-full bg-[#51237f] px-5 text-sm font-semibold text-white transition hover:bg-[#45206b] disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {isBusy === "join" ? (
-                    <span className="inline-flex items-center gap-2">
-                      <LoaderCircle size={14} className="animate-spin" />
-                      Joining...
-                    </span>
-                  ) : isMember ? (
-                    "Joined Club"
-                  ) : (
-                    "Join Club"
-                  )}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleFollowToggle}
-                  disabled={isBusy === "follow"}
-                  className="inline-flex h-11 items-center justify-center rounded-full border border-gray-300 bg-white px-5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {isBusy === "follow" ? (
-                    <span className="inline-flex items-center gap-2">
-                      <LoaderCircle size={14} className="animate-spin" />
-                      Updating...
-                    </span>
-                  ) : isFollowing ? (
-                    "Following"
-                  ) : (
-                    "Follow updates"
-                  )}
-                </button>
+              <div className="grid gap-4 md:grid-cols-[1.45fr_0.55fr]">
+                <div className="rounded-[24px] border border-gray-200 bg-[#fafafa] px-5 py-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#7b5aa6]">What this club is about</p>
+                  <p className="mt-2 text-sm leading-7 text-gray-600">
+                    {initialClub.description || "This club has not added a public description yet."}
+                  </p>
+                </div>
+
+                <div className="rounded-[24px] border border-gray-200 bg-[#fafafa] px-5 py-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#7b5aa6]">Leadership</p>
+                  <div className="mt-2 space-y-1.5">
+                    {(officerNames.length ? officerNames : leadershipMembers.map((member) => member.name)).slice(0, 3).map((officer) => (
+                      <p key={officer} className="text-sm font-medium text-gray-700">
+                        {officer}
+                      </p>
+                    ))}
+                    {!officerNames.length && !leadershipMembers.length ? (
+                      <p className="text-sm text-gray-500">Leadership details are not published yet.</p>
+                    ) : null}
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -387,10 +443,10 @@ export function ClubProfilePanel({
                   key={tab.key}
                   type="button"
                   onClick={() => setActiveTab(tab.key)}
-                  className={`inline-flex h-11 items-center rounded-t-2xl px-4 text-sm font-semibold transition ${
+                  className={`inline-flex h-11 items-center rounded-full px-4 text-sm font-semibold transition ${
                     isActive
-                      ? "border border-b-white border-gray-200 bg-white text-[#51237f]"
-                      : "text-gray-600 hover:text-gray-900"
+                      ? "border border-[#ddd3ea] bg-[#f5effa] text-[#51237f]"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                   }`}
                 >
                   {tab.label}

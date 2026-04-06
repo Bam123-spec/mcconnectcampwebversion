@@ -9,6 +9,7 @@ import {
   CalendarDays,
   Clock,
   Clock3,
+  Download,
   LoaderCircle,
   MapPin,
   QrCode,
@@ -21,6 +22,7 @@ import { getClientCache, setClientCache } from "@/lib/client-cache";
 import { supabase } from "@/lib/supabase";
 import { formatEventDateLabel, formatJoinedLabel, formatOfficerRole, getClubInitials } from "@/lib/live-data";
 import { getClubPath } from "@/lib/club-utils";
+import { downloadEventCertificate } from "@/lib/event-certificate";
 
 type ProfileRow = {
   full_name?: string | null;
@@ -37,6 +39,8 @@ type ActivityRegistration = {
   eventName: string;
   clubName: string;
   dateLabel: string;
+  eventDate: string | null;
+  eventTime: string | null;
   location: string;
   status: "Confirmed";
   isUpcoming: boolean;
@@ -174,6 +178,7 @@ export function ActivityPanel() {
   const [memberships, setMemberships] = useState<ActivityMembership[]>([]);
   const [savedEvents, setSavedEvents] = useState<SavedEvent[]>([]);
   const [activityFeed, setActivityFeed] = useState<ActivityFeedItem[]>([]);
+  const [certificateRegistrationId, setCertificateRegistrationId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -279,6 +284,8 @@ export function ActivityPanel() {
             eventName: event.name,
             clubName: eventClub?.name || "Campus Event",
             dateLabel: formatEventDateLabel(eventDate, event.time),
+            eventDate,
+            eventTime: event.time || null,
             location: event.location || "Location TBA",
             status: "Confirmed",
             isUpcoming: parsedDate ? parsedDate >= new Date() : true,
@@ -531,6 +538,23 @@ export function ActivityPanel() {
     icon: typeof Users;
   }>;
 
+  const handleDownloadCertificate = async (registration: ActivityRegistration) => {
+    try {
+      setCertificateRegistrationId(registration.id);
+      await downloadEventCertificate({
+        studentName: displayName,
+        eventName: registration.eventName,
+        clubName: registration.clubName,
+        dateLabel: registration.dateLabel,
+        eventDate: registration.eventDate,
+        eventTime: registration.eventTime,
+        location: registration.location,
+      });
+    } finally {
+      setCertificateRegistrationId(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white py-6">
       <div className="mx-auto max-w-[88rem] px-4 sm:px-6 lg:px-8">
@@ -659,9 +683,26 @@ export function ActivityPanel() {
                         <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-gray-200 bg-gray-50 text-gray-400">
                           {registration.isUpcoming ? <QrCode size={28} /> : <Clock3 size={28} />}
                         </div>
-                        <span className="text-sm font-semibold text-[#51237f]">
-                          {registration.isUpcoming ? "Event Pass" : "Attended"}
-                        </span>
+                        <div className="flex flex-col gap-2">
+                          <span className="text-sm font-semibold text-[#51237f]">
+                            {registration.isUpcoming ? "Event Pass" : "Attended"}
+                          </span>
+                          {!registration.isUpcoming ? (
+                            <button
+                              type="button"
+                              onClick={() => handleDownloadCertificate(registration)}
+                              disabled={certificateRegistrationId === registration.id}
+                              className="inline-flex items-center gap-2 rounded-xl border border-[#d8c8ea] bg-[#f7f2fb] px-3.5 py-2 text-sm font-semibold text-[#51237f] transition-colors hover:bg-[#efe6f8] disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              {certificateRegistrationId === registration.id ? (
+                                <LoaderCircle size={16} className="animate-spin" />
+                              ) : (
+                                <Download size={16} />
+                              )}
+                              {certificateRegistrationId === registration.id ? "Preparing PDF" : "Download certificate"}
+                            </button>
+                          ) : null}
+                        </div>
                       </div>
                     </div>
                   )) : (
