@@ -113,6 +113,28 @@ export function TopNav() {
           >
             Events
           </Link>
+          <Link
+            href="/activity"
+            aria-current={pathname === "/activity" ? "page" : undefined}
+            className={cn(
+              "text-sm font-semibold transition-colors",
+              pathname === "/activity" ? "text-[#51237f]" : "text-gray-600 hover:text-gray-900"
+            )}
+          >
+            Activity
+          </Link>
+          <Link
+            href="/manage"
+            aria-current={pathname === "/manage" || pathname.startsWith("/manage/") ? "page" : undefined}
+            className={cn(
+              "text-sm font-semibold transition-colors",
+              pathname === "/manage" || pathname.startsWith("/manage/")
+                ? "text-[#51237f]"
+                : "text-gray-600 hover:text-gray-900"
+            )}
+          >
+            Manage
+          </Link>
         </nav>
 
         <div className="flex items-center gap-3">
@@ -121,10 +143,10 @@ export function TopNav() {
           ) : userEmail ? (
             <>
               <Link
-                href="/profile"
-                className="hidden text-sm font-semibold text-gray-800 transition-colors hover:text-[#51237f] sm:inline-flex"
+                href="/activity"
+                className="hidden items-center rounded-full border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-800 transition-colors hover:border-[#51237f]/30 hover:text-[#51237f] sm:inline-flex"
               >
-                {displayName || "Profile"}
+                {displayName || "My Activity"}
               </Link>
               <button
                 type="button"
@@ -175,14 +197,34 @@ export function TopNav() {
           Events
         </Link>
         <Link
-          href={userEmail ? "/profile" : "/login"}
+          href="/activity"
           className={cn(
             "text-sm font-semibold transition-colors",
-            pathname === "/profile" || pathname === "/login" ? "text-[#51237f]" : "text-gray-600 hover:text-gray-900"
+            pathname === "/activity" ? "text-[#51237f]" : "text-gray-600 hover:text-gray-900"
           )}
         >
-          {userEmail ? "Profile" : "Sign In"}
+          Activity
         </Link>
+        <Link
+          href="/manage"
+          className={cn(
+            "text-sm font-semibold transition-colors",
+            pathname === "/manage" || pathname.startsWith("/manage/") ? "text-[#51237f]" : "text-gray-600 hover:text-gray-900"
+          )}
+        >
+          Manage
+        </Link>
+        {!userEmail && (
+          <Link
+            href="/login"
+            className={cn(
+              "text-sm font-semibold transition-colors",
+              pathname === "/login" ? "text-[#51237f]" : "text-gray-600 hover:text-gray-900"
+            )}
+          >
+            Sign In
+          </Link>
+        )}
       </div>
     </header>
   );
