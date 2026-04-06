@@ -3,10 +3,11 @@ import type { Metadata } from "next";
 import { slugifyClubName } from "@/lib/club-utils";
 import { ClubProfilePanel } from "@/components/clubs/club-profile-panel";
 import { createServerSupabaseClient } from "@/lib/supabase";
-import { formatOfficerRole } from "@/lib/live-data";
+import { formatOfficerRole, inferClubCategory } from "@/lib/live-data";
 
 type OfficerRow = {
   role?: string | null;
+  user_id?: string | null;
   profiles?:
     | {
         full_name?: string | null;
@@ -15,6 +16,27 @@ type OfficerRow = {
         full_name?: string | null;
       }[]
     | null;
+};
+
+type MemberRow = {
+  user_id?: string | null;
+  created_at?: string | null;
+  profiles?:
+    | {
+        full_name?: string | null;
+      }
+    | {
+        full_name?: string | null;
+      }[]
+    | null;
+};
+
+type FeedPostRow = {
+  id: string;
+  title?: string | null;
+  content?: string | null;
+  created_at?: string | null;
+  category?: string | null;
 };
 
 const getClubBySlug = async (slug: string) => {
@@ -42,7 +64,7 @@ const getClubBySlug = async (slug: string) => {
 
   if (!club?.id) return null;
 
-  const [{ data: events }, { data: officers }] = await Promise.all([
+  const [{ data: events }, { data: officers }, { data: members }, postsResult] = await Promise.all([
     supabase
       .from("events")
       .select("id, name, date, day, time, location")
@@ -52,9 +74,21 @@ const getClubBySlug = async (slug: string) => {
       .limit(8),
     supabase
       .from("officers")
-      .select("role, profiles!user_id(full_name)")
+      .select("user_id, role, profiles!user_id(full_name)")
       .eq("club_id", club.id)
-      .limit(6),
+      .limit(12),
+    supabase
+      .from("club_members")
+      .select("user_id, created_at, profiles:user_id(full_name)")
+      .eq("club_id", club.id)
+      .eq("status", "approved")
+      .limit(24),
+    supabase
+      .from("forum_posts")
+      .select("id, title, content, created_at, category")
+      .eq("club_id", club.id)
+      .order("created_at", { ascending: false })
+      .limit(12),
   ]);
 
   const officerNames = ((officers ?? []) as OfficerRow[])
@@ -65,6 +99,36 @@ const getClubBySlug = async (slug: string) => {
     })
     .filter(Boolean) as string[];
 
+  const officerIds = new Set(
+    ((officers ?? []) as OfficerRow[])
+      .map((officer) => officer.user_id)
+      .filter(Boolean) as string[]
+  );
+
+  const memberPreview = ((members ?? []) as MemberRow[])
+    .map((member) => {
+      const profile = Array.isArray(member.profiles) ? member.profiles[0] : member.profiles;
+      if (!member.user_id || !profile?.full_name) return null;
+
+      return {
+        id: member.user_id,
+        name: profile.full_name,
+        joinedAt: member.created_at ?? null,
+        roleLabel: officerIds.has(member.user_id) ? "Leadership" : "Member",
+      };
+    })
+    .filter(Boolean) as Array<{ id: string; name: string; joinedAt: string | null; roleLabel: string }>;
+
+  const feedPosts = postsResult.error
+    ? []
+    : ((postsResult.data ?? []) as FeedPostRow[]).map((post) => ({
+        id: post.id,
+        title: post.title || "Club update",
+        content: post.content || "A new club update is available.",
+        createdAt: post.created_at ?? null,
+        category: post.category || "post",
+      }));
+
   return {
     club: {
       id: club.id,
@@ -73,6 +137,10 @@ const getClubBySlug = async (slug: string) => {
       coverImageUrl: club.cover_image_url ?? null,
       memberCount: club.member_count ?? 0,
       slug: slugifyClubName(club.name),
+      category: inferClubCategory({
+        name: club.name,
+        description: club.description,
+      }),
     },
     events: (events ?? []).map((event) => ({
       id: event.id,
@@ -82,6 +150,8 @@ const getClubBySlug = async (slug: string) => {
       location: event.location || "Location TBA",
     })),
     officerNames,
+    members: memberPreview,
+    feedPosts,
   };
 };
 
@@ -117,5 +187,13 @@ export default async function ClubProfilePage({
     notFound();
   }
 
-  return <ClubProfilePanel initialClub={data.club} initialEvents={data.events} officerNames={data.officerNames} />;
+  return (
+    <ClubProfilePanel
+      initialClub={data.club}
+      initialEvents={data.events}
+      officerNames={data.officerNames}
+      initialMembers={data.members}
+      initialFeedPosts={data.feedPosts}
+    />
+  );
 }

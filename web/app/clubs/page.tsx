@@ -21,13 +21,22 @@ type ClubCardData = {
   coverImageUrl: string | null;
 };
 
+const FILTERS = [
+  { label: "All", value: "all" },
+  { label: "Cultural", value: "Cultural" },
+  { label: "Academic", value: "Academic" },
+  { label: "Sports", value: "Sports" },
+  { label: "Tech", value: "Technology" },
+] as const;
+
 export default async function ClubsPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ q?: string }>;
+  searchParams?: Promise<{ q?: string; category?: string }>;
 }) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const query = resolvedSearchParams?.q?.trim() || "";
+  const selectedCategory = resolvedSearchParams?.category?.trim() || "all";
   const supabase = createServerSupabaseClient();
 
   let request = supabase
@@ -54,34 +63,36 @@ export default async function ClubsPage({
     coverImageUrl: club.cover_image_url ?? null,
   }));
 
+  const filteredClubs =
+    selectedCategory === "all"
+      ? displayClubs
+      : displayClubs.filter((club) => club.category === selectedCategory);
+
   return (
-    <div className="bg-[#f5f6f8] min-h-screen py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 md:p-12 text-center md:text-left flex flex-col md:flex-row items-center justify-between gap-8">
-          <div className="max-w-2xl">
-            <h1 className="text-4xl md:text-5xl font-black tracking-tight text-gray-900 mb-4">
-              Student Organizations
-            </h1>
-            <p className="text-lg text-gray-600 leading-relaxed">
-              Discover your community. Browse the clubs already active across Montgomery
-              College and find the groups where students are leading, creating, and
-              connecting.
-            </p>
-          </div>
-          <div className="flex-shrink-0 w-full md:w-auto">
+    <div className="min-h-screen bg-white py-8">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <section className="border-b border-gray-200 pb-8">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-3xl">
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#51237f]">Communities</p>
+              <h1 className="mt-2 text-3xl font-black tracking-[-0.04em] text-gray-950 md:text-4xl">
+                Discover Clubs
+              </h1>
+              <p className="mt-3 text-sm leading-7 text-gray-600 md:text-base">
+                Browse active student communities, find your people, and jump into the groups shaping campus life.
+              </p>
+            </div>
+
             <Link
               href="/docs"
-              className="inline-flex w-full md:w-auto items-center justify-center bg-[#51237f] hover:bg-[#51237f]/90 text-white px-8 py-3.5 rounded-full font-bold shadow-lg transition-colors text-lg"
+              className="inline-flex h-11 items-center justify-center rounded-full bg-[#51237f] px-5 text-sm font-semibold text-white transition hover:bg-[#45206b]"
             >
               Start a Club
             </Link>
           </div>
-        </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-8 flex flex-col md:flex-row gap-4 items-center justify-between sticky top-[72px] z-20">
-          <form role="search" aria-label="Search organizations" className="w-full md:w-1/3 relative">
+          <div className="mt-6 flex flex-col gap-4">
+            <form role="search" aria-label="Search clubs" className="relative max-w-xl">
             <label htmlFor="clubs-search" className="sr-only">
               Search organizations by name or keyword
             </label>
@@ -91,25 +102,46 @@ export default async function ClubsPage({
               type="text"
               name="q"
               defaultValue={query}
-              placeholder="Search organizations by name or keyword..."
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#51237f] focus:border-transparent text-sm"
+              placeholder="Search clubs, interests, or communities"
+              className="h-12 w-full rounded-full border border-gray-300 bg-white pl-10 pr-4 text-sm text-gray-900 outline-none transition focus:border-[#51237f] focus:ring-2 focus:ring-[#51237f]/15"
             />
+            {selectedCategory !== "all" ? <input type="hidden" name="category" value={selectedCategory} /> : null}
           </form>
 
-          <p className="w-full md:w-auto text-sm text-gray-500">
-            Browse all live organizations currently listed in Raptor Connect.
-          </p>
-        </div>
+            <div className="flex flex-wrap gap-2">
+              {FILTERS.map((filter) => {
+                const params = new URLSearchParams();
+                if (query) params.set("q", query);
+                if (filter.value !== "all") params.set("category", filter.value);
+                const href = params.toString() ? `/clubs?${params.toString()}` : "/clubs";
+                const isActive = selectedCategory === filter.value;
 
-        <div className="mb-5 flex items-center justify-between">
+                return (
+                  <Link
+                    key={filter.value}
+                    href={href}
+                    className={`inline-flex h-10 items-center rounded-full border px-4 text-sm font-semibold transition ${
+                      isActive
+                        ? "border-[#51237f] bg-[#51237f] text-white"
+                        : "border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50"
+                    }`}
+                  >
+                    {filter.label}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        <div className="mt-8 mb-5 flex items-center justify-between">
           <p className="text-sm text-gray-500">
-            {displayClubs.length} organization{displayClubs.length === 1 ? "" : "s"}
+            {filteredClubs.length} club{filteredClubs.length === 1 ? "" : "s"}
             {query ? ` matching "${query}"` : ""}
           </p>
         </div>
 
-        <ClubsDirectory initialClubs={displayClubs} />
-
+        <ClubsDirectory initialClubs={filteredClubs} />
       </div>
     </div>
   );

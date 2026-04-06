@@ -45,6 +45,6 @@ export default async function EventsPage({
   );
 
   return (
-    <EventsPanel initialEvents={events} />
+    <EventsPanel initialEvents={events} initialQuery={query} />
   );
 }
