@@ -23,6 +23,7 @@ type ClubEvent = {
   date: string;
   time: string;
   location: string;
+  rsvpCount: number;
 };
 
 type ClubMember = {
@@ -507,6 +508,15 @@ export function ClubProfilePanel({
                   >
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                       <div>
+                        <div className="mb-3 flex flex-wrap items-center gap-2">
+                          <span className="inline-flex rounded-full bg-[#f4ecfb] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#51237f]">
+                            Club event
+                          </span>
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-700">
+                            <Users size={12} className="text-[#51237f]" />
+                            {event.rsvpCount} going
+                          </span>
+                        </div>
                         <h2 className="text-lg font-bold text-gray-950">{event.name}</h2>
                         <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-gray-500">
                           <span className="inline-flex items-center gap-2">

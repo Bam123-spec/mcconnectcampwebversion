@@ -37,6 +37,10 @@ type FeedPostRow = {
   created_at?: string | null;
 };
 
+type EventRegistrationCountRow = {
+  event_id: string;
+};
+
 const derivePostTitle = (value?: string | null) => {
   const content = (value || "").trim();
   if (!content) return "Club update";
@@ -97,6 +101,16 @@ const getClubBySlug = async (slug: string) => {
       .limit(12),
   ]);
 
+  const eventIds = (events ?? []).map((event) => event.id);
+  const { data: eventRegistrations } = eventIds.length
+    ? await supabase.from("event_registrations").select("event_id").in("event_id", eventIds).limit(5000)
+    : { data: [] as EventRegistrationCountRow[] };
+
+  const registrationCounts = new Map<string, number>();
+  for (const row of (eventRegistrations ?? []) as EventRegistrationCountRow[]) {
+    registrationCounts.set(row.event_id, (registrationCounts.get(row.event_id) ?? 0) + 1);
+  }
+
   const officerNames = ((officers ?? []) as OfficerRow[])
     .map((officer) => {
       const profile = Array.isArray(officer.profiles) ? officer.profiles[0] : officer.profiles;
@@ -154,6 +168,7 @@ const getClubBySlug = async (slug: string) => {
       date: event.date || event.day || "",
       time: event.time || "TBA",
       location: event.location || "Location TBA",
+      rsvpCount: registrationCounts.get(event.id) ?? 0,
     })),
     officerNames,
     members: memberPreview,

@@ -26,6 +26,7 @@ const FILTERS: Array<{ key: FilterKey; label: string }> = [
 
 const fallbackCover =
   "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1600&auto=format&fit=crop";
+const EVENTS_PER_PAGE = 6;
 
 const parseEventDateTime = (dateValue?: string | null, timeValue?: string | null) => {
   if (!dateValue) return null;
@@ -104,7 +105,9 @@ export function EventsPanel({
   const [viewMode, setViewMode] = useState<ViewMode>("for-you");
   const [activeFilter, setActiveFilter] = useState<FilterKey | null>(null);
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   const optionsRef = useRef<HTMLDivElement | null>(null);
+  const upcomingSectionRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -233,6 +236,10 @@ export function EventsPanel({
     return () => window.removeEventListener("mousedown", handlePointerDown);
   }, [isOptionsOpen]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeFilter, searchValue, viewMode]);
+
   const { filteredUpcomingEvents, pastEvents, popularThisWeek } = useMemo(() => {
     const now = new Date();
     const weekFromNow = new Date();
@@ -308,6 +315,18 @@ export function EventsPanel({
       popularThisWeek: weeklyPopular,
     };
   }, [activeFilter, initialEvents, preferredClubNames, searchValue, viewMode]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredUpcomingEvents.length / EVENTS_PER_PAGE));
+  const paginatedUpcomingEvents = filteredUpcomingEvents.slice(
+    (currentPage - 1) * EVENTS_PER_PAGE,
+    currentPage * EVENTS_PER_PAGE
+  );
+
+  const handlePageChange = (page: number) => {
+    const nextPage = Math.min(Math.max(page, 1), totalPages);
+    setCurrentPage(nextPage);
+    upcomingSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   const handleToggleRsvp = async (eventId: string, isRegistered: boolean) => {
     const {
@@ -595,7 +614,7 @@ export function EventsPanel({
         </section>
       ) : null}
 
-      <section className="mb-16">
+      <section ref={upcomingSectionRef} className="mb-16">
         <div className="mb-6 flex items-center justify-between">
           <h2 className="flex items-center gap-3 text-2xl font-bold text-gray-950">
             {viewMode === "for-you" ? "For You" : "All Events"}
@@ -606,19 +625,49 @@ export function EventsPanel({
         </div>
 
         {filteredUpcomingEvents.length > 0 ? (
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {filteredUpcomingEvents.map((event) => (
-              <EventCard
-                key={event.id}
-                event={event}
-                authEnabled={AUTH_ENABLED}
-                hasSession={hasSession}
-                isRegistered={registeredIds.has(event.id)}
-                isPending={pendingIds.has(event.id)}
-                onToggleRsvp={handleToggleRsvp}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+              {paginatedUpcomingEvents.map((event) => (
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  authEnabled={AUTH_ENABLED}
+                  hasSession={hasSession}
+                  isRegistered={registeredIds.has(event.id)}
+                  isPending={pendingIds.has(event.id)}
+                  onToggleRsvp={handleToggleRsvp}
+                />
+              ))}
+            </div>
+
+            {totalPages > 1 ? (
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-2 border-t border-gray-100 pt-6">
+                {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+                  <button
+                    key={page}
+                    type="button"
+                    onClick={() => handlePageChange(page)}
+                    aria-current={currentPage === page ? "page" : undefined}
+                    className={`inline-flex h-10 min-w-10 items-center justify-center rounded-full border px-4 text-sm font-semibold transition ${
+                      currentPage === page
+                        ? "border-[#51237f] bg-[#51237f] text-white shadow-[0_12px_24px_-18px_rgba(81,35,127,0.6)]"
+                        : "border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage >= totalPages}
+                  className="inline-flex h-10 items-center justify-center rounded-full border border-gray-300 bg-white px-4 text-sm font-semibold text-gray-700 transition hover:border-gray-400 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-45"
+                >
+                  Next
+                </button>
+              </div>
+            ) : null}
+          </>
         ) : (
           <div className="rounded-[22px] border border-dashed border-gray-300 bg-white px-6 py-14 text-center">
             <h3 className="text-xl font-bold text-gray-900">No events match this view</h3>
