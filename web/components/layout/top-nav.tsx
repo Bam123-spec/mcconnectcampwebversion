@@ -59,8 +59,10 @@ export function TopNav() {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(() => {
-      syncUser();
+    } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT" || event === "SIGNED_IN" || event === "USER_UPDATED") {
+        syncUser();
+      }
     });
 
     return () => {
@@ -109,26 +111,29 @@ export function TopNav() {
     return `${parts[0][0] ?? ""}${parts[1][0] ?? ""}`.toUpperCase();
   }, [displayName, userEmail]);
 
+  const firstName = useMemo(() => {
+    const source = displayName?.trim() || userEmail?.split("@")[0] || "Profile";
+    return source.split(/\s+/).filter(Boolean)[0] || "Profile";
+  }, [displayName, userEmail]);
+
   const primaryAction =
     hasLeadershipAccess && AUTH_ENABLED && userEmail
-      ? pathname.startsWith("/manage")
-        ? { href: "/manage/events/new", label: "Create Event", icon: PlusSquare }
-        : { href: "/manage", label: "Manage", icon: PlusSquare }
+      ? { href: "/manage", label: "Manage", icon: PlusSquare }
       : null;
   const PrimaryActionIcon = primaryAction?.icon;
   const navItemClass = (active: boolean) =>
     cn(
-      "inline-flex h-10 items-center rounded-full px-4 text-sm font-semibold transition-all",
+      "inline-flex h-10 items-center rounded-xl px-3 text-[15px] font-semibold transition-colors",
       active
-        ? "bg-[#f4ecfb] text-[#51237f] shadow-[inset_0_0_0_1px_rgba(81,35,127,0.08)]"
-        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+        ? "bg-[#f5effa] text-[#51237f]"
+        : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
     );
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-200/80 bg-[#fcfcfd]/96 shadow-[0_1px_0_rgba(17,24,39,0.03)] backdrop-blur">
       <div className="mx-auto flex h-[68px] max-w-6xl items-center gap-3 px-4 md:px-6 lg:px-8">
         <div className="flex min-w-0 flex-1 items-center">
-          <Link href="/" className="relative h-9 w-44 shrink-0 transition-opacity hover:opacity-90">
+          <Link href="/" className="relative h-10 w-48 shrink-0 transition-opacity hover:opacity-90">
             <Image
               src="/mc-logo.png"
               alt="Montgomery College Logo"
@@ -139,43 +144,41 @@ export function TopNav() {
           </Link>
         </div>
 
-        <nav
-          aria-label="Primary"
-          className="hidden flex-1 items-center justify-center lg:flex"
-        >
-          <div className="flex items-center gap-1 rounded-full border border-gray-200 bg-white px-1.5 py-1 shadow-[0_10px_22px_-22px_rgba(17,24,39,0.28)]">
-          <Link
-            href="/"
-            aria-current={pathname === "/" ? "page" : undefined}
-            className={navItemClass(pathname === "/")}
+        <div className="flex min-w-0 flex-1 items-center justify-end gap-4">
+          <nav
+            aria-label="Primary"
+            className="hidden items-center gap-1 lg:flex"
           >
-            Home
-          </Link>
-          <Link
-            href="/clubs"
-            aria-current={pathname === "/clubs" || pathname.startsWith("/clubs/") ? "page" : undefined}
-            className={navItemClass(pathname === "/clubs" || pathname.startsWith("/clubs/"))}
-          >
-            Clubs
-          </Link>
-          <Link
-            href="/events"
-            aria-current={pathname === "/events" ? "page" : undefined}
-            className={navItemClass(pathname === "/events")}
-          >
-            Events
-          </Link>
-          <Link
-            href="/activity"
-            aria-current={pathname === "/activity" || pathname === "/profile" ? "page" : undefined}
-            className={navItemClass(pathname === "/activity" || pathname === "/profile")}
-          >
-            Activity
-          </Link>
-          </div>
-        </nav>
+            <Link
+              href="/"
+              aria-current={pathname === "/" ? "page" : undefined}
+              className={navItemClass(pathname === "/")}
+            >
+              Home
+            </Link>
+            <Link
+              href="/clubs"
+              aria-current={pathname === "/clubs" || pathname.startsWith("/clubs/") ? "page" : undefined}
+              className={navItemClass(pathname === "/clubs" || pathname.startsWith("/clubs/"))}
+            >
+              Clubs
+            </Link>
+            <Link
+              href="/events"
+              aria-current={pathname === "/events" ? "page" : undefined}
+              className={navItemClass(pathname === "/events")}
+            >
+              Events
+            </Link>
+            <Link
+              href="/activity"
+              aria-current={pathname === "/activity" || pathname === "/profile" ? "page" : undefined}
+              className={navItemClass(pathname === "/activity" || pathname === "/profile")}
+            >
+              Activity
+            </Link>
+          </nav>
 
-        <div className="flex min-w-0 flex-1 items-center justify-end gap-2.5">
           {!AUTH_ENABLED ? (
             <div className="text-sm font-medium text-gray-500">Preview</div>
           ) : userEmail ? (
@@ -228,7 +231,7 @@ export function TopNav() {
                 <button
                   type="button"
                   onClick={() => setIsMenuOpen((open) => !open)}
-                  className="inline-flex h-10 items-center gap-2.5 rounded-full border border-gray-200 bg-white px-2.5 pr-3 shadow-[0_12px_24px_-24px_rgba(17,24,39,0.28)] transition hover:border-[#51237f]/25 hover:shadow-[0_16px_30px_-24px_rgba(17,24,39,0.32)]"
+                  className="inline-flex h-10 items-center gap-3 rounded-full border border-gray-200 bg-white px-3 pr-3.5 shadow-[0_12px_24px_-24px_rgba(17,24,39,0.28)] transition hover:border-[#51237f]/25 hover:shadow-[0_16px_30px_-24px_rgba(17,24,39,0.32)]"
                   aria-haspopup="menu"
                   aria-expanded={isMenuOpen}
                 >
@@ -236,7 +239,7 @@ export function TopNav() {
                     {avatarLabel}
                   </span>
                   <span className="hidden text-left sm:block">
-                    <span className="block text-sm font-semibold leading-none text-gray-900">{displayName || "Profile"}</span>
+                    <span className="block text-sm font-semibold leading-none text-gray-900">{firstName}</span>
                     <span className="block text-xs text-gray-500">{hasLeadershipAccess ? "Leader access" : "Student"}</span>
                   </span>
                   <ChevronDown size={16} className="text-gray-400" />
@@ -298,7 +301,7 @@ export function TopNav() {
           )}
         </div>
       </div>
-      <div className="flex items-center justify-center gap-2 border-t border-gray-100 bg-white px-4 py-2.5 lg:hidden">
+      <div className="flex items-center justify-center gap-2 border-t border-gray-100 bg-[#fcfcfd] px-4 py-2.5 lg:hidden">
         <Link 
           href="/" 
           className={navItemClass(pathname === "/")}

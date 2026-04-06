@@ -41,10 +41,10 @@ type ClubFeedPost = {
   category: string;
 };
 
-type TabKey = "feed" | "events" | "members" | "about";
+type TabKey = "posts" | "events" | "members" | "about";
 
 const TABS: Array<{ key: TabKey; label: string }> = [
-  { key: "feed", label: "Feed" },
+  { key: "posts", label: "Posts" },
   { key: "events", label: "Events" },
   { key: "members", label: "Members" },
   { key: "about", label: "About" },
@@ -103,7 +103,7 @@ export function ClubProfilePanel({
   initialFeedPosts: ClubFeedPost[];
 }) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<TabKey>("feed");
+  const [activeTab, setActiveTab] = useState<TabKey>("posts");
   const [isMember, setIsMember] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [isBusy, setIsBusy] = useState<"join" | "follow" | null>(null);
@@ -253,31 +253,17 @@ export function ClubProfilePanel({
     ? trimText(initialClub.description.trim(), 180)
     : `${initialClub.name} brings students together through community, campus events, and shared interests.`;
 
-  const feedItems = useMemo(() => {
-    const postItems = initialFeedPosts.map((post) => ({
+  const postItems = useMemo(() => {
+    return initialFeedPosts.map((post) => ({
       id: `post-${post.id}`,
-      type: "post" as const,
       title: post.title,
       meta: formatPostDate(post.createdAt),
       description: trimText(post.content, 180),
       actionLabel: "Read update",
-      href: "/announcements",
+      href: `/clubs/${initialClub.slug}/posts/${post.id}`,
       sortKey: post.createdAt ? new Date(post.createdAt).getTime() : 0,
     }));
-
-    const eventItems = initialEvents.map((event) => ({
-      id: `event-${event.id}`,
-      type: "event" as const,
-      title: event.name,
-      meta: `${formatEventDate(event.date)} • ${event.time}`,
-      description: event.location,
-      actionLabel: "View event",
-      href: "/events",
-      sortKey: event.date ? new Date(event.date).getTime() : Number.MAX_SAFE_INTEGER,
-    }));
-
-    return [...eventItems, ...postItems].sort((left, right) => left.sortKey - right.sortKey);
-  }, [initialEvents, initialFeedPosts]);
+  }, [initialClub.slug, initialFeedPosts]);
 
   const leadershipMembers = initialMembers.filter((member) => member.roleLabel === "Leadership");
 
@@ -458,10 +444,10 @@ export function ClubProfilePanel({
         </section>
 
         <section className="py-8">
-          {activeTab === "feed" ? (
+          {activeTab === "posts" ? (
             <div className="space-y-4">
-              {feedItems.length ? (
-                feedItems.map((item) => (
+              {postItems.length ? (
+                postItems.map((item) => (
                   <article
                     key={item.id}
                     className="rounded-[22px] border border-gray-200 bg-white p-5 shadow-[0_12px_28px_-24px_rgba(17,24,39,0.22)]"
@@ -469,12 +455,8 @@ export function ClubProfilePanel({
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span
-                            className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] ${
-                              item.type === "event" ? "bg-[#f4ecfb] text-[#51237f]" : "bg-gray-100 text-gray-700"
-                            }`}
-                          >
-                            {item.type === "event" ? "Upcoming event" : "Announcement"}
+                          <span className="inline-flex rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-700">
+                            Post
                           </span>
                         </div>
                         <h2 className="mt-3 text-xl font-bold leading-tight text-gray-950">{item.title}</h2>
@@ -530,7 +512,7 @@ export function ClubProfilePanel({
                         </div>
                       </div>
                       <Link
-                        href="/events"
+                        href={`/events/${event.id}`}
                         className="inline-flex h-11 shrink-0 items-center justify-center rounded-full border border-gray-300 bg-white px-5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
                       >
                         View event

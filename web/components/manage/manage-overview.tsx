@@ -136,8 +136,10 @@ export function ManageOverview() {
   useEffect(() => {
     let cancelled = false;
 
-    const loadManageState = async () => {
-      setLoading(true);
+    const loadManageState = async (showLoading = false) => {
+      if (showLoading) {
+        setLoading(true);
+      }
 
       const {
         data: { user },
@@ -185,17 +187,29 @@ export function ManageOverview() {
         setDisplayName(profile?.full_name || user.email?.split("@")[0] || "Student");
         setIsPlatformAdmin(profile?.role === "admin");
         setOfficerClubs(nextOfficerClubs);
-        setSelectedClubId((current) => current || nextOfficerClubs[0]?.id || "");
+        setSelectedClubId((current) => {
+          if (current && nextOfficerClubs.some((club) => club.id === current)) {
+            return current;
+          }
+
+          if (nextOfficerClubs.length === 1) {
+            return nextOfficerClubs[0]?.id || "";
+          }
+
+          return "";
+        });
         setLoading(false);
       }
     };
 
-    loadManageState();
+    loadManageState(true);
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(() => {
-      loadManageState();
+    } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT" || event === "SIGNED_IN" || event === "USER_UPDATED") {
+        loadManageState(event === "SIGNED_OUT");
+      }
     });
 
     return () => {
@@ -416,50 +430,6 @@ export function ManageOverview() {
   const canManageRoles = Boolean(selectedClub && (isPlatformAdmin || hasOfficerCapability(selectedClub.role, "manageRoles")));
   const canEditClub = Boolean(selectedClub && (isPlatformAdmin || selectedClub.role));
 
-  const handlePromote = async (userId: string) => {
-    if (!selectedClub) return;
-    setActionError(null);
-    setActionSuccess(null);
-
-    const { error } = await supabase.from("officers").upsert(
-      [{ user_id: userId, club_id: selectedClub.id, role: "officer" }],
-      { onConflict: "user_id,club_id" }
-    );
-
-    if (error) {
-      setActionError(error.message || "Failed to promote member.");
-      return;
-    }
-
-    setActionSuccess("Member promoted to officer.");
-    setManagedMembers((current) =>
-      current.map((member) =>
-        member.userId === userId ? { ...member, isOfficer: true, roleLabel: "Officer" } : member
-      )
-    );
-  };
-
-  const handleRemoveMember = async (userId: string) => {
-    if (!selectedClub) return;
-    setActionError(null);
-    setActionSuccess(null);
-
-    const { error } = await supabase
-      .from("club_members")
-      .delete()
-      .eq("club_id", selectedClub.id)
-      .eq("user_id", userId);
-
-    if (error) {
-      setActionError(error.message || "Failed to remove member.");
-      return;
-    }
-
-    setActionSuccess("Member removed from club.");
-    setManagedMembers((current) => current.filter((member) => member.userId !== userId));
-    setMemberCount((count) => Math.max(0, count - 1));
-  };
-
   const handleDeleteEvent = async (eventId: string) => {
     if (!selectedClub) return;
     setActionError(null);
@@ -530,6 +500,56 @@ export function ManageOverview() {
             Support & Help
           </Link>
         </div>
+      </div>
+    );
+  }
+
+  if (officerClubs.length > 1 && !selectedClubId) {
+    return (
+      <div className="space-y-6">
+        <section className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-[0_22px_70px_-48px_rgba(17,24,39,0.3)] md:p-8">
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#51237f]">Manage</p>
+          <h1 className="mt-3 text-3xl font-black tracking-[-0.03em] text-gray-950">Choose a club to manage</h1>
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-gray-600">
+            You have leadership access in multiple clubs. Pick the workspace you want to open right now.
+          </p>
+
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            {officerClubs.map((club) => (
+              <button
+                key={club.id}
+                type="button"
+                onClick={() => setSelectedClubId(club.id)}
+                className="group rounded-[24px] border border-gray-200 bg-white p-5 text-left shadow-[0_18px_40px_-34px_rgba(17,24,39,0.24)] transition hover:-translate-y-0.5 hover:border-[#d8c8eb] hover:shadow-[0_22px_44px_-32px_rgba(17,24,39,0.28)]"
+              >
+                <div className="flex items-start gap-4">
+                  <div
+                    className={cn(
+                      "flex h-14 w-14 shrink-0 items-center justify-center rounded-[20px] text-sm font-black text-white shadow-sm",
+                      club.color
+                    )}
+                  >
+                    {club.initials}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h2 className="text-lg font-bold tracking-[-0.02em] text-gray-950">{club.name}</h2>
+                      <span className="rounded-full bg-[#f4ecfb] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#51237f]">
+                        {club.roleLabel}
+                      </span>
+                    </div>
+                    <p className="mt-2 text-sm text-gray-600">
+                      Open this club&apos;s dashboard, members, events, announcements, and analytics.
+                    </p>
+                    <span className="mt-4 inline-flex items-center text-sm font-semibold text-[#51237f]">
+                      Open workspace
+                    </span>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </section>
       </div>
     );
   }
@@ -687,7 +707,7 @@ export function ManageOverview() {
                   className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50"
                 >
                   <Users size={15} />
-                  Manage members
+                  View members
                 </a>
               </>
             ) : null}
@@ -723,8 +743,8 @@ export function ManageOverview() {
         </p>
       ) : null}
 
-      <section className="grid grid-cols-1 gap-6 xl:grid-cols-[1.4fr_1fr]">
-        <div className="space-y-6">
+      <section className="grid grid-cols-1 gap-6 2xl:grid-cols-[1.4fr_1fr]">
+        <div className="min-w-0 space-y-6">
           <section className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-[0_22px_70px_-48px_rgba(17,24,39,0.3)]">
             <div className="mb-5 flex items-start justify-between gap-4">
               <div>
@@ -743,7 +763,7 @@ export function ManageOverview() {
               ) : null}
             </div>
 
-            <div className="grid gap-4 lg:grid-cols-3">
+            <div className="grid gap-4 xl:grid-cols-3">
               <div className="rounded-2xl border border-gray-200 bg-[#fafafa] p-4">
                 <div className="flex items-center justify-between gap-3">
                   <div>
@@ -819,7 +839,7 @@ export function ManageOverview() {
                     style={{ width: `${Math.max(8, leadershipCoverage)}%` }}
                   />
                 </div>
-                <div className="mt-3 grid grid-cols-3 gap-2 text-sm text-gray-600">
+                <div className="mt-3 grid grid-cols-2 gap-3 text-sm text-gray-600 sm:grid-cols-3">
                   <div>
                     <p className="text-[11px] uppercase tracking-[0.12em] text-gray-500">Officers</p>
                     <p className="mt-1 font-semibold text-gray-950">{officerCount}</p>
@@ -947,7 +967,7 @@ export function ManageOverview() {
           </section>
         </div>
 
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           <section className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-[0_22px_70px_-48px_rgba(17,24,39,0.3)]">
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -999,9 +1019,9 @@ export function ManageOverview() {
                       <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-[#51237f] shadow-sm">
                         <Users size={18} />
                       </span>
-                      <h3 className="mt-4 text-lg font-bold tracking-[-0.02em] text-gray-950">Manage Members</h3>
+                      <h3 className="mt-4 text-lg font-bold tracking-[-0.02em] text-gray-950">View Members</h3>
                       <p className="mt-1 text-sm leading-6 text-gray-600">
-                        Approve, promote, and remove people from your community.
+                        See who is in the club and how they are involved.
                       </p>
                     </div>
                     <ArrowRight size={18} className="mt-1 shrink-0 text-gray-400 transition-colors group-hover:text-gray-700" />
@@ -1025,7 +1045,7 @@ export function ManageOverview() {
                   </div>
                 </Link>
                 <Link
-                  href="/announcements"
+                  href={selectedClub ? `/manage/announcements/new?clubId=${selectedClub.id}` : "/manage/announcements/new"}
                   className="group rounded-[24px] border border-gray-200 bg-[#fafafa] px-5 py-5 transition-colors hover:border-gray-300 hover:bg-white"
                 >
                   <div className="flex items-start justify-between gap-4">
@@ -1072,8 +1092,11 @@ export function ManageOverview() {
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Members</p>
                 <h2 className="mt-2 text-2xl font-bold tracking-[-0.02em] text-gray-950">
-                  People in your club
+                  Member roster and involvement
                 </h2>
+                <p className="mt-2 text-sm leading-6 text-gray-600">
+                  A read-only view of who is in the club, their role, and when they joined.
+                </p>
               </div>
               <span className="rounded-full bg-[#f4ecfb] px-3 py-1 text-xs font-semibold text-[#51237f]">
                 {memberCount} total
@@ -1090,6 +1113,12 @@ export function ManageOverview() {
                       <p className="text-base font-semibold text-gray-950">{member.name}</p>
                       <div className="mt-1 flex flex-wrap items-center gap-2">
                         <p className="text-sm text-gray-600">{member.roleLabel}</p>
+                        <span className="rounded-full bg-[#faf5ff] px-2.5 py-1 text-[11px] font-semibold text-[#51237f]">
+                          {member.isOfficer ? "Leadership" : "Member"}
+                        </span>
+                        {member.createdAt ? (
+                          <span className="text-xs text-gray-500">Joined {formatRelativeLabel(member.createdAt)}</span>
+                        ) : null}
                         {member.isSelf ? (
                           <span className="rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-semibold text-gray-600">
                             You
@@ -1097,35 +1126,8 @@ export function ManageOverview() {
                         ) : null}
                       </div>
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        disabled={!canManageRoles || member.isOfficer || member.isSelf}
-                        onClick={() => handlePromote(member.userId)}
-                        aria-label={`Promote ${member.name} to officer`}
-                        className={cn(
-                          "inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold transition-colors",
-                          !canManageRoles || member.isOfficer || member.isSelf
-                            ? "cursor-not-allowed border border-gray-200 text-gray-400"
-                            : "border border-gray-300 text-gray-800 hover:bg-gray-50"
-                        )}
-                      >
-                        Promote
-                      </button>
-                      <button
-                        type="button"
-                        disabled={!canManageMembers || member.isSelf}
-                        onClick={() => handleRemoveMember(member.userId)}
-                        aria-label={`Remove ${member.name} from club`}
-                        className={cn(
-                          "inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold transition-colors",
-                          !canManageMembers || member.isSelf
-                            ? "cursor-not-allowed border border-gray-200 text-gray-400"
-                            : "border border-red-200 text-red-700 hover:bg-red-50"
-                        )}
-                      >
-                        Remove
-                      </button>
+                    <div className="shrink-0 rounded-full border border-gray-200 bg-[#fafafa] px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
+                      {member.isOfficer ? "Officer" : "Community"}
                     </div>
                   </div>
                 ))

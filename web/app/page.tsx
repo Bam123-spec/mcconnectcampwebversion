@@ -204,7 +204,7 @@ export default async function HomePage() {
         eventName: event.name,
         realCount: registrationCounts.get(event.id) ?? 0,
       }),
-      href: "/events",
+      href: `/events/${event.id}`,
     };
   });
 

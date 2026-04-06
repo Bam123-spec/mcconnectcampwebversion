@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CalendarDays, ChevronDown, Clock3, Flame, Search } from "lucide-react";
 import { EventCard, type WebEventCardEvent } from "@/components/events/EventCard";
+import { EventPassButton } from "@/components/events/event-pass-button";
 import { getClientCache, setClientCache } from "@/lib/client-cache";
 import { getDisplayEventTurnout } from "@/lib/demo-analytics";
 import { AUTH_ENABLED } from "@/lib/features";
@@ -582,6 +583,7 @@ export function EventsPanel({
                     month: "short",
                     day: "numeric",
                   });
+              const timeLabel = (event.time || "TBA").split(" - ")[0];
 
               return (
                 <article
@@ -615,7 +617,7 @@ export function EventsPanel({
                     <div className="absolute inset-x-0 bottom-0 p-4">
                       <p className="text-sm font-medium text-white/85">{event.organizer_name || "Campus Event"}</p>
                       <h3 className="mt-2 text-xl font-bold leading-tight text-white">
-                        <Link href="/events" className="transition hover:text-white/85 focus:outline-none focus:text-white/85">
+                        <Link href={`/events/${event.id}`} className="transition hover:text-white/85 focus:outline-none focus:text-white/85">
                           {event.name}
                         </Link>
                       </h3>
@@ -630,7 +632,7 @@ export function EventsPanel({
                       </span>
                       <span className="inline-flex items-center gap-2">
                         <Clock3 size={15} className="text-gray-400" />
-                        {(event.time || "TBA").split(" - ")[0]}
+                        {timeLabel}
                       </span>
                     </div>
 
@@ -650,18 +652,25 @@ export function EventsPanel({
 
                     <div className="flex items-center justify-between gap-3">
                       <p className="line-clamp-1 text-sm text-gray-500">{event.location}</p>
-                      {AUTH_ENABLED ? (
+                      {AUTH_ENABLED && isRegistered ? (
+                        <EventPassButton
+                          eventId={event.id}
+                          eventName={event.name}
+                          eventDate={dateLabel}
+                          eventTime={timeLabel}
+                          eventLocation={event.location}
+                          className="inline-flex shrink-0 items-center gap-2 rounded-full border border-[#51237f] bg-white px-4 py-2.5 text-sm font-semibold text-[#51237f] transition-colors hover:bg-[#f4ecfb]"
+                        />
+                      ) : AUTH_ENABLED ? (
                         <button
                           type="button"
                           onClick={() => handleToggleRsvp(event.id, isRegistered)}
                           disabled={isPending}
                           className={`inline-flex shrink-0 items-center rounded-full px-4 py-2.5 text-sm font-semibold transition-colors ${
-                            isRegistered
-                              ? "border border-[#51237f] text-[#51237f] hover:bg-purple-50"
-                              : "bg-[#51237f] text-white shadow-[0_12px_24px_-18px_rgba(81,35,127,0.7)] hover:bg-[#45206b]"
+                            "bg-[#51237f] text-white shadow-[0_12px_24px_-18px_rgba(81,35,127,0.7)] hover:bg-[#45206b]"
                           } ${isPending ? "cursor-not-allowed opacity-60" : ""}`}
                         >
-                          {isPending ? "Updating..." : isRegistered ? "Registered" : "RSVP"}
+                          {isPending ? "Updating..." : "RSVP"}
                         </button>
                       ) : (
                         <Link

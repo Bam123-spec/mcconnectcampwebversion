@@ -1,8 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { LoaderCircle } from "lucide-react";
+import { ImagePlus, LoaderCircle, X } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { formatOfficerRole } from "@/lib/live-data";
 import { hasOfficerCapability } from "@/lib/officer-capabilities";
@@ -44,13 +45,14 @@ export function CreateEventPanel({ initialClubId }: { initialClubId?: string }) 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const [form, setForm] = useState({
     title: "",
     description: "",
     date: "",
     time: "",
     location: "",
-    imageUrl: "",
   });
 
   useEffect(() => {
@@ -123,6 +125,30 @@ export function CreateEventPanel({ initialClubId }: { initialClubId?: string }) 
     [clubs, selectedClubId]
   );
 
+  const handleImageSelection = (file: File | null) => {
+    if (imagePreviewUrl?.startsWith("blob:")) {
+      URL.revokeObjectURL(imagePreviewUrl);
+    }
+
+    if (!file) {
+      setSelectedImage(null);
+      setImagePreviewUrl(null);
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(file);
+    setSelectedImage(file);
+    setImagePreviewUrl(previewUrl);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (imagePreviewUrl?.startsWith("blob:")) {
+        URL.revokeObjectURL(imagePreviewUrl);
+      }
+    };
+  }, [imagePreviewUrl]);
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -135,6 +161,34 @@ export function CreateEventPanel({ initialClubId }: { initialClubId?: string }) 
     setError(null);
     setSuccess(null);
 
+    let coverImageUrl: string | null = null;
+
+    if (selectedImage) {
+      const fileExtension = selectedImage.name.split(".").pop()?.toLowerCase() || "jpg";
+      const safeExtension = fileExtension.replace(/[^a-z0-9]/g, "") || "jpg";
+      const filePath = `events/${selectedClub.clubId}/${Date.now()}-${form.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.${safeExtension}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("clubconnect-assets")
+        .upload(filePath, selectedImage, {
+          cacheControl: "3600",
+          contentType: selectedImage.type || undefined,
+          upsert: false,
+        });
+
+      if (uploadError) {
+        setError("We couldn't upload that cover image right now. Please try another file.");
+        setSubmitting(false);
+        return;
+      }
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("clubconnect-assets").getPublicUrl(filePath);
+
+      coverImageUrl = publicUrl;
+    }
+
     const { error: insertError } = await supabase.from("events").insert([
       {
         club_id: selectedClub.clubId,
@@ -144,7 +198,7 @@ export function CreateEventPanel({ initialClubId }: { initialClubId?: string }) 
         day: form.date,
         time: form.time,
         location: form.location,
-        cover_image_url: form.imageUrl || null,
+        cover_image_url: coverImageUrl,
       },
     ]);
 
@@ -161,8 +215,8 @@ export function CreateEventPanel({ initialClubId }: { initialClubId?: string }) 
       date: "",
       time: "",
       location: "",
-      imageUrl: "",
     });
+    handleImageSelection(null);
     setSubmitting(false);
   };
 
@@ -291,16 +345,48 @@ export function CreateEventPanel({ initialClubId }: { initialClubId?: string }) 
             />
           </label>
 
-          <label className="space-y-2">
-            <span className="text-sm font-semibold text-gray-900">Cover image URL</span>
-            <input
-              value={form.imageUrl}
-              onChange={(event) => setForm((current) => ({ ...current, imageUrl: event.target.value }))}
-              className="w-full rounded-2xl border border-gray-300 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-[#51237f]"
-              placeholder="https://..."
-            />
-          </label>
+          <div className="space-y-2">
+            <span className="text-sm font-semibold text-gray-900">Cover image</span>
+            <label className="flex min-h-[54px] cursor-pointer items-center justify-between gap-3 rounded-2xl border border-dashed border-gray-300 bg-white px-4 py-3 text-sm text-gray-700 transition hover:border-[#51237f] hover:bg-[#faf7fd]">
+              <span className="inline-flex items-center gap-2">
+                <ImagePlus size={16} className="text-[#51237f]" />
+                {selectedImage ? selectedImage.name : "Upload event cover"}
+              </span>
+              <span className="rounded-full bg-[#f4ecfb] px-3 py-1 text-xs font-semibold text-[#51237f]">
+                Choose file
+              </span>
+              <input
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                onChange={(event) => handleImageSelection(event.target.files?.[0] || null)}
+              />
+            </label>
+            <p className="text-xs text-gray-500">This image will appear on the event card and event detail page.</p>
+          </div>
         </div>
+
+        {imagePreviewUrl ? (
+          <div className="mt-6 rounded-[24px] border border-gray-200 bg-[#fafafa] p-4">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold text-gray-900">Cover preview</p>
+                <p className="text-xs text-gray-500">Check how the event image will look before publishing.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleImageSelection(null)}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-500 transition hover:bg-gray-50"
+                aria-label="Remove uploaded cover image"
+              >
+                <X size={15} />
+              </button>
+            </div>
+            <div className="relative h-56 overflow-hidden rounded-[20px] border border-gray-200 bg-white">
+              <Image src={imagePreviewUrl} alt="Event cover preview" fill className="object-cover" unoptimized />
+            </div>
+          </div>
+        ) : null}
 
         {error ? (
           <p className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">

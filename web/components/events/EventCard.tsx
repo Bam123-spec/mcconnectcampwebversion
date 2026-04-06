@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { Users } from "lucide-react";
 import Link from "next/link";
+import { EventPassButton } from "@/components/events/event-pass-button";
 
 export type WebEventCardEvent = {
   id: string;
@@ -62,6 +63,7 @@ export function EventCard({
         day: "numeric",
         year: "numeric",
       });
+  const eventTimeLabel = (event.time || "TBA").split(" - ")[0];
 
   return (
     <article
@@ -99,7 +101,7 @@ export function EventCard({
         <div className="absolute inset-x-0 bottom-0 p-5">
           <p className="text-sm font-medium text-white/85">{event.organizer_name || "Montgomery College"}</p>
           <h3 className="mt-2 line-clamp-2 text-2xl font-bold leading-tight text-white">
-            <Link href="/events" className="transition hover:text-white/85 focus:outline-none focus:text-white/85">
+            <Link href={`/events/${event.id}`} className="transition hover:text-white/85 focus:outline-none focus:text-white/85">
               {event.name}
             </Link>
           </h3>
@@ -114,7 +116,7 @@ export function EventCard({
           </div>
           <div className="rounded-2xl bg-gray-50 px-3 py-3">
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-400">Time</p>
-            <p className="mt-1 font-semibold text-gray-900">{(event.time || "TBA").split(" - ")[0]}</p>
+            <p className="mt-1 font-semibold text-gray-900">{eventTimeLabel}</p>
           </div>
           <div className="rounded-2xl bg-gray-50 px-3 py-3">
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-400">Location</p>
@@ -168,6 +170,14 @@ export function EventCard({
               <span className="inline-flex items-center rounded-full border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-500">
                 RSVP Soon
               </span>
+            ) : isRegistered ? (
+              <EventPassButton
+                eventId={event.id}
+                eventName={event.name}
+                eventDate={dateString}
+                eventTime={eventTimeLabel}
+                eventLocation={event.location}
+              />
             ) : onToggleRsvp ? (
               <button
                 type="button"
