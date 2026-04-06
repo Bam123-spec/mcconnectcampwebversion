@@ -1,5 +1,17 @@
 import Link from "next/link";
-import { LogIn, Users, Search, Filter, ExternalLink } from "lucide-react";
+import {
+  ArrowRight,
+  BellRing,
+  CalendarDays,
+  Compass,
+  ExternalLink,
+  Filter,
+  LogIn,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  Users,
+} from "lucide-react";
 import { EventCard } from "@/components/events/EventCard";
 
 const MOCK_EVENTS = [
@@ -62,55 +74,175 @@ const QUICK_LINKS = [
   { id: "q4", name: "Library Services", url: "#" },
 ];
 
+const HERO_METRICS = [
+  { label: "Live events this week", value: "72" },
+  { label: "Active student groups", value: "180+" },
+  { label: "Weekly campus updates", value: "24" },
+  { label: "Private spaces protected", value: "100%" },
+];
+
+const HERO_HIGHLIGHTS = [
+  "Private event details stay gated until sign-in.",
+  "Student life, clubs, events, and updates in one view.",
+  "Built for commuters, organizers, and campus staff alike.",
+];
+
 export default async function Home() {
   const isAuthenticated = false;
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#f5f6f8]">
-      {/* Hero Section */}
-      <section className="relative w-full h-[400px] md:h-[500px]">
-        {/* Background Image */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2670&auto=format&fit=crop')" }}
+    <div className="flex flex-col min-h-screen bg-[#f6f2ea]">
+      <section className="relative overflow-hidden border-b border-black/5 bg-[linear-gradient(180deg,#efe4d2_0%,#f6f2ea_56%,#f6f2ea_100%)]">
+        <div className="hero-mesh absolute inset-0 opacity-80" aria-hidden="true" />
+        <div
+          className="absolute inset-x-0 top-0 h-40 bg-[radial-gradient(circle_at_top,rgba(81,35,127,0.24),transparent_60%)]"
+          aria-hidden="true"
         />
-        {/* Overlay gradient for readability */}
-        <div className="absolute inset-0 bg-black/40" />
-        
-        {/* Hero Content */}
-        <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4 max-w-4xl mx-auto">
-          <h1 className="text-white text-5xl md:text-6xl font-bold mb-4 drop-shadow-lg">
-            {isAuthenticated ? "Welcome back, Student!" : "Welcome to Raptor Connect!"}
-          </h1>
-          <p className="text-white text-xl md:text-2xl mb-8 font-medium drop-shadow-md">
-            {isAuthenticated ? "Here's what's happening on your campus today." : "The official campus community platform at Montgomery College"}
-          </p>
-          {!isAuthenticated && (
-            <Link 
-              href="/events" 
-              className="flex items-center gap-2 bg-[#51237f] hover:bg-[#51237f]/90 text-white px-8 py-3 rounded-full font-semibold transition-colors shadow-lg"
-            >
-              <LogIn size={18} />
-              Explore Events
-            </Link>
-          )}
+        <div
+          className="absolute -left-20 top-24 h-72 w-72 rounded-full bg-[#51237f]/12 blur-3xl"
+          aria-hidden="true"
+        />
+        <div
+          className="absolute right-0 top-12 h-80 w-80 rounded-full bg-[#c66b3d]/14 blur-3xl"
+          aria-hidden="true"
+        />
+
+        <div className="relative mx-auto flex max-w-7xl flex-col gap-12 px-4 py-16 md:px-6 md:py-20 lg:py-24">
+          <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12">
+            <div className="max-w-2xl">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/75 px-4 py-2 text-sm font-semibold text-[#51237f] shadow-[0_12px_32px_rgba(81,35,127,0.10)] backdrop-blur">
+                <Sparkles className="h-4 w-4" />
+                Montgomery College&apos;s digital quad
+              </div>
+
+              <h1 className="mt-6 max-w-xl text-5xl font-semibold leading-[0.92] tracking-[-0.04em] text-[#161212] md:text-6xl lg:text-7xl">
+                {isAuthenticated ? "Campus momentum, already in motion." : "Campus life without the scavenger hunt."}
+              </h1>
+
+              <p className="mt-6 max-w-xl text-lg leading-8 text-[#4e4742] md:text-xl">
+                {isAuthenticated
+                  ? "Events, leadership updates, and student activity are waiting in one clean command center."
+                  : "Raptor Connect brings events, clubs, announcements, and protected campus details into a single, polished front door for Montgomery College."}
+              </p>
+
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <Link
+                  href="/events"
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-[#161212] px-6 py-3.5 text-sm font-semibold text-white transition-transform duration-200 hover:-translate-y-0.5"
+                >
+                  <Compass className="h-4 w-4" />
+                  Explore what&apos;s happening
+                </Link>
+                <Link
+                  href={isAuthenticated ? "/activity" : "/login"}
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-[#161212]/12 bg-white/80 px-6 py-3.5 text-sm font-semibold text-[#161212] shadow-[0_10px_30px_rgba(22,18,18,0.08)] backdrop-blur transition-colors hover:bg-white"
+                >
+                  {isAuthenticated ? <BellRing className="h-4 w-4" /> : <LogIn className="h-4 w-4" />}
+                  {isAuthenticated ? "Open activity feed" : "Sign in for full access"}
+                </Link>
+              </div>
+
+              <div className="mt-8 space-y-3">
+                {HERO_HIGHLIGHTS.map((highlight) => (
+                  <div key={highlight} className="flex items-start gap-3 text-sm text-[#413a36] md:text-base">
+                    <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[#51237f]" />
+                    <span>{highlight}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="relative lg:pl-8">
+              <div className="float-gentle relative overflow-hidden rounded-[32px] border border-white/70 bg-[#161212] p-6 text-white shadow-[0_30px_80px_rgba(22,18,18,0.22)]">
+                <div
+                  className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.18),transparent_38%),linear-gradient(135deg,rgba(255,255,255,0.10),transparent_52%)]"
+                  aria-hidden="true"
+                />
+                <div className="relative">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/60">Tonight at MC</p>
+                      <h2 className="mt-2 text-2xl font-semibold">Campus pulse</h2>
+                    </div>
+                    <div className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium text-white/80">
+                      Live preview
+                    </div>
+                  </div>
+
+                  <div className="mt-6 rounded-[24px] bg-white/8 p-5 backdrop-blur-sm">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-sm text-white/60">Featured tonight</p>
+                        <p className="mt-2 text-2xl font-semibold">Leadership Workshop</p>
+                        <p className="mt-2 max-w-sm text-sm leading-6 text-white/70">
+                          Doors open at 4:00 PM in the Student Union. RSVP activity is rising and officer updates have already started.
+                        </p>
+                      </div>
+                      <div className="rounded-2xl bg-[#f0b24d] px-3 py-2 text-right text-[#161212]">
+                        <div className="text-xs font-semibold uppercase tracking-[0.2em]">RSVP</div>
+                        <div className="text-2xl font-semibold">184</div>
+                      </div>
+                    </div>
+
+                    <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                      <div className="rounded-2xl border border-white/10 bg-white/8 p-4">
+                        <CalendarDays className="h-4 w-4 text-[#f0b24d]" />
+                        <div className="mt-3 text-2xl font-semibold">12</div>
+                        <p className="mt-1 text-xs uppercase tracking-[0.16em] text-white/55">Events opening registration</p>
+                      </div>
+                      <div className="rounded-2xl border border-white/10 bg-white/8 p-4">
+                        <Users className="h-4 w-4 text-[#9dc9ff]" />
+                        <div className="mt-3 text-2xl font-semibold">38</div>
+                        <p className="mt-1 text-xs uppercase tracking-[0.16em] text-white/55">Clubs posted this week</p>
+                      </div>
+                      <div className="rounded-2xl border border-white/10 bg-white/8 p-4">
+                        <BellRing className="h-4 w-4 text-[#f5a6c6]" />
+                        <div className="mt-3 text-2xl font-semibold">7</div>
+                        <p className="mt-1 text-xs uppercase tracking-[0.16em] text-white/55">New office alerts</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="absolute -left-3 top-8 hidden w-52 rounded-[24px] border border-[#161212]/10 bg-white/92 p-4 shadow-[0_18px_45px_rgba(22,18,18,0.10)] backdrop-blur md:block">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#7f776f]">Private access</p>
+                <p className="mt-2 text-sm font-semibold text-[#161212]">Location details unlock only after sign-in.</p>
+                <p className="mt-2 text-sm leading-6 text-[#5a534d]">Open campus browsing stays public without leaking protected event information.</p>
+              </div>
+
+              <div className="absolute -right-2 bottom-8 hidden w-56 rounded-[24px] border border-white/70 bg-[#fff9f0] p-4 shadow-[0_18px_45px_rgba(198,107,61,0.14)] md:block">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#a45b35]">Fresh activity</p>
+                <div className="mt-3 flex items-center justify-between text-sm text-[#342b27]">
+                  <span>3 new newsletters</span>
+                  <ArrowRight className="h-4 w-4" />
+                </div>
+                <div className="mt-2 h-2 rounded-full bg-[#f1dfcd]">
+                  <div className="h-2 w-[72%] rounded-full bg-[#c66b3d]" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-4 rounded-[30px] border border-white/70 bg-white/72 p-5 shadow-[0_20px_60px_rgba(22,18,18,0.08)] backdrop-blur md:grid-cols-4 md:p-6">
+            {HERO_METRICS.map((metric) => (
+              <div key={metric.label} className="rounded-[22px] border border-[#161212]/8 bg-white/80 px-5 py-4">
+                <div className="text-3xl font-semibold tracking-[-0.04em] text-[#161212]">{metric.value}</div>
+                <div className="mt-1 text-sm text-[#625a54]">{metric.label}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Main Content Area */}
       <main className="max-w-7xl mx-auto w-full px-4 py-8 md:py-12 flex flex-col lg:flex-row gap-8">
-        
-        {/* Left Column: Events & News */}
         <div className="flex-1 space-y-12">
-          
-          {/* Upcoming Events */}
           <section>
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
               <h2 className="text-2xl font-semibold text-gray-800">
                 Upcoming Events <span className="text-gray-500 font-normal text-lg">(72)</span>
               </h2>
-              
-              {/* Filter / Search Bar */}
+
               <div className="flex items-center gap-2">
                 <div className="relative">
                   <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -133,7 +265,6 @@ export default async function Home() {
             </div>
           </section>
 
-          {/* Latest News */}
           <section>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-semibold text-gray-800">Latest News</h2>
@@ -169,10 +300,7 @@ export default async function Home() {
           </section>
         </div>
 
-        {/* Right Column: Sidebars */}
         <aside className="w-full lg:w-80 space-y-8 shrink-0">
-          
-          {/* Featured Clubs */}
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
             <div className="bg-[#51237f] px-5 py-4">
               <h3 className="text-white font-bold text-lg">Featured Groups</h3>
@@ -195,7 +323,6 @@ export default async function Home() {
             </div>
           </div>
 
-          {/* Quick Links */}
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
             <div className="bg-[#51237f] px-5 py-4">
               <h3 className="text-white font-bold text-lg">Campus Resources</h3>

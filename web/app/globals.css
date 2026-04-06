@@ -41,4 +41,26 @@
   .nav-link.active {
     @apply text-[var(--primary)] bg-purple-50;
   }
+
+  .hero-mesh {
+    background-image:
+      linear-gradient(to right, rgba(22, 18, 18, 0.06) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(22, 18, 18, 0.06) 1px, transparent 1px);
+    background-size: 42px 42px;
+    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.85), transparent 92%);
+  }
+
+  .float-gentle {
+    animation: float-gentle 7s ease-in-out infinite;
+  }
+}
+
+@keyframes float-gentle {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
 }
