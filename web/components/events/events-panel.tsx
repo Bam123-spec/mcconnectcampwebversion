@@ -1,12 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CalendarDays, ChevronDown, Clock3, Flame, Search } from "lucide-react";
 import { EventCard, type WebEventCardEvent } from "@/components/events/EventCard";
 import { EventPassButton } from "@/components/events/event-pass-button";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { getClientCache, setClientCache } from "@/lib/client-cache";
 import { getDisplayEventTurnout } from "@/lib/demo-analytics";
 import { AUTH_ENABLED } from "@/lib/features";
@@ -370,6 +370,11 @@ export function EventsPanel({
     (currentPage - 1) * EVENTS_PER_PAGE,
     currentPage * EVENTS_PER_PAGE
   );
+  const eventsToday = filteredUpcomingEvents.filter((event) => getUrgencyLabel(event.date) === "Today");
+  const eventsSoon = filteredUpcomingEvents.filter((event) => {
+    const urgency = getUrgencyLabel(event.date);
+    return urgency === "Today" || urgency === "Soon";
+  });
 
   const handlePageChange = (page: number) => {
     const nextPage = Math.min(Math.max(page, 1), totalPages);
@@ -443,114 +448,113 @@ export function EventsPanel({
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 md:px-6 md:py-10 lg:px-8">
       <header className="mb-10 border-b border-gray-200 pb-6">
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#51237f]">Discover</p>
-              <h1 className="mt-2 text-3xl font-black tracking-[-0.04em] text-gray-950 md:text-4xl">
-                Events happening around campus
-              </h1>
-            </div>
-
-            <form
-              role="search"
-              aria-label="Search events"
-              onSubmit={(event) => event.preventDefault()}
-              className="relative w-full max-w-md"
-            >
-              <Search
-                aria-hidden="true"
-                size={16}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-              />
-              <input
-                type="text"
-                value={searchValue}
-                onChange={(event) => setSearchValue(event.target.value)}
-                placeholder="Search events, clubs, or locations"
-                className="h-12 w-full rounded-full border border-gray-300 bg-white pl-11 pr-4 text-sm text-gray-900 outline-none transition focus:border-[#51237f] focus:ring-2 focus:ring-[#51237f]/15"
-              />
-            </form>
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#51237f]">Discover</p>
+            <h1 className="mt-3 text-4xl font-black tracking-[-0.05em] text-gray-950">Events around campus</h1>
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-gray-600">
+              Browse upcoming events, find something relevant fast, and keep the page easy to scan.
+            </p>
           </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="inline-flex rounded-full border border-gray-300 bg-gray-100 p-1">
-              {VIEW_MODES.map((mode) => (
-                <button
-                  key={mode.key}
-                  type="button"
-                  onClick={() => setViewMode(mode.key)}
-                  className={`inline-flex h-9 items-center rounded-full px-4 text-sm font-semibold transition ${
-                    viewMode === mode.key
-                      ? "bg-white text-[#51237f] shadow-sm"
-                      : "text-gray-600 hover:text-gray-900"
-                  }`}
-                >
-                  {mode.label}
-                </button>
-              ))}
-            </div>
+          <form
+            role="search"
+            aria-label="Search events"
+            onSubmit={(event) => event.preventDefault()}
+            className="relative w-full lg:max-w-md"
+          >
+            <Search
+              aria-hidden="true"
+              size={18}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+            />
+            <input
+              type="text"
+              value={searchValue}
+              onChange={(event) => setSearchValue(event.target.value)}
+              placeholder="Search events, clubs, or locations"
+              className="h-12 w-full rounded-md border border-gray-300 bg-white pl-12 pr-4 text-sm text-gray-900 outline-none transition focus:border-[#51237f] focus:ring-2 focus:ring-[#51237f]/15"
+            />
+          </form>
+        </div>
 
-            <div className="relative sm:ml-auto" ref={optionsRef}>
+        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap items-center gap-2">
+            {VIEW_MODES.map((mode) => (
               <button
+                key={mode.key}
                 type="button"
-                onClick={() => setIsOptionsOpen((open) => !open)}
-                className="inline-flex h-10 items-center gap-2 rounded-full border border-gray-300 bg-white px-4 text-sm font-semibold text-gray-700 transition hover:border-gray-400 hover:bg-gray-50"
-                aria-haspopup="menu"
-                aria-expanded={isOptionsOpen}
+                onClick={() => setViewMode(mode.key)}
+                className={`inline-flex h-10 items-center rounded-md border px-4 text-sm font-semibold transition ${
+                  viewMode === mode.key
+                    ? "border-[#51237f] bg-[#f4ecfb] text-[#51237f]"
+                    : "border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50"
+                }`}
               >
-                Options
-                {activeFilter ? (
-                  <span className="rounded-full bg-[#f4ecfb] px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#51237f]">
-                    {FILTERS.find((filter) => filter.key === activeFilter)?.label}
-                  </span>
-                ) : null}
-                <ChevronDown size={16} className="text-gray-400" />
+                {mode.label}
               </button>
+            ))}
+          </div>
 
-              {isOptionsOpen ? (
-                <div
-                  role="menu"
-                  className="absolute right-0 top-[calc(100%+0.75rem)] z-20 w-56 rounded-2xl border border-gray-200 bg-white p-2 shadow-[0_18px_36px_-24px_rgba(17,24,39,0.28)]"
+          <div className="relative" ref={optionsRef}>
+            <button
+              type="button"
+              onClick={() => setIsOptionsOpen((open) => !open)}
+              className="inline-flex h-10 items-center gap-2 rounded-md border border-gray-300 bg-white px-4 text-sm font-semibold text-gray-700 transition hover:border-gray-400 hover:bg-gray-50"
+              aria-haspopup="menu"
+              aria-expanded={isOptionsOpen}
+            >
+              Options
+              {activeFilter ? (
+                <span className="rounded-full bg-[#f4ecfb] px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#51237f]">
+                  {FILTERS.find((filter) => filter.key === activeFilter)?.label}
+                </span>
+              ) : null}
+              <ChevronDown size={16} className="text-gray-400" />
+            </button>
+
+            {isOptionsOpen ? (
+              <div
+                role="menu"
+                className="absolute right-0 top-[calc(100%+0.75rem)] z-20 w-56 rounded-md border border-gray-200 bg-white p-2 shadow-[0_18px_36px_-24px_rgba(17,24,39,0.28)]"
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveFilter(null);
+                    setIsOptionsOpen(false);
+                  }}
+                  className={`flex w-full items-center justify-between rounded-md px-3 py-2.5 text-left text-sm font-medium transition ${
+                    activeFilter === null ? "bg-[#f4ecfb] text-[#51237f]" : "text-gray-700 hover:bg-gray-50"
+                  }`}
+                  role="menuitem"
                 >
+                  All filters
+                  {activeFilter === null ? <span className="text-xs font-semibold uppercase tracking-[0.14em]">Active</span> : null}
+                </button>
+                {FILTERS.map((filter) => (
                   <button
+                    key={filter.key}
                     type="button"
                     onClick={() => {
-                      setActiveFilter(null);
+                      setActiveFilter((current) => (current === filter.key ? null : filter.key));
                       setIsOptionsOpen(false);
                     }}
-                    className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm font-medium transition ${
-                      activeFilter === null ? "bg-[#f4ecfb] text-[#51237f]" : "text-gray-700 hover:bg-gray-50"
+                    className={`mt-1 flex w-full items-center justify-between rounded-md px-3 py-2.5 text-left text-sm font-medium transition ${
+                      activeFilter === filter.key
+                        ? "bg-[#f4ecfb] text-[#51237f]"
+                        : "text-gray-700 hover:bg-gray-50"
                     }`}
                     role="menuitem"
                   >
-                    All filters
-                    {activeFilter === null ? <span className="text-xs font-semibold uppercase tracking-[0.14em]">Active</span> : null}
+                    {filter.label}
+                    {activeFilter === filter.key ? (
+                      <span className="text-xs font-semibold uppercase tracking-[0.14em]">Active</span>
+                    ) : null}
                   </button>
-                  {FILTERS.map((filter) => (
-                    <button
-                      key={filter.key}
-                      type="button"
-                      onClick={() => {
-                        setActiveFilter((current) => (current === filter.key ? null : filter.key));
-                        setIsOptionsOpen(false);
-                      }}
-                      className={`mt-1 flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm font-medium transition ${
-                        activeFilter === filter.key
-                          ? "bg-[#f4ecfb] text-[#51237f]"
-                          : "text-gray-700 hover:bg-gray-50"
-                      }`}
-                      role="menuitem"
-                    >
-                      {filter.label}
-                      {activeFilter === filter.key ? (
-                        <span className="text-xs font-semibold uppercase tracking-[0.14em]">Active</span>
-                      ) : null}
-                    </button>
-                  ))}
-                </div>
-              ) : null}
-            </div>
+                ))}
+              </div>
+            ) : null}
           </div>
         </div>
 
@@ -561,201 +565,275 @@ export function EventsPanel({
         ) : null}
       </header>
 
-      {popularThisWeek.length ? (
-        <section className="mb-12">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="flex items-center gap-3 text-xl font-bold text-gray-950">
-              <Flame size={18} className="text-[#51237f]" />
-              Popular This Week
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-            {popularThisWeek.map((event) => {
-              const urgency = getUrgencyLabel(event.date);
-              const isRegistered = registeredIds.has(event.id);
-              const isPending = pendingIds.has(event.id);
-              const parsedDate = new Date(event.date);
-              const dateLabel = Number.isNaN(parsedDate.getTime())
-                ? "Date to be announced"
-                : parsedDate.toLocaleDateString("en-US", {
-                    weekday: "short",
-                    month: "short",
-                    day: "numeric",
-                  });
-              const timeLabel = (event.time || "TBA").split(" - ")[0];
-
-              return (
-                <article
-                  key={`popular-${event.id}`}
-                  className="overflow-hidden rounded-[24px] border border-gray-200 bg-white shadow-[0_16px_34px_-26px_rgba(17,24,39,0.24)]"
-                >
-                  <div className="relative h-40 bg-gray-100">
-                    <Image
-                      src={event.cover_image_url || fallbackCover}
-                      alt={event.name}
-                      fill
-                      className="object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                    <div className="absolute left-4 top-4 flex flex-wrap items-center gap-2">
-                      <span className="rounded-full bg-white/92 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#51237f] shadow-sm backdrop-blur-sm">
-                        Popular
-                      </span>
-                      {urgency ? (
-                        <span
-                          className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] ${
-                            urgency === "Today"
-                              ? "bg-[#51237f]/92 text-white"
-                              : "bg-amber-400/92 text-gray-950"
-                          }`}
-                        >
-                          {urgency}
-                        </span>
-                      ) : null}
-                    </div>
-                    <div className="absolute inset-x-0 bottom-0 p-4">
-                      <p className="text-sm font-medium text-white/85">{event.organizer_name || "Campus Event"}</p>
-                      <h3 className="mt-2 text-xl font-bold leading-tight text-white">
-                        <Link href={`/events/${event.id}`} className="transition hover:text-white/85 focus:outline-none focus:text-white/85">
-                          {event.name}
-                        </Link>
-                      </h3>
-                    </div>
-                  </div>
-
-                  <div className="p-5">
-                    <div className="mb-4 flex flex-wrap items-center gap-3 text-sm text-gray-600">
-                      <span className="inline-flex items-center gap-2">
-                        <CalendarDays size={15} className="text-gray-400" />
-                        {dateLabel}
-                      </span>
-                      <span className="inline-flex items-center gap-2">
-                        <Clock3 size={15} className="text-gray-400" />
-                        {timeLabel}
-                      </span>
-                    </div>
-
-                    <div className="mb-5 flex items-center gap-3">
-                      <div className="flex -space-x-2">
-                        <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-[#51237f] text-[10px] font-bold text-white">
-                          MC
-                        </span>
-                        <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-[#7a58a0] text-[10px] font-bold text-white">
-                          ST
-                        </span>
-                      </div>
-                      <span className="text-sm font-semibold text-gray-700">
-                        {(event.rsvp_count ?? 0).toLocaleString()} going
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="line-clamp-1 text-sm text-gray-500">{event.location}</p>
-                      {AUTH_ENABLED && isRegistered ? (
-                        <EventPassButton
-                          eventId={event.id}
-                          eventName={event.name}
-                          eventDate={dateLabel}
-                          eventTime={timeLabel}
-                          eventLocation={event.location}
-                          className="inline-flex shrink-0 items-center gap-2 rounded-full border border-[#51237f] bg-white px-4 py-2.5 text-sm font-semibold text-[#51237f] transition-colors hover:bg-[#f4ecfb]"
-                        />
-                      ) : AUTH_ENABLED ? (
-                        <button
-                          type="button"
-                          onClick={() => handleToggleRsvp(event.id, isRegistered)}
-                          disabled={isPending}
-                          className={`inline-flex shrink-0 items-center rounded-full px-4 py-2.5 text-sm font-semibold transition-colors ${
-                            "bg-[#51237f] text-white shadow-[0_12px_24px_-18px_rgba(81,35,127,0.7)] hover:bg-[#45206b]"
-                          } ${isPending ? "cursor-not-allowed opacity-60" : ""}`}
-                        >
-                          {isPending ? "Updating..." : "RSVP"}
-                        </button>
-                      ) : (
-                        <Link
-                          href="/login"
-                          className="inline-flex shrink-0 items-center rounded-full bg-[#51237f] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_-18px_rgba(81,35,127,0.7)] transition-colors hover:bg-[#45206b]"
-                        >
-                          Sign in
-                        </Link>
-                      )}
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        </section>
-      ) : null}
-
-      <section ref={upcomingSectionRef} className="mb-16">
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="flex items-center gap-3 text-2xl font-bold text-gray-950">
-            {viewMode === "for-you" ? "For You" : "All Events"}
-            <span className="rounded-full border border-[#e7dcf3] bg-[#f4ecfb] px-3 py-1 text-sm font-bold text-[#51237f]">
-              {filteredUpcomingEvents.length}
-            </span>
-          </h2>
-        </div>
-
-        {filteredUpcomingEvents.length > 0 ? (
-          <>
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {paginatedUpcomingEvents.map((event) => (
-                <EventCard
-                  key={event.id}
-                  event={event}
-                  authEnabled={AUTH_ENABLED}
-                  hasSession={hasSession}
-                  isRegistered={registeredIds.has(event.id)}
-                  isPending={pendingIds.has(event.id)}
-                  onToggleRsvp={handleToggleRsvp}
-                />
-              ))}
-            </div>
-
-            {totalPages > 1 ? (
-              <div className="mt-8 flex flex-wrap items-center justify-center gap-2 border-t border-gray-100 pt-6">
-                {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+      <div className="grid gap-8 xl:grid-cols-[240px_minmax(0,1fr)]">
+        <aside className="hidden xl:block">
+          <div className="sticky top-28 space-y-4">
+            <section className="rounded-[10px] border border-gray-200 bg-white p-5 shadow-[0_12px_28px_-24px_rgba(17,24,39,0.22)]">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-400">Browse</p>
+              <div className="mt-4 space-y-2">
+                {VIEW_MODES.map((mode) => (
                   <button
-                    key={page}
+                    key={mode.key}
                     type="button"
-                    onClick={() => handlePageChange(page)}
-                    aria-current={currentPage === page ? "page" : undefined}
-                    className={`inline-flex h-10 min-w-10 items-center justify-center rounded-full border px-4 text-sm font-semibold transition ${
-                      currentPage === page
-                        ? "border-[#51237f] bg-[#51237f] text-white shadow-[0_12px_24px_-18px_rgba(81,35,127,0.6)]"
-                        : "border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50"
+                    onClick={() => setViewMode(mode.key)}
+                    className={`flex w-full items-center justify-between rounded-md px-4 py-3 text-left text-sm font-semibold transition ${
+                      viewMode === mode.key
+                        ? "bg-[#f4ecfb] text-[#51237f]"
+                        : "text-gray-700 hover:bg-gray-50"
                     }`}
                   >
-                    {page}
+                    <span>{mode.label}</span>
+                    <span className="text-xs text-gray-400">{mode.key === "for-you" ? "Personalized" : "Campus-wide"}</span>
                   </button>
                 ))}
+              </div>
+            </section>
+
+            <section className="rounded-[10px] border border-gray-200 bg-white p-5 shadow-[0_12px_28px_-24px_rgba(17,24,39,0.22)]">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-400">Quick filters</p>
+              <div className="mt-4 space-y-2">
                 <button
                   type="button"
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage >= totalPages}
-                  className="inline-flex h-10 items-center justify-center rounded-full border border-gray-300 bg-white px-4 text-sm font-semibold text-gray-700 transition hover:border-gray-400 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-45"
+                  onClick={() => setActiveFilter(null)}
+                  className={`flex w-full items-center justify-between rounded-md px-4 py-3 text-left text-sm font-semibold transition ${
+                    activeFilter === null ? "bg-[#f4ecfb] text-[#51237f]" : "text-gray-700 hover:bg-gray-50"
+                  }`}
                 >
-                  Next
+                  <span>All events</span>
+                  <span className="text-xs text-gray-400">{filteredUpcomingEvents.length}</span>
                 </button>
+                {FILTERS.map((filter) => (
+                  <button
+                    key={filter.key}
+                    type="button"
+                    onClick={() => setActiveFilter((current) => (current === filter.key ? null : filter.key))}
+                    className={`flex w-full items-center justify-between rounded-md px-4 py-3 text-left text-sm font-semibold transition ${
+                      activeFilter === filter.key ? "bg-[#f4ecfb] text-[#51237f]" : "text-gray-700 hover:bg-gray-50"
+                    }`}
+                  >
+                    <span>{filter.label}</span>
+                    <span className="text-xs text-gray-400">Filter</span>
+                  </button>
+                ))}
               </div>
-            ) : null}
-          </>
-        ) : (
-          <div className="rounded-[22px] border border-dashed border-gray-300 bg-white px-6 py-14 text-center">
-            <h3 className="text-xl font-bold text-gray-900">No events match this view</h3>
-            <p className="mt-2 text-sm text-gray-500">Try a different filter or search to explore more campus activity.</p>
+            </section>
+
+            <section className="rounded-[10px] border border-gray-200 bg-white p-5 shadow-[0_12px_28px_-24px_rgba(17,24,39,0.22)]">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-400">This week</p>
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                <div className="rounded-md bg-gray-50 p-4">
+                  <p className="text-2xl font-black tracking-[-0.04em] text-gray-950">{eventsToday.length}</p>
+                  <p className="mt-1 text-sm text-gray-500">Today</p>
+                </div>
+                <div className="rounded-md bg-gray-50 p-4">
+                  <p className="text-2xl font-black tracking-[-0.04em] text-gray-950">{eventsSoon.length}</p>
+                  <p className="mt-1 text-sm text-gray-500">Soon</p>
+                </div>
+              </div>
+            </section>
           </div>
-        )}
-      </section>
+        </aside>
+
+        <div className="min-w-0">
+          {popularThisWeek.length ? (
+            <section className="mb-12">
+              <div className="mb-6 flex items-center justify-between">
+                <h2 className="flex items-center gap-3 text-xl font-bold text-gray-950">
+                  <Flame size={18} className="text-[#51237f]" />
+                  Popular This Week
+                </h2>
+              </div>
+
+              <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+                {popularThisWeek.map((event) => {
+                  const urgency = getUrgencyLabel(event.date);
+                  const isRegistered = registeredIds.has(event.id);
+                  const isPending = pendingIds.has(event.id);
+                  const parsedDate = new Date(event.date);
+                  const dateLabel = Number.isNaN(parsedDate.getTime())
+                    ? "Date to be announced"
+                    : parsedDate.toLocaleDateString("en-US", {
+                        weekday: "short",
+                        month: "short",
+                        day: "numeric",
+                      });
+                  const timeLabel = (event.time || "TBA").split(" - ")[0];
+
+                  return (
+                    <article
+                      key={`popular-${event.id}`}
+                      className="overflow-hidden rounded-[10px] border border-gray-200 bg-white shadow-[0_16px_34px_-26px_rgba(17,24,39,0.24)]"
+                    >
+                      <div className="relative h-40 bg-gray-100">
+                        <ImageWithFallback
+                          src={event.cover_image_url}
+                          fallbackSrc={fallbackCover}
+                          alt={event.name}
+                          fill
+                          className="object-cover"
+                          style={{ objectPosition: "center 32%" }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                        <div className="absolute left-4 top-4 flex flex-wrap items-center gap-2">
+                          <span className="rounded-full bg-white/92 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#51237f] shadow-sm backdrop-blur-sm">
+                            Popular
+                          </span>
+                          {urgency ? (
+                            <span
+                              className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] ${
+                                urgency === "Today"
+                                  ? "bg-[#51237f]/92 text-white"
+                                  : "bg-amber-400/92 text-gray-950"
+                              }`}
+                            >
+                              {urgency}
+                            </span>
+                          ) : null}
+                        </div>
+                        <div className="absolute inset-x-0 bottom-0 p-4">
+                          <p className="text-sm font-medium text-white/85">{event.organizer_name || "Campus Event"}</p>
+                          <h3 className="mt-2 text-xl font-bold leading-tight text-white">
+                            <Link href={`/events/${event.id}`} className="transition hover:text-white/85 focus:outline-none focus:text-white/85">
+                              {event.name}
+                            </Link>
+                          </h3>
+                        </div>
+                      </div>
+
+                      <div className="p-5">
+                        <div className="mb-4 flex flex-wrap items-center gap-3 text-sm text-gray-600">
+                          <span className="inline-flex items-center gap-2">
+                            <CalendarDays size={15} className="text-gray-400" />
+                            {dateLabel}
+                          </span>
+                          <span className="inline-flex items-center gap-2">
+                            <Clock3 size={15} className="text-gray-400" />
+                            {timeLabel}
+                          </span>
+                        </div>
+
+                        <div className="mb-5 flex items-center gap-3">
+                          <div className="flex -space-x-2">
+                            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-[#51237f] text-[10px] font-bold text-white">
+                              MC
+                            </span>
+                            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-[#7a58a0] text-[10px] font-bold text-white">
+                              ST
+                            </span>
+                          </div>
+                          <span className="text-sm font-semibold text-gray-700">
+                            {(event.rsvp_count ?? 0).toLocaleString()} going
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="line-clamp-1 text-sm text-gray-500">{event.location}</p>
+                          {AUTH_ENABLED && isRegistered ? (
+                            <EventPassButton
+                              eventId={event.id}
+                              eventName={event.name}
+                              eventDate={dateLabel}
+                              eventTime={timeLabel}
+                              eventLocation={event.location}
+                              className="inline-flex shrink-0 items-center gap-2 rounded-md border border-[#51237f] bg-white px-4 py-2.5 text-sm font-semibold text-[#51237f] transition-colors hover:bg-[#f4ecfb]"
+                            />
+                          ) : AUTH_ENABLED ? (
+                            <button
+                              type="button"
+                              onClick={() => handleToggleRsvp(event.id, isRegistered)}
+                              disabled={isPending}
+                              className={`inline-flex shrink-0 items-center rounded-md px-4 py-2.5 text-sm font-semibold transition-colors ${
+                                "bg-[#51237f] text-white shadow-[0_12px_24px_-18px_rgba(81,35,127,0.7)] hover:bg-[#45206b]"
+                              } ${isPending ? "cursor-not-allowed opacity-60" : ""}`}
+                            >
+                              {isPending ? "Updating..." : "RSVP"}
+                            </button>
+                          ) : (
+                            <Link
+                              href="/login"
+                              className="inline-flex shrink-0 items-center rounded-md bg-[#51237f] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_-18px_rgba(81,35,127,0.7)] transition-colors hover:bg-[#45206b]"
+                            >
+                              Sign in
+                            </Link>
+                          )}
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </section>
+          ) : null}
+
+          <section ref={upcomingSectionRef} className="mb-16">
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="flex items-center gap-3 text-2xl font-bold text-gray-950">
+                {viewMode === "for-you" ? "For You" : "All Events"}
+                <span className="rounded-md border border-[#e7dcf3] bg-[#f4ecfb] px-3 py-1 text-sm font-bold text-[#51237f]">
+                  {filteredUpcomingEvents.length}
+                </span>
+              </h2>
+            </div>
+
+            {filteredUpcomingEvents.length > 0 ? (
+              <>
+                <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+                  {paginatedUpcomingEvents.map((event) => (
+                    <EventCard
+                      key={event.id}
+                      event={event}
+                      authEnabled={AUTH_ENABLED}
+                      hasSession={hasSession}
+                      isRegistered={registeredIds.has(event.id)}
+                      isPending={pendingIds.has(event.id)}
+                      onToggleRsvp={handleToggleRsvp}
+                    />
+                  ))}
+                </div>
+
+                {totalPages > 1 ? (
+                  <div className="mt-8 flex flex-wrap items-center justify-center gap-2 border-t border-gray-100 pt-6">
+                    {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+                      <button
+                        key={page}
+                        type="button"
+                        onClick={() => handlePageChange(page)}
+                        aria-current={currentPage === page ? "page" : undefined}
+                        className={`inline-flex h-10 min-w-10 items-center justify-center rounded-md border px-4 text-sm font-semibold transition ${
+                          currentPage === page
+                            ? "border-[#51237f] bg-[#51237f] text-white shadow-[0_12px_24px_-18px_rgba(81,35,127,0.6)]"
+                            : "border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage >= totalPages}
+                      className="inline-flex h-10 items-center justify-center rounded-md border border-gray-300 bg-white px-4 text-sm font-semibold text-gray-700 transition hover:border-gray-400 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-45"
+                    >
+                      Next
+                    </button>
+                  </div>
+                ) : null}
+              </>
+            ) : (
+              <div className="rounded-[10px] border border-dashed border-gray-300 bg-white px-6 py-14 text-center">
+                <h3 className="text-xl font-bold text-gray-900">No events match this view</h3>
+                <p className="mt-2 text-sm text-gray-500">Try a different filter or search to explore more campus activity.</p>
+              </div>
+            )}
+          </section>
+        </div>
+      </div>
 
       <section className="border-t border-gray-200 pt-10">
         <div className="mb-6 flex items-center justify-between">
           <h2 className="flex items-center gap-3 text-xl font-bold text-gray-500">
             Past Events
-            <span className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-sm font-bold text-gray-400">
+            <span className="rounded-md border border-gray-200 bg-gray-50 px-3 py-1 text-sm font-bold text-gray-400">
               {pastEvents.length}
             </span>
           </h2>
@@ -773,7 +851,7 @@ export function EventsPanel({
             ))}
           </div>
         ) : (
-          <div className="rounded-[22px] border border-dashed border-gray-300 bg-white px-6 py-12 text-center text-sm text-gray-500">
+          <div className="rounded-[10px] border border-dashed border-gray-300 bg-white px-6 py-12 text-center text-sm text-gray-500">
             Past events will show up here once more campus activity has been archived.
           </div>
         )}

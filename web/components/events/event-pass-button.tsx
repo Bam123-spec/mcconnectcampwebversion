@@ -79,18 +79,18 @@ export function EventPassButton({
   const modalContent =
     isOpen && isMounted ? (
       <div className="fixed inset-0 z-[90] flex items-center justify-center bg-gray-950/45 px-4 py-6">
-        <div className="relative w-full max-w-md rounded-[28px] bg-white p-6 shadow-[0_30px_100px_-45px_rgba(17,24,39,0.5)]">
+        <div className="relative w-full max-w-md rounded-[12px] bg-white p-6 shadow-[0_30px_100px_-45px_rgba(17,24,39,0.5)]">
           <button
             type="button"
             onClick={() => setIsOpen(false)}
             aria-label="Close event pass"
-            className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition hover:bg-gray-50"
+            className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-md border border-gray-200 text-gray-500 transition hover:bg-gray-50"
           >
             <X size={16} />
           </button>
 
           <div className="pr-12">
-            <span className="inline-flex items-center gap-2 rounded-full bg-[#f4ecfb] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#51237f]">
+            <span className="inline-flex items-center gap-2 rounded-md bg-[#f4ecfb] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#51237f]">
               <QrCode size={13} />
               Event Pass
             </span>
@@ -100,8 +100,8 @@ export function EventPassButton({
             </p>
           </div>
 
-          <div className="mt-6 rounded-[24px] border border-gray-200 bg-[#fafafa] p-5">
-            <div className="mx-auto flex h-[220px] w-[220px] items-center justify-center rounded-[24px] bg-white shadow-[0_16px_34px_-26px_rgba(17,24,39,0.24)]">
+          <div className="mt-6 rounded-[10px] border border-gray-200 bg-[#fafafa] p-5">
+            <div className="mx-auto flex h-[220px] w-[220px] items-center justify-center rounded-[10px] bg-white shadow-[0_16px_34px_-26px_rgba(17,24,39,0.24)]">
               {qrDataUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={qrDataUrl} alt={`QR code for ${eventName}`} className="h-[188px] w-[188px]" />
@@ -134,7 +134,7 @@ export function EventPassButton({
               <a
                 href={qrDataUrl}
                 download={`${eventName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-event-pass.png`}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#51237f] px-5 text-sm font-semibold text-white transition hover:bg-[#45206b]"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-[#51237f] px-5 text-sm font-semibold text-white transition hover:bg-[#45206b]"
               >
                 <Download size={15} />
                 Download pass
@@ -143,7 +143,7 @@ export function EventPassButton({
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="inline-flex h-11 items-center justify-center rounded-full border border-gray-300 px-5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+              className="inline-flex h-11 items-center justify-center rounded-md border border-gray-300 px-5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
             >
               Close
             </button>
@@ -159,7 +159,7 @@ export function EventPassButton({
         onClick={handleOpen}
         className={
           className ||
-          "inline-flex items-center gap-2 rounded-full border border-[#51237f] bg-white px-4 py-2.5 text-sm font-semibold text-[#51237f] transition-colors hover:bg-[#f4ecfb]"
+          "inline-flex items-center gap-2 rounded-md border border-[#51237f] bg-white px-4 py-2.5 text-sm font-semibold text-[#51237f] transition-colors hover:bg-[#f4ecfb]"
         }
       >
         <QrCode size={16} />
