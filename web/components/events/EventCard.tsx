@@ -75,9 +75,17 @@ export function EventCard({
         <ImageWithFallback
           src={event.cover_image_url}
           fallbackSrc={fallbackCover}
+          alt=""
+          aria-hidden="true"
+          fill
+          className="object-cover scale-110 blur-xl opacity-45"
+        />
+        <ImageWithFallback
+          src={event.cover_image_url}
+          fallbackSrc={fallbackCover}
           alt={event.name}
           fill
-          className="object-cover transition duration-500 hover:scale-[1.03]"
+          className="object-contain object-center p-3 transition duration-500 group-hover:scale-[1.02]"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
         <div className="absolute left-4 top-4 flex flex-wrap items-center gap-2">
