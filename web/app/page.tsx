@@ -107,6 +107,16 @@ const formatUpdateDate = (value?: string | null) => {
   });
 };
 
+const normalizeDateKey = (value?: string | null) => {
+  if (!value) return null;
+  const datePart = value.split("T")[0];
+  const [year, month, day] = datePart.split("-").map(Number);
+  if (!year || !month || !day) return null;
+  const parsed = new Date(year, month - 1, day);
+  if (Number.isNaN(parsed.getTime())) return null;
+  return `${parsed.getFullYear()}-${String(parsed.getMonth() + 1).padStart(2, "0")}-${String(parsed.getDate()).padStart(2, "0")}`;
+};
+
 const derivePostTitle = (value?: string | null) => {
   const content = (value || "").trim();
   if (!content) return "Club update";
@@ -209,11 +219,13 @@ export default async function HomePage() {
     }),
   ].slice(0, 4);
 
-  const happeningNow = events[0] ?? null;
   const featuredClubs = clubs.slice(0, 3);
   const comingUp = events.slice(1, 4);
-  const featuredNote = updates[0] ?? null;
-  const spotlightClub = featuredClubs[0] ?? null;
+  const today = new Date();
+  const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  const eventsToday = (eventsData ?? []).filter((event: EventRow) => normalizeDateKey(event.date || event.day) === todayKey).length;
+  const previewEvents = events.slice(0, 3);
+  const previewUpdates = updates.slice(0, 2);
 
   const utilityLinks = [
     { label: "Event Registration", href: "/events" },
@@ -225,127 +237,115 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen bg-white">
       <main>
-        <section className="relative overflow-hidden border-b border-gray-200 bg-white">
-          <div className="absolute inset-x-0 top-0 h-[430px] bg-[linear-gradient(180deg,#ffffff_0%,#f7f3ff_56%,rgba(255,255,255,0.72)_82%,rgba(255,255,255,0)_100%)] md:h-[470px]" />
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(81,35,127,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(81,35,127,0.05)_1px,transparent_1px)] bg-[size:56px_56px]" />
-          <div className="absolute left-[-10%] top-16 h-64 w-64 rounded-full bg-[#efe7ff] blur-3xl" />
-          <div className="absolute right-[-6%] top-0 h-80 w-80 rounded-full bg-[#dbe4ff] blur-3xl" />
-          <div className="absolute left-1/2 top-0 hidden h-[430px] w-px bg-[linear-gradient(180deg,transparent,rgba(81,35,127,0.12),transparent)] lg:block md:h-[470px]" />
-          <div className="relative mx-auto max-w-6xl px-4 py-10 md:px-6 md:py-12 lg:px-8 lg:py-16">
-            <div className="grid items-start gap-10 lg:grid-cols-[1.05fr,0.95fr]">
-              <div className="pt-2">
+        <section className="relative overflow-hidden border-b border-gray-200 bg-[linear-gradient(180deg,#ffffff_0%,#faf7ff_62%,#ffffff_100%)]">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(81,35,127,0.10),transparent_24%),radial-gradient(circle_at_80%_16%,rgba(92,117,255,0.08),transparent_22%)]" />
+          <div className="relative mx-auto max-w-6xl px-4 py-12 md:px-6 md:py-14 lg:px-8 lg:py-20">
+            <div className="grid items-center gap-12 lg:grid-cols-[0.95fr,1.05fr]">
+              <div className="animate-in fade-in slide-in-from-bottom-3 duration-700">
                 <p className="text-sm font-medium uppercase tracking-[0.22em] text-[#51237f]">
                   Montgomery College campus life
                 </p>
                 <h1 className="mt-5 max-w-2xl text-[2.8rem] font-semibold tracking-[-0.08em] text-gray-950 md:text-[4.5rem] md:leading-[0.98]">
-                  Campus life, designed like a real product.
+                  Discover campus life through a product, not a portal.
                 </h1>
                 <p className="mt-5 max-w-xl text-base leading-8 text-gray-600">
-                  Find what is happening, discover student organizations, and keep up with campus momentum through
-                  one clear home that feels modern instead of institutional.
+                  See what is happening today, jump into student organizations, and catch live campus updates from one cleaner, faster home.
                 </p>
 
                 <div className="mt-8 flex flex-wrap gap-3">
                   <Link
                     href="/events"
-                    className="inline-flex h-11 items-center justify-center rounded-full bg-[#51237f] px-5 text-sm font-medium text-white transition hover:bg-[#45206b]"
+                    className="inline-flex h-11 items-center justify-center rounded-full bg-[#51237f] px-5 text-sm font-medium text-white transition duration-200 hover:-translate-y-0.5 hover:bg-[#45206b] hover:shadow-[0_14px_28px_-18px_rgba(81,35,127,0.5)]"
                   >
                     Explore events
                   </Link>
                   <Link
                     href="/clubs"
-                    className="inline-flex h-11 items-center justify-center rounded-full border border-gray-300 bg-white px-5 text-sm font-medium text-gray-900 transition hover:bg-gray-50"
+                    className="inline-flex h-11 items-center justify-center rounded-full border border-gray-300 bg-white px-5 text-sm font-medium text-gray-900 transition duration-200 hover:-translate-y-0.5 hover:bg-gray-50 hover:shadow-[0_12px_24px_-18px_rgba(15,23,42,0.2)]"
                   >
                     Browse clubs
                   </Link>
                 </div>
 
-                <div className="mt-10 grid max-w-xl gap-3 sm:grid-cols-3">
-                  <div className="rounded-[20px] border border-white bg-white/80 p-4 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.24)] backdrop-blur">
-                    <div className="text-[11px] font-medium uppercase tracking-[0.16em] text-gray-400">Upcoming</div>
-                    <div className="mt-2 text-2xl font-semibold tracking-[-0.05em] text-gray-950">{events.length}</div>
-                    <div className="mt-1 text-sm text-gray-500">live events</div>
+                <div className="mt-10 flex max-w-2xl flex-wrap gap-3">
+                  <div className="rounded-full border border-[#e6dcf7] bg-white px-4 py-3 text-sm text-gray-700 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.16)]">
+                    <span className="font-semibold text-gray-950">{eventsToday || events.length}</span> events happening today
                   </div>
-                  <div className="rounded-[20px] border border-white bg-white/80 p-4 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.24)] backdrop-blur">
-                    <div className="text-[11px] font-medium uppercase tracking-[0.16em] text-gray-400">Featured</div>
-                    <div className="mt-2 text-2xl font-semibold tracking-[-0.05em] text-gray-950">{featuredClubs.length}</div>
-                    <div className="mt-1 text-sm text-gray-500">club picks</div>
+                  <div className="rounded-full border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.16)]">
+                    <span className="font-semibold text-gray-950">{featuredClubs.length}</span> clubs featured right now
                   </div>
-                  <div className="rounded-[20px] border border-white bg-white/80 p-4 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.24)] backdrop-blur">
-                    <div className="text-[11px] font-medium uppercase tracking-[0.16em] text-gray-400">Updates</div>
-                    <div className="mt-2 text-2xl font-semibold tracking-[-0.05em] text-gray-950">{updates.length}</div>
-                    <div className="mt-1 text-sm text-gray-500">campus notes</div>
+                  <div className="rounded-full border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.16)]">
+                    <span className="font-semibold text-gray-950">{updates.length}</span> fresh campus updates
                   </div>
                 </div>
               </div>
 
-              <div className="grid gap-4 lg:grid-cols-[1.15fr,0.85fr]">
-                {happeningNow ? (
-                  <Link
-                    href={happeningNow.href}
-                    className="rounded-[28px] border border-white bg-white p-5 shadow-[0_26px_60px_-36px_rgba(15,23,42,0.28)] transition hover:-translate-y-0.5"
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div className="rounded-full bg-[#f4ecff] px-3 py-1 text-[11px] font-medium uppercase tracking-[0.16em] text-[#51237f]">
-                        Happening now
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 lg:delay-150">
+                <div className="rounded-[32px] border border-[#e8e5ef] bg-white p-4 shadow-[0_28px_70px_-40px_rgba(15,23,42,0.28)]">
+                  <div className="rounded-[24px] border border-gray-200 bg-[#f8f8fb] p-3">
+                    <div className="flex items-center justify-between rounded-[18px] border border-gray-200 bg-white px-4 py-3">
+                      <div>
+                        <div className="text-[11px] font-medium uppercase tracking-[0.16em] text-[#51237f]">
+                          Live preview
+                        </div>
+                        <div className="mt-1 text-sm font-medium text-gray-500">What students see right now</div>
                       </div>
-                      <div className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
-                        {happeningNow.turnout} going
+                      <div className="flex items-center gap-2">
+                        <div className="h-2.5 w-2.5 rounded-full bg-[#51237f]" />
+                        <div className="h-2.5 w-2.5 rounded-full bg-gray-300" />
+                        <div className="h-2.5 w-2.5 rounded-full bg-gray-300" />
                       </div>
                     </div>
-                    <div className="mt-4 text-sm font-medium text-[#51237f]">{happeningNow.clubName}</div>
-                    <h2 className="mt-2 text-[1.45rem] font-semibold leading-8 tracking-[-0.05em] text-gray-950">
-                      {happeningNow.title}
-                    </h2>
-                    <p className="mt-3 text-sm leading-7 text-gray-600">{happeningNow.description}</p>
-                    <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-gray-500">
-                      <span className="inline-flex items-center gap-2">
-                        <CalendarDays size={15} className="text-gray-400" />
-                        {happeningNow.when}
-                      </span>
-                      <span className="inline-flex items-center gap-2">
-                        <MapPin size={15} className="text-gray-400" />
-                        {happeningNow.location}
-                      </span>
+
+                    <div className="mt-3 space-y-3">
+                      {previewEvents.map((event) => (
+                        <Link
+                          key={`preview-event-${event.id}`}
+                          href={event.href}
+                          className="block rounded-[20px] border border-gray-200 bg-white p-4 transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_26px_-20px_rgba(15,23,42,0.18)]"
+                        >
+                          <div className="flex items-start justify-between gap-4">
+                            <div>
+                              <div className="text-[11px] font-medium uppercase tracking-[0.16em] text-[#51237f]">
+                                {event.clubName}
+                              </div>
+                              <h3 className="mt-2 text-base font-semibold leading-6 text-gray-950">{event.title}</h3>
+                            </div>
+                            <div className="rounded-full bg-[#f4ecff] px-3 py-1 text-xs font-medium text-[#51237f]">
+                              {event.turnout} going
+                            </div>
+                          </div>
+                          <p className="mt-2 text-sm leading-6 text-gray-600">{event.description}</p>
+                          <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-gray-500">
+                            <span className="inline-flex items-center gap-2">
+                              <CalendarDays size={15} className="text-gray-400" />
+                              {event.when}
+                            </span>
+                            <span className="inline-flex items-center gap-2">
+                              <MapPin size={15} className="text-gray-400" />
+                              {event.location}
+                            </span>
+                          </div>
+                        </Link>
+                      ))}
+
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {previewUpdates.map((item) => (
+                          <Link
+                            key={`preview-update-${item.id}`}
+                            href={item.href}
+                            className="rounded-[18px] border border-gray-200 bg-white p-4 transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_26px_-20px_rgba(15,23,42,0.18)]"
+                          >
+                            <div className="text-[11px] font-medium uppercase tracking-[0.16em] text-gray-500">
+                              {item.source}
+                            </div>
+                            <h3 className="mt-2 text-sm font-semibold leading-6 text-gray-950">{item.title}</h3>
+                            <div className="mt-3 text-xs font-medium text-gray-400">{item.when}</div>
+                          </Link>
+                        ))}
+                      </div>
                     </div>
-                  </Link>
-                ) : null}
-
-                <div className="grid gap-4">
-                  {featuredNote ? (
-                    <Link
-                      href={featuredNote.href}
-                      className="rounded-[24px] border border-[#dad0ee] bg-[#fbf8ff] p-5 shadow-[0_22px_42px_-34px_rgba(81,35,127,0.36)] transition hover:-translate-y-0.5"
-                    >
-                      <div className="text-[11px] font-medium uppercase tracking-[0.16em] text-[#51237f]">
-                        Campus note
-                      </div>
-                      <h3 className="mt-3 text-lg font-semibold leading-7 tracking-[-0.04em] text-gray-950">
-                        {featuredNote.title}
-                      </h3>
-                      <p className="mt-3 text-sm leading-6 text-gray-600">{featuredNote.description}</p>
-                      <div className="mt-4 text-sm text-gray-500">{featuredNote.when}</div>
-                    </Link>
-                  ) : null}
-
-                  {spotlightClub ? (
-                    <Link
-                      href={spotlightClub.href}
-                      className="rounded-[24px] border border-[#d7def3] bg-[#f5f8ff] p-5 shadow-[0_22px_42px_-34px_rgba(37,99,235,0.25)] transition hover:-translate-y-0.5"
-                    >
-                      <div className="text-[11px] font-medium uppercase tracking-[0.16em] text-[#3156c8]">
-                        Club spotlight
-                      </div>
-                      <h3 className="mt-3 text-lg font-semibold leading-7 tracking-[-0.04em] text-gray-950">
-                        {spotlightClub.name}
-                      </h3>
-                      <p className="mt-3 text-sm leading-6 text-gray-600">{spotlightClub.description}</p>
-                      <div className="mt-4 inline-flex items-center gap-2 text-sm text-gray-500">
-                        <Users size={15} className="text-gray-400" />
-                        {spotlightClub.members} members
-                      </div>
-                    </Link>
-                  ) : null}
+                  </div>
                 </div>
               </div>
             </div>

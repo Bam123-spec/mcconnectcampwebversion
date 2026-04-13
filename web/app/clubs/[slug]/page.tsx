@@ -25,9 +25,11 @@ type MemberRow = {
   profiles?:
     | {
         full_name?: string | null;
+        avatar_url?: string | null;
       }
     | {
         full_name?: string | null;
+        avatar_url?: string | null;
       }[]
     | null;
 };
@@ -91,7 +93,7 @@ const getClubBySlug = async (slug: string) => {
       .limit(12),
     supabase
       .from("club_members")
-      .select("user_id, created_at, profiles:user_id(full_name)")
+      .select("user_id, created_at, profiles:user_id(full_name, avatar_url)")
       .eq("club_id", club.id)
       .eq("status", "approved")
       .limit(24),
@@ -137,9 +139,16 @@ const getClubBySlug = async (slug: string) => {
         name: profile.full_name,
         joinedAt: member.created_at ?? null,
         roleLabel: officerIds.has(member.user_id) ? "Leadership" : "Member",
+        avatarUrl: profile.avatar_url ?? null,
       };
     })
-    .filter(Boolean) as Array<{ id: string; name: string; joinedAt: string | null; roleLabel: string }>;
+    .filter(Boolean) as Array<{
+      id: string;
+      name: string;
+      joinedAt: string | null;
+      roleLabel: string;
+      avatarUrl: string | null;
+    }>;
 
   const feedPosts = postsResult.error
     ? []
