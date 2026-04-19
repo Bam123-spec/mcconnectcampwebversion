@@ -114,7 +114,7 @@ export function MemberChatPanel() {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-3 rounded-[24px] border border-gray-200 bg-white p-6 text-sm text-gray-500 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
+      <div className="flex items-center gap-3 rounded-[24px] border border-gray-200 bg-white p-6 text-sm text-gray-500 shadow-sm">
         <LoaderCircle size={16} className="animate-spin text-[#51237f]" />
         Loading member chats.
       </div>
@@ -123,7 +123,7 @@ export function MemberChatPanel() {
 
   if (!signedIn) {
     return (
-      <div className="rounded-[24px] border border-gray-200 bg-white p-8 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
+      <div className="rounded-[28px] border border-gray-200 bg-white p-8 shadow-sm">
         <h1 className="text-3xl font-bold tracking-[-0.02em] text-gray-950">Open member chat after sign in</h1>
         <p className="mt-4 max-w-2xl text-sm leading-7 text-gray-600">
           Sign in to access the member-facing chat rooms for clubs you manage.
@@ -133,8 +133,8 @@ export function MemberChatPanel() {
   }
 
   return (
-    <div className="space-y-8">
-      <section className="rounded-[24px] border border-gray-200 bg-white p-8 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
+    <div className="space-y-10">
+      <section className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-sm md:p-8">
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#51237f]">Member Chat</p>
         <h1 className="mt-3 text-3xl font-bold tracking-[-0.02em] text-gray-950">Talk directly with your club members</h1>
         <p className="mt-4 max-w-2xl text-sm leading-7 text-gray-600">
@@ -142,13 +142,13 @@ export function MemberChatPanel() {
         </p>
       </section>
 
-      <section className="rounded-[24px] border border-gray-200 bg-white p-6 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
-        <div className="space-y-3">
+      <section className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="space-y-4">
           {rooms.length ? (
             rooms.map((club) => (
               <div
                 key={club.clubId}
-                className="flex items-center justify-between rounded-2xl border border-gray-200 px-4 py-4"
+                className="flex items-center justify-between rounded-2xl border border-gray-200 bg-white px-4 py-4"
               >
                 <div className="flex min-w-0 items-center gap-3">
                   <span
@@ -180,7 +180,7 @@ export function MemberChatPanel() {
               </div>
             ))
           ) : (
-            <div className="rounded-2xl border border-dashed border-gray-200 bg-[#fafafa] px-5 py-6 text-sm text-gray-600">
+            <div className="rounded-2xl border border-dashed border-gray-200 bg-white px-5 py-6 text-sm text-gray-600">
               No managed club chats are available yet.
             </div>
           )}

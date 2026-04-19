@@ -200,7 +200,7 @@ export function LeadershipChatRoom({ conversationId }: { conversationId: string 
 
   return (
     <div className="space-y-6">
-      <section className="rounded-[24px] border border-gray-200 bg-white p-8 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
+      <section className="rounded-[24px] border border-gray-200 bg-white p-8 shadow-sm">
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#51237f]">Leadership Channel</p>
         <h1 className="mt-3 text-3xl font-bold tracking-[-0.02em] text-gray-950">{title}</h1>
         <p className="mt-4 text-sm leading-7 text-gray-600">
@@ -208,7 +208,7 @@ export function LeadershipChatRoom({ conversationId }: { conversationId: string 
         </p>
       </section>
 
-      <section className="rounded-[24px] border border-gray-200 bg-white p-6 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
+      <section className="rounded-[24px] border border-gray-200 bg-white p-6 shadow-sm">
         {loading ? (
           <div className="flex items-center gap-3 text-sm text-gray-500">
             <LoaderCircle size={16} className="animate-spin text-[#51237f]" />
@@ -228,7 +228,7 @@ export function LeadershipChatRoom({ conversationId }: { conversationId: string 
                     className={`max-w-[85%] rounded-2xl px-4 py-3 ${
                       message.isOwn
                         ? "ml-auto bg-[#51237f] text-white"
-                        : "border border-gray-200 bg-[#fafafa] text-gray-900"
+                      : "border border-gray-200 bg-white text-gray-900"
                     }`}
                   >
                     <p className={`text-xs font-semibold ${message.isOwn ? "text-white/80" : "text-gray-500"}`}>
@@ -238,7 +238,7 @@ export function LeadershipChatRoom({ conversationId }: { conversationId: string 
                   </div>
                 ))
               ) : (
-                <div className="rounded-2xl border border-dashed border-gray-200 bg-[#fafafa] px-5 py-6 text-sm text-gray-600">
+                <div className="rounded-2xl border border-dashed border-gray-200 bg-white px-5 py-6 text-sm text-gray-600">
                   No leadership messages yet. Start the private coordination here.
                 </div>
               )}

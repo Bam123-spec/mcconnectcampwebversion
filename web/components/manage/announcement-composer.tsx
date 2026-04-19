@@ -222,7 +222,7 @@ export function AnnouncementComposer({ initialClubId }: { initialClubId?: string
 
   if (loading) {
     return (
-      <div className="rounded-[28px] border border-gray-200 bg-white p-8 shadow-[0_22px_70px_-48px_rgba(17,24,39,0.22)]">
+      <div className="rounded-[28px] border border-gray-200 bg-white p-8 shadow-sm">
         <div className="flex items-center gap-3 text-sm font-medium text-gray-600">
           <LoaderCircle size={18} className="animate-spin text-[#51237f]" />
           Loading your club access...
@@ -233,7 +233,7 @@ export function AnnouncementComposer({ initialClubId }: { initialClubId?: string
 
   if (!officerClubs.length) {
     return (
-      <div className="rounded-[28px] border border-gray-200 bg-white p-8 shadow-[0_22px_70px_-48px_rgba(17,24,39,0.22)]">
+      <div className="rounded-[28px] border border-gray-200 bg-white p-8 shadow-sm">
         <h1 className="text-2xl font-black tracking-[-0.03em] text-gray-950">No club access found</h1>
         <p className="mt-3 max-w-2xl text-sm leading-7 text-gray-600">
           You need officer or admin access to publish announcements into a club feed.
@@ -249,8 +249,8 @@ export function AnnouncementComposer({ initialClubId }: { initialClubId?: string
   }
 
   return (
-    <div className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-[0_22px_70px_-48px_rgba(17,24,39,0.22)] md:p-8">
-      <div className="flex flex-col gap-3 border-b border-gray-200 pb-6">
+    <div className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-sm md:p-8">
+      <div className="flex flex-col gap-4 border-b border-gray-200 pb-7">
         <span className="inline-flex w-fit items-center gap-2 rounded-full bg-[#f4ecfb] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#51237f]">
           <Megaphone size={13} />
           Club Announcement
@@ -261,8 +261,8 @@ export function AnnouncementComposer({ initialClubId }: { initialClubId?: string
         </p>
       </div>
 
-      <form onSubmit={handlePublish} className="mt-6 space-y-5">
-        <div className="grid gap-5 md:grid-cols-2">
+      <form onSubmit={handlePublish} className="mt-7 space-y-6">
+        <div className="grid gap-6 md:grid-cols-2">
           <label className="block">
             <span className="text-sm font-semibold text-gray-800">Club audience</span>
             <select
@@ -300,8 +300,8 @@ export function AnnouncementComposer({ initialClubId }: { initialClubId?: string
         </div>
 
         {imagePreviewUrl ? (
-          <div className="rounded-[24px] border border-gray-200 bg-[#fafafa] p-4">
-            <div className="mb-3 flex items-center justify-between gap-3">
+          <div className="rounded-[24px] border border-gray-200 bg-white p-5 shadow-sm">
+            <div className="mb-4 flex items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold text-gray-900">Image preview</p>
                 <p className="text-xs text-gray-500">This will be attached to the announcement post.</p>
@@ -315,7 +315,7 @@ export function AnnouncementComposer({ initialClubId }: { initialClubId?: string
                 <X size={15} />
               </button>
             </div>
-            <div className="relative h-52 overflow-hidden rounded-[20px] border border-gray-200 bg-white">
+            <div className="relative h-52 overflow-hidden rounded-[20px] border border-gray-200 bg-[#fafafa]">
               <Image src={imagePreviewUrl} alt="Announcement preview" fill className="object-cover" unoptimized />
             </div>
           </div>
@@ -344,7 +344,7 @@ export function AnnouncementComposer({ initialClubId }: { initialClubId?: string
         </label>
 
         {selectedClub ? (
-          <div className="rounded-[22px] border border-gray-200 bg-[#fafafa] px-4 py-4 text-sm text-gray-600">
+          <div className="rounded-[22px] border border-gray-200 bg-white px-4 py-4 text-sm text-gray-600">
             This will publish into <span className="font-semibold text-gray-900">{selectedClub.name}</span> and appear in that club’s feed.
           </div>
         ) : null}

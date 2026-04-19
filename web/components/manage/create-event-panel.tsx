@@ -222,7 +222,7 @@ export function CreateEventPanel({ initialClubId }: { initialClubId?: string }) 
 
   if (loading) {
     return (
-      <div className="flex items-center gap-3 rounded-[24px] border border-gray-200 bg-white p-6 text-sm text-gray-500 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
+      <div className="flex items-center gap-3 rounded-[24px] border border-gray-200 bg-white p-6 text-sm text-gray-500 shadow-sm">
         <LoaderCircle size={16} className="animate-spin text-[#51237f]" />
         Loading event creation access.
       </div>
@@ -231,7 +231,7 @@ export function CreateEventPanel({ initialClubId }: { initialClubId?: string }) 
 
   if (!signedIn) {
     return (
-      <div className="rounded-[24px] border border-gray-200 bg-white p-8 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
+      <div className="rounded-[28px] border border-gray-200 bg-white p-8 shadow-sm">
         <h1 className="text-3xl font-bold tracking-[-0.02em] text-gray-950">Create club events after sign in</h1>
         <p className="mt-4 max-w-2xl text-sm leading-7 text-gray-600">
           Sign in first so we can verify which clubs you manage and which event tools your role allows.
@@ -248,7 +248,7 @@ export function CreateEventPanel({ initialClubId }: { initialClubId?: string }) 
 
   if (!canCreate) {
     return (
-      <div className="rounded-[24px] border border-gray-200 bg-white p-8 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
+      <div className="rounded-[28px] border border-gray-200 bg-white p-8 shadow-sm">
         <h1 className="text-3xl font-bold tracking-[-0.02em] text-gray-950">Your role can’t create events yet</h1>
         <p className="mt-4 max-w-2xl text-sm leading-7 text-gray-600">
           Presidents, Vice Presidents, Treasurers, and platform admins can create events from this workspace.
@@ -264,8 +264,8 @@ export function CreateEventPanel({ initialClubId }: { initialClubId?: string }) 
   }
 
   return (
-    <div className="space-y-8">
-      <section className="rounded-[24px] border border-gray-200 bg-white p-8 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
+    <div className="space-y-10">
+      <section className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-sm md:p-8">
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#51237f]">Create Event</p>
         <h1 className="mt-3 text-3xl font-bold tracking-[-0.02em] text-gray-950">
           Launch a new event for your club
@@ -277,9 +277,9 @@ export function CreateEventPanel({ initialClubId }: { initialClubId?: string }) 
 
       <form
         onSubmit={handleSubmit}
-        className="rounded-[24px] border border-gray-200 bg-white p-8 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]"
+        className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-sm md:p-8"
       >
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-7 md:grid-cols-2">
           <label className="space-y-2 md:col-span-2">
             <span className="text-sm font-semibold text-gray-900">Club</span>
             <select
@@ -367,8 +367,8 @@ export function CreateEventPanel({ initialClubId }: { initialClubId?: string }) 
         </div>
 
         {imagePreviewUrl ? (
-          <div className="mt-6 rounded-[24px] border border-gray-200 bg-[#fafafa] p-4">
-            <div className="mb-3 flex items-center justify-between gap-3">
+          <div className="mt-8 rounded-[24px] border border-gray-200 bg-white p-5 shadow-sm">
+            <div className="mb-4 flex items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold text-gray-900">Cover preview</p>
                 <p className="text-xs text-gray-500">Check how the event image will look before publishing.</p>
@@ -382,7 +382,7 @@ export function CreateEventPanel({ initialClubId }: { initialClubId?: string }) 
                 <X size={15} />
               </button>
             </div>
-            <div className="relative h-56 overflow-hidden rounded-[20px] border border-gray-200 bg-white">
+            <div className="relative h-56 overflow-hidden rounded-[20px] border border-gray-200 bg-[#fafafa]">
               <Image src={imagePreviewUrl} alt="Event cover preview" fill className="object-cover" unoptimized />
             </div>
           </div>

@@ -116,7 +116,7 @@ export function LeadershipChatPanel() {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-3 rounded-[24px] border border-gray-200 bg-white p-6 text-sm text-gray-500 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
+      <div className="flex items-center gap-3 rounded-[24px] border border-gray-200 bg-white p-6 text-sm text-gray-500 shadow-sm">
         <LoaderCircle size={16} className="animate-spin text-[#51237f]" />
         Loading leadership channels.
       </div>
@@ -125,7 +125,7 @@ export function LeadershipChatPanel() {
 
   if (!signedIn) {
     return (
-      <div className="rounded-[24px] border border-gray-200 bg-white p-8 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
+      <div className="rounded-[28px] border border-gray-200 bg-white p-8 shadow-sm">
         <h1 className="text-3xl font-bold tracking-[-0.02em] text-gray-950">Leadership channels start after sign in</h1>
         <p className="mt-4 max-w-2xl text-sm leading-7 text-gray-600">
           Sign in to access the private leadership conversations connected to your club roles.
@@ -135,8 +135,8 @@ export function LeadershipChatPanel() {
   }
 
   return (
-    <div className="space-y-8">
-      <section className="rounded-[24px] border border-gray-200 bg-white p-8 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
+    <div className="space-y-10">
+      <section className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-sm md:p-8">
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#51237f]">Leadership Channel</p>
         <h1 className="mt-3 text-3xl font-bold tracking-[-0.02em] text-gray-950">
           Private coordination for officers and leadership
@@ -146,14 +146,14 @@ export function LeadershipChatPanel() {
         </p>
       </section>
 
-      <section className="rounded-[24px] border border-gray-200 bg-white p-6 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
-        <div className="space-y-3">
+      <section className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="space-y-4">
           {conversations.length ? (
             conversations.map((conversation) => (
               <Link
                 key={conversation.id}
                 href={`/manage/chats/leadership/${conversation.id}`}
-                className="flex items-center justify-between rounded-2xl border border-gray-200 px-4 py-4 transition hover:border-[#d7cae8] hover:bg-[#faf8fd]"
+                className="flex items-center justify-between rounded-2xl border border-gray-200 bg-white px-4 py-4 transition hover:border-[#d7cae8] hover:bg-[#faf8fd]"
               >
                 <div className="min-w-0">
                   <p className="truncate text-base font-semibold text-gray-950">{conversation.title}</p>
@@ -168,7 +168,7 @@ export function LeadershipChatPanel() {
               </Link>
             ))
           ) : (
-            <div className="rounded-2xl border border-dashed border-gray-200 bg-[#fafafa] px-5 py-6 text-sm text-gray-600">
+            <div className="rounded-2xl border border-dashed border-gray-200 bg-white px-5 py-6 text-sm text-gray-600">
               No leadership conversations are available yet.
             </div>
           )}

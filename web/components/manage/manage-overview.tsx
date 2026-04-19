@@ -453,7 +453,7 @@ export function ManageOverview() {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-3 rounded-[24px] border border-gray-200 bg-white p-6 text-sm text-gray-500 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
+      <div className="flex items-center gap-3 rounded-[24px] border border-gray-200 bg-white p-6 text-sm text-gray-500 shadow-sm">
         <LoaderCircle size={16} className="animate-spin text-[#51237f]" />
         Loading your management access.
       </div>
@@ -462,7 +462,7 @@ export function ManageOverview() {
 
   if (!signedIn) {
     return (
-      <div className="rounded-[24px] border border-gray-200 bg-white p-8 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
+      <div className="rounded-[28px] border border-gray-200 bg-white p-8 shadow-sm">
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#51237f]">Manage</p>
         <h1 className="mt-3 text-3xl font-bold tracking-[-0.02em] text-gray-950">Officer tools start after sign in</h1>
         <p className="mt-4 max-w-2xl text-sm leading-7 text-gray-600">
@@ -480,7 +480,7 @@ export function ManageOverview() {
 
   if (!officerClubs.length && !isPlatformAdmin) {
     return (
-      <div className="rounded-[24px] border border-gray-200 bg-white p-8 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
+      <div className="rounded-[28px] border border-gray-200 bg-white p-8 shadow-sm">
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#51237f]">Manage</p>
         <h1 className="mt-3 text-3xl font-bold tracking-[-0.02em] text-gray-950">No management access yet</h1>
         <p className="mt-4 max-w-2xl text-sm leading-7 text-gray-600">
@@ -506,21 +506,21 @@ export function ManageOverview() {
 
   if (officerClubs.length > 1 && !selectedClubId) {
     return (
-      <div className="space-y-6">
-        <section className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-[0_22px_70px_-48px_rgba(17,24,39,0.3)] md:p-8">
+      <div className="space-y-8">
+        <section className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-sm md:p-8">
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#51237f]">Manage</p>
           <h1 className="mt-3 text-3xl font-black tracking-[-0.03em] text-gray-950">Choose a club to manage</h1>
           <p className="mt-3 max-w-3xl text-sm leading-7 text-gray-600">
             You have leadership access in multiple clubs. Pick the workspace you want to open right now.
           </p>
 
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
+          <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {officerClubs.map((club) => (
               <button
                 key={club.id}
                 type="button"
                 onClick={() => setSelectedClubId(club.id)}
-                className="group rounded-[24px] border border-gray-200 bg-white p-5 text-left shadow-[0_18px_40px_-34px_rgba(17,24,39,0.24)] transition hover:-translate-y-0.5 hover:border-[#d8c8eb] hover:shadow-[0_22px_44px_-32px_rgba(17,24,39,0.28)]"
+                className="group rounded-[24px] border border-gray-200 bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-[#d8c8eb] hover:shadow-[0_16px_28px_-24px_rgba(17,24,39,0.24)]"
               >
                 <div className="flex items-start gap-4">
                   <div
@@ -589,9 +589,9 @@ export function ManageOverview() {
   const maxUpcomingRsvps = Math.max(...upcomingEventBars.map((event) => event.value), 1);
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-[28px] border border-gray-200 bg-white p-5 shadow-[0_22px_70px_-48px_rgba(17,24,39,0.3)] md:p-6">
-        <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+    <div className="space-y-8">
+      <section className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-sm md:p-8">
+        <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-3">
               <span className="inline-flex items-center gap-2 rounded-full bg-[#f4ecfb] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#51237f]">
@@ -635,14 +635,14 @@ export function ManageOverview() {
             </div>
           </div>
 
-          <div className="w-full max-w-xl space-y-4">
+          <div className="w-full max-w-xl space-y-5">
             {officerClubs.length > 1 ? (
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Active club</label>
                 <select
                   value={selectedClub?.id || ""}
                   onChange={(event) => setSelectedClubId(event.target.value)}
-                  className="mt-2 h-11 w-full rounded-2xl border border-gray-300 bg-white px-4 text-sm text-gray-800 outline-none transition focus:border-[#51237f]"
+                  className="mt-2 h-12 w-full rounded-2xl border border-gray-300 bg-white px-4 text-sm text-gray-800 outline-none transition focus:border-[#51237f]"
                 >
                   {officerClubs.map((club) => (
                     <option key={club.id} value={club.id}>
@@ -654,21 +654,21 @@ export function ManageOverview() {
             ) : null}
 
             <div className="grid grid-cols-3 gap-3">
-              <div className="rounded-2xl border border-gray-200 bg-[#fafafa] px-4 py-4">
+              <div className="rounded-2xl border border-gray-200 bg-white px-4 py-4">
                 <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500">
                   <Users size={14} className="text-[#51237f]" />
                   Members
                 </div>
                 <div className="mt-2 text-3xl font-black text-gray-950">{dashboardLoading ? "..." : memberCount}</div>
               </div>
-              <div className="rounded-2xl border border-gray-200 bg-[#fafafa] px-4 py-4">
+              <div className="rounded-2xl border border-gray-200 bg-white px-4 py-4">
                 <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500">
                   <CalendarDays size={14} className="text-[#51237f]" />
                   Events
                 </div>
                 <div className="mt-2 text-3xl font-black text-gray-950">{dashboardLoading ? "..." : eventCount}</div>
               </div>
-              <div className="rounded-2xl border border-gray-200 bg-[#fafafa] px-4 py-4">
+              <div className="rounded-2xl border border-gray-200 bg-white px-4 py-4">
                 <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500">
                   <ShieldCheck size={14} className="text-[#51237f]" />
                   RSVPs
@@ -679,7 +679,7 @@ export function ManageOverview() {
           </div>
         </div>
 
-        <div className="mt-5 grid gap-3 border-t border-gray-200 pt-5 lg:grid-cols-[1.2fr_0.8fr]">
+        <div className="mt-6 grid gap-4 border-t border-gray-200 pt-6 lg:grid-cols-[1.2fr_0.8fr]">
           <div className="flex flex-wrap gap-3">
             {selectedClub ? (
               <>
@@ -745,7 +745,7 @@ export function ManageOverview() {
 
       <section className="grid grid-cols-1 gap-6 2xl:grid-cols-[1.4fr_1fr]">
         <div className="min-w-0 space-y-6">
-          <section className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-[0_22px_70px_-48px_rgba(17,24,39,0.3)]">
+          <section className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-sm">
             <div className="mb-5 flex items-start justify-between gap-4">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Club Pulse</p>
@@ -764,7 +764,7 @@ export function ManageOverview() {
             </div>
 
             <div className="grid gap-4 xl:grid-cols-3">
-              <div className="rounded-2xl border border-gray-200 bg-[#fafafa] p-4">
+              <div className="rounded-2xl border border-gray-200 bg-white p-4">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500">Member growth</p>
@@ -787,7 +787,7 @@ export function ManageOverview() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-gray-200 bg-[#fafafa] p-4">
+              <div className="rounded-2xl border border-gray-200 bg-white p-4">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500">RSVP trend</p>
@@ -822,7 +822,7 @@ export function ManageOverview() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-gray-200 bg-[#fafafa] p-4">
+              <div className="rounded-2xl border border-gray-200 bg-white p-4">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500">Leadership coverage</p>
@@ -922,7 +922,7 @@ export function ManageOverview() {
             </div>
           </section>
 
-          <section className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-[0_22px_70px_-48px_rgba(17,24,39,0.3)]">
+          <section className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-sm">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Recent Activity</p>
@@ -935,7 +935,7 @@ export function ManageOverview() {
             <div className="mt-5 space-y-3">
               {recentActivity.length ? (
                 recentActivity.map((item) => (
-                  <div key={item.id} className="flex items-start gap-4 rounded-2xl border border-gray-200 bg-[#fafafa] px-4 py-4">
+                  <div key={item.id} className="flex items-start gap-4 rounded-2xl border border-gray-200 bg-white px-4 py-4">
                     <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-[#51237f] shadow-sm">
                       {item.kind === "member" ? (
                         <UserPlus size={18} />
@@ -968,7 +968,7 @@ export function ManageOverview() {
         </div>
 
         <div className="min-w-0 space-y-6">
-          <section className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-[0_22px_70px_-48px_rgba(17,24,39,0.3)]">
+          <section className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-sm">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Quick Actions</p>
@@ -988,7 +988,7 @@ export function ManageOverview() {
                   className={cn(
                     "rounded-[24px] border px-5 py-5 transition-all",
                     canCreateEvents
-                      ? "border-[#51237f] bg-[#51237f] text-white shadow-[0_18px_40px_-32px_rgba(81,35,127,0.85)] hover:bg-[#45206b]"
+                      ? "border-[#51237f] bg-[#51237f] text-white shadow-[0_14px_28px_-24px_rgba(81,35,127,0.65)] hover:bg-[#45206b]"
                       : "cursor-not-allowed border-gray-200 bg-white text-gray-400"
                   )}
                 >
@@ -1012,7 +1012,7 @@ export function ManageOverview() {
                 </Link>
                 <a
                   href="#manage-members"
-                  className="group rounded-[24px] border border-gray-200 bg-[#fafafa] px-5 py-5 transition-colors hover:border-gray-300 hover:bg-white"
+                  className="group rounded-[24px] border border-gray-200 bg-white px-5 py-5 transition-colors hover:border-gray-300 hover:bg-[#fafafa]"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div>
@@ -1029,7 +1029,7 @@ export function ManageOverview() {
                 </a>
                 <Link
                   href={canEditClub ? `/manage/clubs/${selectedClub.id}/edit` : getClubPath(selectedClub.id)}
-                  className="group rounded-[24px] border border-gray-200 bg-[#fafafa] px-5 py-5 transition-colors hover:border-gray-300 hover:bg-white"
+                  className="group rounded-[24px] border border-gray-200 bg-white px-5 py-5 transition-colors hover:border-gray-300 hover:bg-[#fafafa]"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div>
@@ -1046,7 +1046,7 @@ export function ManageOverview() {
                 </Link>
                 <Link
                   href={selectedClub ? `/manage/announcements/new?clubId=${selectedClub.id}` : "/manage/announcements/new"}
-                  className="group rounded-[24px] border border-gray-200 bg-[#fafafa] px-5 py-5 transition-colors hover:border-gray-300 hover:bg-white"
+                  className="group rounded-[24px] border border-gray-200 bg-white px-5 py-5 transition-colors hover:border-gray-300 hover:bg-[#fafafa]"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div>
@@ -1070,7 +1070,7 @@ export function ManageOverview() {
                   key={chip.label}
                   className={cn(
                     "flex items-center justify-between rounded-2xl border px-4 py-3 text-sm",
-                    chip.enabled ? "border-emerald-200 bg-emerald-50/60" : "border-gray-200 bg-[#fafafa]"
+                    chip.enabled ? "border-emerald-200 bg-emerald-50/60" : "border-gray-200 bg-white"
                   )}
                 >
                   <span className="font-semibold text-gray-900">{chip.label}</span>
@@ -1087,7 +1087,7 @@ export function ManageOverview() {
             </div>
           </section>
 
-          <section id="manage-members" className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-[0_22px_70px_-48px_rgba(17,24,39,0.3)]">
+          <section id="manage-members" className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-sm">
             <div className="mb-5 flex items-start justify-between gap-4">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Members</p>
@@ -1107,7 +1107,7 @@ export function ManageOverview() {
                 managedMembers.map((member) => (
                   <div
                     key={member.userId}
-                    className="flex flex-col gap-3 rounded-2xl border border-gray-200 px-4 py-4 md:flex-row md:items-center md:justify-between"
+                    className="flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white px-4 py-4 md:flex-row md:items-center md:justify-between"
                   >
                     <div className="min-w-0">
                       <p className="text-base font-semibold text-gray-950">{member.name}</p>
@@ -1139,7 +1139,7 @@ export function ManageOverview() {
             </div>
           </section>
 
-          <section className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-[0_22px_70px_-48px_rgba(17,24,39,0.3)]">
+          <section className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-sm">
             <div className="mb-5">
               <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Comms</p>
               <h2 className="mt-2 text-xl font-bold tracking-[-0.02em] text-gray-950">

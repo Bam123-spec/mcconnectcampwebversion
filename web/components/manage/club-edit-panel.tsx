@@ -170,7 +170,7 @@ export function ClubEditPanel({ clubId }: { clubId: string }) {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-3 rounded-[24px] border border-gray-200 bg-white p-6 text-sm text-gray-500 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
+      <div className="flex items-center gap-3 rounded-[24px] border border-gray-200 bg-white p-6 text-sm text-gray-500 shadow-sm">
         <LoaderCircle size={16} className="animate-spin text-[#51237f]" />
         Loading club details.
       </div>
@@ -179,7 +179,7 @@ export function ClubEditPanel({ clubId }: { clubId: string }) {
 
   if (!allowed) {
     return (
-      <div className="rounded-[24px] border border-gray-200 bg-white p-8 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
+      <div className="rounded-[28px] border border-gray-200 bg-white p-8 shadow-sm">
         <h1 className="text-3xl font-bold tracking-[-0.02em] text-gray-950">Club editing unavailable</h1>
         <p className="mt-4 max-w-2xl text-sm leading-7 text-gray-600">{error || "You do not have access to edit this club."}</p>
         <Link
@@ -193,8 +193,8 @@ export function ClubEditPanel({ clubId }: { clubId: string }) {
   }
 
   return (
-    <div className="space-y-8">
-      <section className="rounded-[24px] border border-gray-200 bg-white p-8 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]">
+    <div className="space-y-10">
+      <section className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-sm md:p-8">
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#51237f]">Edit Club</p>
         <h1 className="mt-3 text-3xl font-bold tracking-[-0.02em] text-gray-950">Update club details</h1>
         <p className="mt-4 max-w-2xl text-sm leading-7 text-gray-600">
@@ -204,9 +204,9 @@ export function ClubEditPanel({ clubId }: { clubId: string }) {
 
       <form
         onSubmit={handleSubmit}
-        className="rounded-[24px] border border-gray-200 bg-white p-8 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.35)]"
+        className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-sm md:p-8"
       >
-        <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 gap-7">
           <label className="space-y-2">
             <span className="text-sm font-semibold text-gray-900">Club name</span>
             <input
@@ -245,8 +245,8 @@ export function ClubEditPanel({ clubId }: { clubId: string }) {
         </div>
 
         {imagePreviewUrl ? (
-          <div className="mt-6 rounded-[24px] border border-gray-200 bg-[#fafafa] p-4">
-            <div className="mb-3 flex items-center justify-between gap-3">
+          <div className="mt-8 rounded-[24px] border border-gray-200 bg-white p-5 shadow-sm">
+            <div className="mb-4 flex items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold text-gray-900">Cover preview</p>
                 <p className="text-xs text-gray-500">This will appear on the club profile and discovery cards.</p>
@@ -260,7 +260,7 @@ export function ClubEditPanel({ clubId }: { clubId: string }) {
                 <X size={15} />
               </button>
             </div>
-            <div className="relative h-52 overflow-hidden rounded-[20px] border border-gray-200 bg-white">
+            <div className="relative h-52 overflow-hidden rounded-[20px] border border-gray-200 bg-[#fafafa]">
               <Image src={imagePreviewUrl} alt="Club cover preview" fill className="object-cover" unoptimized />
             </div>
           </div>
