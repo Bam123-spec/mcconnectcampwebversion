@@ -64,3 +64,9 @@
     transform: translateY(-8px);
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .float-gentle {
+    animation: none;
+  }
+}

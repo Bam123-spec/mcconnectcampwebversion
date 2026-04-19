@@ -1,6 +1,5 @@
 import Link from "next/link";
 import {
-  ArrowRight,
   BellRing,
   CalendarDays,
   Compass,
@@ -9,6 +8,7 @@ import {
   LogIn,
   Search,
   ShieldCheck,
+  ShieldPlus,
   Sparkles,
   Users,
 } from "lucide-react";
@@ -92,18 +92,18 @@ export default async function Home() {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f6f2ea]">
-      <section className="relative overflow-hidden border-b border-black/5 bg-[linear-gradient(180deg,#efe4d2_0%,#f6f2ea_56%,#f6f2ea_100%)]">
-        <div className="hero-mesh absolute inset-0 opacity-80" aria-hidden="true" />
+      <section className="relative overflow-hidden border-b border-black/5 bg-[linear-gradient(180deg,#f4f1fb_0%,#fbfbfe_56%,#ffffff_100%)]">
+        <div className="hero-mesh absolute inset-0 opacity-35" aria-hidden="true" />
         <div
-          className="absolute inset-x-0 top-0 h-40 bg-[radial-gradient(circle_at_top,rgba(81,35,127,0.24),transparent_60%)]"
+          className="absolute inset-x-0 top-0 h-48 bg-[radial-gradient(circle_at_top,rgba(81,35,127,0.18),transparent_62%)]"
           aria-hidden="true"
         />
         <div
-          className="absolute -left-20 top-24 h-72 w-72 rounded-full bg-[#51237f]/12 blur-3xl"
+          className="absolute -left-20 top-20 h-72 w-72 rounded-full bg-[#51237f]/8 blur-3xl"
           aria-hidden="true"
         />
         <div
-          className="absolute right-0 top-12 h-80 w-80 rounded-full bg-[#c66b3d]/14 blur-3xl"
+          className="absolute right-0 top-14 h-80 w-80 rounded-full bg-[#00a0df]/8 blur-3xl"
           aria-hidden="true"
         />
 
@@ -153,9 +153,9 @@ export default async function Home() {
             </div>
 
             <div className="relative lg:pl-8">
-              <div className="float-gentle relative overflow-hidden rounded-[32px] border border-white/70 bg-[#161212] p-6 text-white shadow-[0_30px_80px_rgba(22,18,18,0.22)]">
+              <div className="float-gentle relative overflow-hidden rounded-[32px] border border-[#51237f]/10 bg-[#14121a] p-6 text-white shadow-[0_30px_80px_rgba(42,26,71,0.18)]">
                 <div
-                  className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.18),transparent_38%),linear-gradient(135deg,rgba(255,255,255,0.10),transparent_52%)]"
+                  className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.14),transparent_34%),linear-gradient(180deg,rgba(98,59,149,0.30),transparent_46%)]"
                   aria-hidden="true"
                 />
                 <div className="relative">
@@ -169,18 +169,55 @@ export default async function Home() {
                     </div>
                   </div>
 
-                  <div className="mt-6 rounded-[24px] bg-white/8 p-5 backdrop-blur-sm">
-                    <div className="flex items-start justify-between gap-4">
+                  <div className="mt-6 rounded-[24px] border border-white/8 bg-white/6 p-5 backdrop-blur-sm">
+                    <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
                       <div>
                         <p className="text-sm text-white/60">Featured tonight</p>
                         <p className="mt-2 text-2xl font-semibold">Leadership Workshop</p>
-                        <p className="mt-2 max-w-sm text-sm leading-6 text-white/70">
-                          Doors open at 4:00 PM in the Student Union. RSVP activity is rising and officer updates have already started.
+                        <p className="mt-3 max-w-sm text-sm leading-6 text-white/72">
+                          Doors open at 4:00 PM in the Student Union. Officer notes are live, RSVP demand is climbing, and protected location details stay hidden until sign-in.
                         </p>
+
+                        <div className="mt-5 flex flex-wrap items-center gap-3">
+                          <div className="rounded-full bg-[#f0b24d] px-3 py-2 text-right text-[#161212]">
+                            <div className="text-[10px] font-semibold uppercase tracking-[0.2em]">RSVP</div>
+                            <div className="text-2xl font-semibold">184</div>
+                          </div>
+                          <div className="rounded-full border border-white/10 bg-white/8 px-4 py-2 text-sm text-white/75">
+                            Student Union
+                          </div>
+                          <div className="rounded-full border border-white/10 bg-white/8 px-4 py-2 text-sm text-white/75">
+                            4:00 PM start
+                          </div>
+                        </div>
                       </div>
-                      <div className="rounded-2xl bg-[#f0b24d] px-3 py-2 text-right text-[#161212]">
-                        <div className="text-xs font-semibold uppercase tracking-[0.2em]">RSVP</div>
-                        <div className="text-2xl font-semibold">184</div>
+
+                      <div className="grid gap-3">
+                        <div className="rounded-[22px] border border-white/10 bg-[#201b28] p-4">
+                          <div className="flex items-start gap-3">
+                            <div className="rounded-2xl bg-white/10 p-2">
+                              <ShieldPlus className="h-4 w-4 text-[#c9b8ff]" />
+                            </div>
+                            <div>
+                              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">Private access</p>
+                              <p className="mt-2 text-base font-semibold">Sensitive details stay gated</p>
+                              <p className="mt-2 text-sm leading-6 text-white/68">
+                                Open browsing is public, but room-level details and protected logistics appear only after authentication.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="rounded-[22px] border border-white/10 bg-white/6 p-4">
+                          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">Fresh activity</p>
+                          <div className="mt-3 flex items-center justify-between text-sm text-white/82">
+                            <span>3 new newsletters</span>
+                            <span>72% read rate</span>
+                          </div>
+                          <div className="mt-3 h-2 rounded-full bg-white/10">
+                            <div className="h-2 w-[72%] rounded-full bg-[#8cc8ff]" />
+                          </div>
+                        </div>
                       </div>
                     </div>
 
@@ -204,29 +241,12 @@ export default async function Home() {
                   </div>
                 </div>
               </div>
-
-              <div className="absolute -left-3 top-8 hidden w-52 rounded-[24px] border border-[#161212]/10 bg-white/92 p-4 shadow-[0_18px_45px_rgba(22,18,18,0.10)] backdrop-blur md:block">
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#7f776f]">Private access</p>
-                <p className="mt-2 text-sm font-semibold text-[#161212]">Location details unlock only after sign-in.</p>
-                <p className="mt-2 text-sm leading-6 text-[#5a534d]">Open campus browsing stays public without leaking protected event information.</p>
-              </div>
-
-              <div className="absolute -right-2 bottom-8 hidden w-56 rounded-[24px] border border-white/70 bg-[#fff9f0] p-4 shadow-[0_18px_45px_rgba(198,107,61,0.14)] md:block">
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#a45b35]">Fresh activity</p>
-                <div className="mt-3 flex items-center justify-between text-sm text-[#342b27]">
-                  <span>3 new newsletters</span>
-                  <ArrowRight className="h-4 w-4" />
-                </div>
-                <div className="mt-2 h-2 rounded-full bg-[#f1dfcd]">
-                  <div className="h-2 w-[72%] rounded-full bg-[#c66b3d]" />
-                </div>
-              </div>
             </div>
           </div>
 
-          <div className="grid gap-4 rounded-[30px] border border-white/70 bg-white/72 p-5 shadow-[0_20px_60px_rgba(22,18,18,0.08)] backdrop-blur md:grid-cols-4 md:p-6">
+          <div className="grid gap-4 rounded-[30px] border border-[#51237f]/8 bg-white/82 p-5 shadow-[0_20px_60px_rgba(34,22,60,0.06)] backdrop-blur md:grid-cols-4 md:p-6">
             {HERO_METRICS.map((metric) => (
-              <div key={metric.label} className="rounded-[22px] border border-[#161212]/8 bg-white/80 px-5 py-4">
+              <div key={metric.label} className="rounded-[22px] border border-[#51237f]/8 bg-[#faf9fe] px-5 py-4">
                 <div className="text-3xl font-semibold tracking-[-0.04em] text-[#161212]">{metric.value}</div>
                 <div className="mt-1 text-sm text-[#625a54]">{metric.label}</div>
               </div>
