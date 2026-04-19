@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { LogIn, User } from "lucide-react";
+import { LogIn } from "lucide-react";
 import { AUTH_ENABLED } from "@/lib/features";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
@@ -71,6 +71,15 @@ export function TopNav() {
     };
   }, []);
 
+  const accountLabel = displayName || "Account";
+  const accountInitials = accountLabel
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
+
   return (
     <header className="sticky top-0 z-50 border-b border-gray-200 bg-white">
       <div className="mx-auto flex h-[64px] max-w-6xl items-stretch px-4 md:px-6 lg:px-8">
@@ -126,15 +135,22 @@ export function TopNav() {
           ) : userEmail ? (
             <Link
               href="/activity"
-              className="inline-flex h-10 items-center gap-2 rounded-md border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-800 transition hover:bg-gray-50 hover:text-[#51237f]"
+              className="group inline-flex h-11 items-center gap-3 rounded-full border border-gray-200 bg-white px-2.5 pl-2 shadow-[0_8px_22px_-18px_rgba(15,23,42,0.3)] transition hover:border-[#51237f]/25 hover:bg-[#fbf8ff]"
             >
-              <User size={16} />
-              <span className="hidden sm:inline">{displayName || "Account"}</span>
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#51237f] text-xs font-bold text-white">
+                {accountInitials || "MC"}
+              </span>
+              <span className="hidden min-w-0 pr-2 sm:block">
+                <span className="block max-w-44 truncate text-sm font-semibold leading-4 text-gray-900 group-hover:text-[#51237f]">
+                  {accountLabel}
+                </span>
+                <span className="block text-[11px] font-medium leading-4 text-gray-400">Account</span>
+              </span>
             </Link>
           ) : (
             <Link
               href="/login"
-              className="inline-flex h-10 items-center gap-2 rounded-md px-3 text-sm font-semibold text-gray-800 transition hover:bg-gray-50 hover:text-[#51237f]"
+              className="inline-flex h-11 items-center gap-2 rounded-full bg-[#51237f] px-4 text-sm font-semibold text-white shadow-[0_12px_28px_-20px_rgba(81,35,127,0.7)] transition hover:bg-[#45206b]"
             >
               <LogIn size={16} />
               Sign In

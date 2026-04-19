@@ -293,8 +293,8 @@ export function ClubProfilePanel({
 
   return (
     <main className="min-h-screen bg-white text-[#17151c]">
-      <div className="mx-auto max-w-[1180px] px-4 py-10 sm:px-6 lg:px-8">
-        <div className="mb-8 flex items-center justify-between">
+      <div className="mx-auto max-w-[1180px] px-4 py-12 sm:px-6 lg:px-8 lg:py-14">
+        <div className="mb-10 flex items-center justify-between">
           <Link href="/clubs" className="text-sm font-semibold text-[#51237f] hover:underline">
             Back to clubs
           </Link>
@@ -303,9 +303,9 @@ export function ClubProfilePanel({
           </span>
         </div>
 
-        <section className="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_420px]">
+        <section className="grid items-start gap-12 lg:grid-cols-[minmax(0,1fr)_400px] xl:gap-16">
           <div className="pt-2">
-            <div className="mb-5 flex items-center gap-3">
+            <div className="mb-6 flex items-center gap-3">
               <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[#51237f] text-sm font-black text-white">
                 {clubBadge}
               </span>
@@ -315,13 +315,13 @@ export function ClubProfilePanel({
               </div>
             </div>
 
-            <h1 className="max-w-4xl text-[3.6rem] font-black leading-[0.9] tracking-[-0.075em] text-[#121016] md:text-[5.5rem]">
+            <h1 className="max-w-4xl text-[3.25rem] font-black leading-[1.02] tracking-[-0.065em] text-[#121016] md:text-[4.75rem] md:leading-[1.01]">
               {initialClub.name}
             </h1>
 
-            <p className="mt-6 max-w-2xl text-[17px] leading-8 text-gray-600">{clubSummary}</p>
+            <p className="mt-7 max-w-2xl text-[17px] leading-9 text-gray-600">{clubSummary}</p>
 
-            <div className="mt-7 flex flex-wrap items-center gap-4">
+            <div className="mt-8 flex flex-wrap items-center gap-5">
               <div className="flex -space-x-3">
                 {memberPreview.map((member) => (
                   <div
@@ -344,12 +344,13 @@ export function ClubProfilePanel({
                   </div>
                 ) : null}
               </div>
-              <p className="text-sm font-semibold text-gray-700">
-                {initialClub.memberCount} members <span className="mx-2 text-gray-300">/</span> {initialEvents.length} upcoming events
+              <p className="text-sm font-semibold leading-6 text-gray-700">
+                {initialClub.memberCount} members <span className="mx-2 text-gray-300">/</span>{" "}
+                {initialEvents.length} upcoming events
               </p>
             </div>
 
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <button
                 type="button"
                 onClick={handleJoin}
@@ -387,15 +388,15 @@ export function ClubProfilePanel({
             </div>
           </div>
 
-          <div className="space-y-4">
-            <div className="relative aspect-[4/4.45] overflow-hidden rounded-[34px] bg-gray-100 shadow-[0_28px_70px_-44px_rgba(17,24,39,0.45)]">
+          <div className="space-y-5">
+            <div className="relative aspect-[4/4.15] overflow-hidden rounded-[30px] bg-gray-100 shadow-[0_24px_60px_-42px_rgba(17,24,39,0.42)]">
               <Image src={initialClub.coverImageUrl || fallbackCover} alt={initialClub.name} fill className="object-cover" priority />
-              <div className="absolute inset-x-4 bottom-4 rounded-[26px] bg-white p-4 shadow-[0_18px_42px_-30px_rgba(17,24,39,0.4)]">
+              <div className="absolute inset-x-5 bottom-5 rounded-[24px] bg-white p-5 shadow-[0_18px_42px_-30px_rgba(17,24,39,0.4)]">
                 <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#51237f]">Up next</p>
                 {featuredEvent ? (
                   <>
-                    <h2 className="mt-2 text-xl font-black leading-tight tracking-[-0.04em]">{featuredEvent.name}</h2>
-                    <div className="mt-3 space-y-2 text-sm text-gray-600">
+                    <h2 className="mt-2 text-xl font-black leading-7 tracking-[-0.035em]">{featuredEvent.name}</h2>
+                    <div className="mt-4 space-y-2.5 text-sm text-gray-600">
                       <p className="flex items-center gap-2">
                         <CalendarDays size={15} className="text-gray-400" />
                         {formatEventDate(featuredEvent.date)} / {featuredEvent.time}
@@ -405,7 +406,7 @@ export function ClubProfilePanel({
                         {featuredEvent.location}
                       </p>
                     </div>
-                    <Link href={`/events/${featuredEvent.id}`} className="mt-4 inline-flex text-sm font-bold text-[#51237f] hover:underline">
+                    <Link href={`/events/${featuredEvent.id}`} className="mt-5 inline-flex text-sm font-bold text-[#51237f] hover:underline">
                       View event
                     </Link>
                   </>
@@ -415,13 +416,13 @@ export function ClubProfilePanel({
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 rounded-[28px] border border-gray-100 bg-[#fafafa] p-3">
+            <div className="grid grid-cols-3 gap-3 rounded-[28px] border border-gray-100 bg-[#fafafa] p-3.5">
               {[
                 ["Members", initialClub.memberCount],
                 ["Events", initialEvents.length],
                 ["Leads", leadershipCount],
               ].map(([label, value]) => (
-                <div key={label} className="rounded-[22px] bg-white px-3 py-4 text-center">
+                <div key={label} className="rounded-[22px] bg-white px-3 py-5 text-center">
                   <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-gray-400">{label}</p>
                   <p className="mt-1 text-2xl font-black">{value}</p>
                 </div>

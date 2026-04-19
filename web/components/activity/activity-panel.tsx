@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   Activity,
   Award,
@@ -561,193 +561,218 @@ export function ActivityPanel() {
   };
 
   return (
-    <div className="min-h-screen bg-white py-6">
+    <div className="min-h-screen bg-[#fbfbf8] py-8">
       <div className="mx-auto max-w-[88rem] px-4 sm:px-6 lg:px-8">
-        <div className="space-y-6">
-          <section className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.18)]">
-            <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex items-start gap-4">
+        <section className="rounded-[32px] border border-gray-200 bg-white p-6 shadow-[0_18px_50px_-42px_rgba(17,24,39,0.18)]">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-3xl">
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#51237f]">My dashboard</p>
+              <div className="mt-3 flex items-start gap-4">
                 <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#51237f] text-xl font-black text-white">
                   {initials}
                 </div>
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Student dashboard</p>
-                  <h1 className="mt-1 text-3xl font-black tracking-[-0.03em] text-gray-950">{displayName}</h1>
-                  <p className="mt-1 text-sm text-gray-600">
+                  <h1 className="text-4xl font-semibold tracking-[-0.05em] text-gray-950 md:text-5xl">
+                    {displayName}
+                  </h1>
+                  <p className="mt-2 max-w-2xl text-base leading-7 text-gray-600">
                     Montgomery College
                     {subtitleParts.length ? ` · ${subtitleParts.join(" · ")}` : ""}
                   </p>
                   {email ? <p className="mt-1 text-sm text-gray-500">{email}</p> : null}
                 </div>
               </div>
-
-              <div className="flex flex-wrap gap-2">
-                {profile?.role === "admin" ? (
-                  <span className="rounded-full bg-[#fff4d6] px-3 py-1 text-xs font-semibold text-[#8a6116]">
-                    Platform admin
-                  </span>
-                ) : null}
-                {profile?.officer_title ? (
-                  <span className="rounded-full bg-[#ede7f6] px-3 py-1 text-xs font-semibold text-[#51237f]">
-                    {profile.officer_title}
-                  </span>
-                ) : null}
-                {profile?.username ? (
-                  <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">
-                    @{profile.username}
-                  </span>
-                ) : null}
-              </div>
             </div>
 
-            <div className="mt-5 grid gap-4 md:grid-cols-3 xl:grid-cols-4">
-              <div className="rounded-2xl border border-gray-200 bg-[#fafafa] p-4">
-                <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500">
-                  <Ticket size={14} className="text-[#51237f]" />
-                  Events attended
-                </div>
-                <div className="mt-2 text-3xl font-black text-gray-950">{attendedCount}</div>
-                <p className="mt-1 text-sm text-gray-500">Past campus events you checked into.</p>
-              </div>
-              <div className="rounded-2xl border border-gray-200 bg-[#fafafa] p-4">
-                <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500">
-                  <Users size={14} className="text-[#51237f]" />
-                  Clubs joined
-                </div>
-                <div className="mt-2 text-3xl font-black text-gray-950">{memberships.length}</div>
-                <p className="mt-1 text-sm text-gray-500">Active communities in your dashboard.</p>
-              </div>
-              <div className="rounded-2xl border border-gray-200 bg-[#fafafa] p-4">
-                <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500">
-                  <ShieldCheck size={14} className="text-[#51237f]" />
-                  Leadership roles
-                </div>
-                <div className="mt-2 text-3xl font-black text-gray-950">{leadershipCount}</div>
-                <p className="mt-1 text-sm text-gray-500">Officer or leadership access you hold.</p>
-              </div>
-              <div className="rounded-2xl border border-gray-200 bg-[#fafafa] p-4">
-                <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500">
-                  <Bookmark size={14} className="text-[#51237f]" />
-                  Saved events
-                </div>
-                <div className="mt-2 text-3xl font-black text-gray-950">{savedEvents.length}</div>
-                <p className="mt-1 text-sm text-gray-500">Things you want to come back to soon.</p>
-              </div>
+            <div className="flex flex-wrap gap-2">
+              {profile?.role === "admin" ? (
+                <span className="rounded-full bg-[#fff4d6] px-3 py-1.5 text-xs font-semibold text-[#8a6116]">
+                  Platform admin
+                </span>
+              ) : null}
+              {profile?.officer_title ? (
+                <span className="rounded-full bg-[#ede7f6] px-3 py-1.5 text-xs font-semibold text-[#51237f]">
+                  {profile.officer_title}
+                </span>
+              ) : null}
+              {profile?.username ? (
+                <span className="rounded-full bg-gray-100 px-3 py-1.5 text-xs font-semibold text-gray-700">
+                  @{profile.username}
+                </span>
+              ) : null}
             </div>
+          </div>
 
-            <div className="mt-5 border-t border-gray-200 pt-5">
-              {profile?.bio ? (
-                <p className="max-w-3xl text-sm leading-7 text-gray-600">{profile.bio}</p>
-              ) : (
-                <p className="max-w-3xl text-sm leading-7 text-gray-600">
-                  Your personal dashboard keeps registrations, memberships, saved events, and leadership access in one place so you can check in quickly every day.
-                </p>
-              )}
-            </div>
-          </section>
+          <p className="mt-6 max-w-3xl text-sm leading-7 text-gray-600">
+            Your activity, memberships, saved events, and leadership access in one calm place.
+          </p>
 
-          <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.35fr_0.95fr]">
-            <div className="space-y-6">
-              <section className="overflow-hidden rounded-[24px] border border-gray-200 bg-white shadow-[0_18px_50px_-40px_rgba(17,24,39,0.18)]">
-                <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5">
-                  <div>
-                    <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Registered events</p>
-                    <h2 className="mt-1 text-xl font-bold tracking-[-0.02em] text-gray-950">Upcoming and past RSVPs</h2>
-                  </div>
-                  <Link href="/events" className="text-sm font-semibold text-[#51237f] hover:underline">
-                    Browse Events
-                  </Link>
+          <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <StatCard icon={<Ticket size={14} className="text-[#51237f]" />} label="Events attended" value={attendedCount} note="Past campus events you checked into." />
+            <StatCard icon={<Users size={14} className="text-[#51237f]" />} label="Clubs joined" value={memberships.length} note="Active communities in your dashboard." />
+            <StatCard icon={<ShieldCheck size={14} className="text-[#51237f]" />} label="Leadership roles" value={leadershipCount} note="Officer or leadership access you hold." />
+            <StatCard icon={<Bookmark size={14} className="text-[#51237f]" />} label="Saved events" value={savedEvents.length} note="Things you want to come back to soon." />
+          </div>
+        </section>
+
+        <div className="mt-8 grid gap-8 xl:grid-cols-[1.35fr_0.95fr]">
+          <div className="space-y-8">
+            <section className="rounded-[28px] border border-gray-200 bg-white shadow-[0_18px_50px_-42px_rgba(17,24,39,0.18)]">
+              <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5">
+                <div>
+                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Activity</p>
+                  <h2 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-gray-950">Recent timeline</h2>
                 </div>
-                <div className="p-6 flex flex-col gap-4">
-                  {registrations.length ? registrations.map((registration) => (
-                    <div
-                      key={registration.id}
-                      className="flex flex-col gap-4 rounded-2xl border border-gray-200 p-4 sm:flex-row"
-                    >
-                      <div className="flex-1">
-                        <div className="mb-2 flex flex-wrap items-center gap-2">
-                          <span className="rounded-full bg-green-100 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-green-800">
-                            {registration.status}
-                          </span>
-                          <span className="text-xs font-medium text-gray-500">{registration.clubName}</span>
-                        </div>
-                        <h3 className="text-lg font-bold text-gray-950">{registration.eventName}</h3>
-                        <div className="mt-3 flex flex-col gap-2 text-sm font-medium text-gray-600 sm:flex-row sm:items-center sm:gap-6">
-                          <div className="flex items-center gap-1.5">
-                            <Clock size={16} className="text-gray-400" />
-                            {registration.dateLabel}
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <MapPin size={16} className="text-gray-400" />
-                            {registration.location}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-3 border-t border-gray-200 pt-4 sm:border-l sm:border-t-0 sm:pl-6 sm:pt-0">
-                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-gray-200 bg-gray-50 text-gray-400">
-                          {registration.isUpcoming ? <QrCode size={28} /> : <Clock3 size={28} />}
-                        </div>
-                        <div className="flex flex-col gap-2">
-                          {registration.isUpcoming ? (
-                            <EventPassButton
-                              eventId={registration.eventId}
-                              eventName={registration.eventName}
-                              eventDate={registration.eventDate || registration.dateLabel}
-                              eventTime={registration.eventTime || "Time TBA"}
-                              eventLocation={registration.location}
-                              className="inline-flex items-center gap-2 rounded-xl border border-[#d8c8ea] bg-[#f7f2fb] px-3.5 py-2 text-sm font-semibold text-[#51237f] transition-colors hover:bg-[#efe6f8]"
-                            />
+                <Link href="/activity" className="text-sm font-semibold text-[#51237f] hover:underline">
+                  Refresh
+                </Link>
+              </div>
+              <div className="p-4 sm:p-5">
+                {activityFeed.length ? (
+                  <div className="space-y-3">
+                    {activityFeed.map((item) => (
+                      <div key={item.id} className="flex items-start gap-4 rounded-[20px] border border-gray-100 bg-[#fcfcfd] p-4">
+                        <span className="mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#f4ecfb] text-[#51237f]">
+                          {item.kind === "join" ? (
+                            <UserPlus size={18} />
+                          ) : item.kind === "officer" ? (
+                            <ShieldCheck size={18} />
+                          ) : item.kind === "attendance" ? (
+                            <CalendarDays size={18} />
                           ) : (
-                            <span className="text-sm font-semibold text-[#51237f]">Attended</span>
+                            <Activity size={18} />
                           )}
-                          {!registration.isUpcoming ? (
-                            <button
-                              type="button"
-                              onClick={() => handleDownloadCertificate(registration)}
-                              disabled={certificateRegistrationId === registration.id}
-                              className="inline-flex items-center gap-2 rounded-xl border border-[#d8c8ea] bg-[#f7f2fb] px-3.5 py-2 text-sm font-semibold text-[#51237f] transition-colors hover:bg-[#efe6f8] disabled:cursor-not-allowed disabled:opacity-60"
-                            >
-                              {certificateRegistrationId === registration.id ? (
-                                <LoaderCircle size={16} className="animate-spin" />
-                              ) : (
-                                <Download size={16} />
-                              )}
-                              {certificateRegistrationId === registration.id ? "Preparing PDF" : "Download certificate"}
-                            </button>
-                          ) : null}
+                        </span>
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                            <h3 className="text-sm font-semibold text-gray-950">{item.title}</h3>
+                            <span className="rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-500">
+                              {item.timeLabel}
+                            </span>
+                          </div>
+                          <p className="mt-1 text-sm leading-6 text-gray-600">{item.context}</p>
                         </div>
                       </div>
-                    </div>
-                  )) : (
-                    <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 px-5 py-8 text-center">
-                      <h3 className="text-lg font-bold text-gray-900">No event registrations yet</h3>
-                      <p className="mt-2 text-sm text-gray-500">Once you RSVP to events, they’ll appear here.</p>
-                    </div>
-                  )}
-                </div>
-              </section>
-
-              <section className="overflow-hidden rounded-[24px] border border-gray-200 bg-white shadow-[0_18px_50px_-40px_rgba(17,24,39,0.18)]">
-                <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5">
-                  <div>
-                    <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Communities</p>
-                    <h2 className="mt-1 text-xl font-bold tracking-[-0.02em] text-gray-950">Your clubs and roles</h2>
+                    ))}
                   </div>
-                  <Link href="/clubs" className="text-sm font-semibold text-[#51237f] hover:underline">
-                    Find Groups
-                  </Link>
+                ) : (
+                  <div className="rounded-[20px] border border-dashed border-gray-200 bg-gray-50 px-6 py-12 text-center">
+                    <h3 className="text-base font-semibold text-gray-950">No recent activity yet</h3>
+                    <p className="mt-2 text-sm text-gray-500">
+                      As you join clubs and RSVP to events, your activity feed will appear here.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </section>
+
+            <section className="rounded-[28px] border border-gray-200 bg-white shadow-[0_18px_50px_-42px_rgba(17,24,39,0.18)]">
+              <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5">
+                <div>
+                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Registered events</p>
+                  <h2 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-gray-950">Upcoming and past RSVPs</h2>
                 </div>
-                <ul className="divide-y divide-gray-100">
-                  {memberships.length ? memberships.map((membership) => (
-                    <li key={membership.id} className="flex items-center gap-4 p-6 transition-colors hover:bg-gray-50">
+                <Link href="/events" className="text-sm font-semibold text-[#51237f] hover:underline">
+                  Browse events
+                </Link>
+              </div>
+              <div className="p-4 sm:p-5">
+                {registrations.length ? (
+                  <div className="space-y-3">
+                    {registrations.map((registration) => (
+                      <div
+                        key={registration.id}
+                        className="rounded-[20px] border border-gray-100 bg-[#fcfcfd] p-4 transition-colors hover:border-gray-200"
+                      >
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                          <div className="min-w-0">
+                            <div className="mb-2 flex flex-wrap items-center gap-2">
+                              <span className="rounded-full bg-green-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-green-800">
+                                {registration.status}
+                              </span>
+                              <span className="text-xs font-medium text-gray-500">{registration.clubName}</span>
+                            </div>
+                            <h3 className="text-lg font-semibold text-gray-950">{registration.eventName}</h3>
+                            <div className="mt-3 flex flex-col gap-2 text-sm text-gray-600 sm:flex-row sm:flex-wrap sm:gap-x-6">
+                              <span className="inline-flex items-center gap-2">
+                                <Clock size={15} className="text-gray-400" />
+                                {registration.dateLabel}
+                              </span>
+                              <span className="inline-flex items-center gap-2">
+                                <MapPin size={15} className="text-gray-400" />
+                                {registration.location}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-3 border-t border-gray-100 pt-4 sm:border-t-0 sm:pt-0">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-400">
+                              {registration.isUpcoming ? <QrCode size={24} /> : <Clock3 size={24} />}
+                            </div>
+                            <div className="flex flex-col gap-2">
+                              {registration.isUpcoming ? (
+                                <EventPassButton
+                                  eventId={registration.eventId}
+                                  eventName={registration.eventName}
+                                  eventDate={registration.eventDate || registration.dateLabel}
+                                  eventTime={registration.eventTime || "Time TBA"}
+                                  eventLocation={registration.location}
+                                  className="inline-flex items-center gap-2 rounded-full border border-[#d8c8ea] bg-[#f7f2fb] px-4 py-2 text-sm font-semibold text-[#51237f] transition-colors hover:bg-[#efe6f8]"
+                                />
+                              ) : (
+                                <span className="text-sm font-semibold text-[#51237f]">Attended</span>
+                              )}
+                              {!registration.isUpcoming ? (
+                                <button
+                                  type="button"
+                                  onClick={() => handleDownloadCertificate(registration)}
+                                  disabled={certificateRegistrationId === registration.id}
+                                  className="inline-flex items-center gap-2 rounded-full border border-[#d8c8ea] bg-[#f7f2fb] px-4 py-2 text-sm font-semibold text-[#51237f] transition-colors hover:bg-[#efe6f8] disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                  {certificateRegistrationId === registration.id ? (
+                                    <LoaderCircle size={16} className="animate-spin" />
+                                  ) : (
+                                    <Download size={16} />
+                                  )}
+                                  {certificateRegistrationId === registration.id ? "Preparing PDF" : "Download certificate"}
+                                </button>
+                              ) : null}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-[20px] border border-dashed border-gray-200 bg-gray-50 px-6 py-12 text-center">
+                    <h3 className="text-base font-semibold text-gray-950">No event registrations yet</h3>
+                    <p className="mt-2 text-sm text-gray-500">Once you RSVP to events, they’ll appear here.</p>
+                  </div>
+                )}
+              </div>
+            </section>
+
+            <section className="rounded-[28px] border border-gray-200 bg-white shadow-[0_18px_50px_-42px_rgba(17,24,39,0.18)]">
+              <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5">
+                <div>
+                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Communities</p>
+                  <h2 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-gray-950">Your clubs and roles</h2>
+                </div>
+                <Link href="/clubs" className="text-sm font-semibold text-[#51237f] hover:underline">
+                  Find groups
+                </Link>
+              </div>
+              <ul className="divide-y divide-gray-100">
+                {memberships.length ? (
+                  memberships.map((membership) => (
+                    <li key={membership.id} className="flex items-center gap-4 p-5 transition-colors hover:bg-gray-50">
                       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#51237f] text-lg font-black text-white shadow-sm">
                         {membership.initials}
                       </div>
                       <div className="min-w-0 flex-1">
                         <Link
                           href={getClubPath(membership.clubId)}
-                          className="text-base font-bold text-gray-900 truncate hover:text-[#51237f]"
+                          className="truncate text-base font-semibold text-gray-950 hover:text-[#51237f]"
                         >
                           {membership.name}
                         </Link>
@@ -755,7 +780,7 @@ export function ActivityPanel() {
                       </div>
                       <div className="shrink-0 text-right">
                         <span
-                          className={`inline-block rounded-full px-3 py-1 text-xs font-bold tracking-wide ${
+                          className={`inline-block rounded-full px-3 py-1 text-xs font-semibold tracking-wide ${
                             membership.badgeTone === "officer"
                               ? "bg-purple-100 text-[#51237f]"
                               : "bg-gray-100 text-gray-600"
@@ -765,167 +790,151 @@ export function ActivityPanel() {
                         </span>
                       </div>
                     </li>
-                  )) : (
-                    <li className="p-6">
-                      <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 px-5 py-8 text-center">
-                        <h3 className="text-lg font-bold text-gray-900">No club memberships yet</h3>
-                        <p className="mt-2 text-sm text-gray-500">Join a club to start building your campus dashboard.</p>
-                      </div>
-                    </li>
-                  )}
-                </ul>
-              </section>
-            </div>
-
-            <div className="space-y-6">
-              <section className="rounded-[24px] border border-gray-200 bg-white p-6 shadow-[0_18px_50px_-40px_rgba(17,24,39,0.18)]">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Snapshot</p>
-                    <h2 className="mt-1 text-xl font-bold tracking-[-0.02em] text-gray-950">Your weekly pace</h2>
-                  </div>
-                  <Award size={18} className="text-[#51237f]" />
-                </div>
-
-                <div className="mt-5 space-y-4">
-                  <div className="rounded-2xl border border-gray-200 bg-[#fafafa] p-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="text-sm font-medium text-gray-600">Upcoming RSVPs</span>
-                      <span className="text-2xl font-black text-gray-950">{upcomingRegistrations.length}</span>
+                  ))
+                ) : (
+                  <li className="p-5">
+                    <div className="rounded-[20px] border border-dashed border-gray-200 bg-gray-50 px-6 py-12 text-center">
+                      <h3 className="text-base font-semibold text-gray-950">No club memberships yet</h3>
+                      <p className="mt-2 text-sm text-gray-500">Join a club to start building your campus dashboard.</p>
                     </div>
-                    <div className="mt-3 h-2 rounded-full bg-white">
-                      <div
-                        className="h-full rounded-full bg-[#51237f]"
-                        style={{ width: `${Math.max(12, registrations.length ? (upcomingRegistrations.length / registrations.length) * 100 : 12)}%` }}
-                      />
-                    </div>
-                  </div>
-                  <div className="rounded-2xl border border-gray-200 bg-[#fafafa] p-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="text-sm font-medium text-gray-600">Leadership presence</span>
-                      <span className="text-2xl font-black text-gray-950">{leadershipCount}</span>
-                    </div>
-                    <p className="mt-2 text-sm text-gray-500">
-                      {leadershipCount
-                        ? "You currently hold officer access in one or more clubs."
-                        : "No leadership roles assigned right now."}
-                    </p>
-                  </div>
-                </div>
-
-                <Link
-                  href="/events"
-                  className="mt-5 block w-full rounded-xl bg-[#51237f] py-2.5 text-center text-sm font-bold text-white transition-colors hover:bg-[#45206b]"
-                >
-                  Explore More Events
-                </Link>
-              </section>
-
-              <section className="overflow-hidden rounded-[24px] border border-gray-200 bg-white shadow-[0_18px_50px_-40px_rgba(17,24,39,0.18)]">
-                <div className="border-b border-gray-100 px-6 py-5">
-                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Recommended</p>
-                  <h2 className="mt-1 text-xl font-bold tracking-[-0.02em] text-gray-950">Next steps for you</h2>
-                </div>
-                <div className="p-6 space-y-3">
-                  {recommendations.map((item) => {
-                    const Icon = item.icon;
-                    return (
-                      <div key={item.id} className="rounded-2xl border border-gray-200 bg-[#fafafa] p-4">
-                        <div className="flex items-start gap-3">
-                          <span className="mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-[#51237f] shadow-sm">
-                            <Icon size={18} />
-                          </span>
-                          <div className="min-w-0 flex-1">
-                            <h3 className="text-sm font-bold text-gray-950">{item.title}</h3>
-                            <p className="mt-1 text-sm leading-6 text-gray-600">{item.description}</p>
-                            <Link
-                              href={item.href}
-                              className="mt-3 inline-flex rounded-full bg-[#51237f] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#45206b]"
-                            >
-                              {item.cta}
-                            </Link>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </section>
-
-              <section className="rounded-[24px] border border-gray-200 bg-white shadow-[0_18px_50px_-40px_rgba(17,24,39,0.18)]">
-                <div className="border-b border-gray-100 px-6 py-5">
-                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Activity</p>
-                  <h2 className="mt-1 text-xl font-bold tracking-[-0.02em] text-gray-950">Recent timeline</h2>
-                </div>
-                <div className="p-6 space-y-3">
-                  {activityFeed.length ? (
-                    activityFeed.map((item) => (
-                      <div key={item.id} className="rounded-2xl border border-gray-200 px-4 py-4">
-                        <div className="flex items-start gap-3">
-                          <span className="mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#f4ecfb] text-[#51237f]">
-                            {item.kind === "join" ? (
-                              <UserPlus size={18} />
-                            ) : item.kind === "officer" ? (
-                              <ShieldCheck size={18} />
-                            ) : item.kind === "attendance" ? (
-                              <CalendarDays size={18} />
-                            ) : (
-                              <Activity size={18} />
-                            )}
-                          </span>
-                          <div className="min-w-0">
-                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                              <h3 className="text-sm font-bold text-gray-950">{item.title}</h3>
-                              <span className="rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-500">
-                                {item.timeLabel}
-                              </span>
-                            </div>
-                            <p className="mt-1 text-sm leading-6 text-gray-600">{item.context}</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 px-5 py-8 text-center">
-                      <h3 className="text-lg font-bold text-gray-900">No recent activity yet</h3>
-                      <p className="mt-2 text-sm text-gray-500">As you join clubs and RSVP to events, your activity feed will start filling in here.</p>
-                    </div>
-                  )}
-                </div>
-              </section>
-
-              <section className="overflow-hidden rounded-[24px] border border-gray-200 bg-white shadow-[0_18px_50px_-40px_rgba(17,24,39,0.18)]">
-                <div className="border-b border-gray-100 px-6 py-5">
-                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Saved</p>
-                  <h2 className="mt-1 text-xl font-bold tracking-[-0.02em] text-gray-950">Events you bookmarked</h2>
-                </div>
-                <div className="p-6 flex flex-col gap-3">
-                  {savedEvents.length ? (
-                    savedEvents.map((event) => (
-                      <div key={event.id} className="rounded-2xl border border-gray-200 px-4 py-4">
-                        <div className="font-bold text-gray-950">{event.name}</div>
-                        <div className="mt-2 text-sm text-gray-500">{event.dateLabel}</div>
-                        <div className="mt-1 text-sm text-gray-500">{event.location}</div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 px-5 py-8 text-center">
-                      <h3 className="text-lg font-bold text-gray-900">No saved events yet</h3>
-                      <p className="mt-2 text-sm text-gray-500">Save events from the campus feed to come back to them later.</p>
-                    </div>
-                  )}
-
-                  {error ? (
-                    <div aria-live="assertive" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-700">
-                      {error}
-                    </div>
-                  ) : null}
-                </div>
-              </section>
-            </div>
+                  </li>
+                )}
+              </ul>
+            </section>
           </div>
+
+          <aside className="space-y-6">
+            <section className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-[0_18px_50px_-42px_rgba(17,24,39,0.18)]">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Snapshot</p>
+                  <h2 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-gray-950">Your weekly pace</h2>
+                </div>
+                <Award size={18} className="text-[#51237f]" />
+              </div>
+
+              <div className="mt-5 space-y-3">
+                <MiniMetric label="Upcoming RSVPs" value={upcomingRegistrations.length} />
+                <MiniMetric
+                  label="Leadership presence"
+                  value={leadershipCount}
+                  helperText={
+                    leadershipCount
+                      ? "You currently hold officer access in one or more clubs."
+                      : "No leadership roles assigned right now."
+                  }
+                />
+              </div>
+
+              <Link
+                href="/events"
+                className="mt-5 block w-full rounded-full bg-[#51237f] py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-[#45206b]"
+              >
+                Explore more events
+              </Link>
+            </section>
+
+            <section className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-[0_18px_50px_-42px_rgba(17,24,39,0.18)]">
+              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Recommended</p>
+              <h2 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-gray-950">Next steps for you</h2>
+              <div className="mt-4 space-y-3">
+                {recommendations.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <div key={item.id} className="rounded-[20px] border border-gray-100 bg-[#fcfcfd] p-4">
+                      <div className="flex items-start gap-3">
+                        <span className="mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#f4ecfb] text-[#51237f]">
+                          <Icon size={18} />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <h3 className="text-sm font-semibold text-gray-950">{item.title}</h3>
+                          <p className="mt-1 text-sm leading-6 text-gray-600">{item.description}</p>
+                          <Link
+                            href={item.href}
+                            className="mt-3 inline-flex rounded-full bg-[#51237f] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#45206b]"
+                          >
+                            {item.cta}
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+
+            <section className="rounded-[28px] border border-gray-200 bg-white p-6 shadow-[0_18px_50px_-42px_rgba(17,24,39,0.18)]">
+              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#51237f]">Saved</p>
+              <h2 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-gray-950">Events you bookmarked</h2>
+              <div className="mt-4 space-y-3">
+                {savedEvents.length ? (
+                  savedEvents.map((event) => (
+                    <div key={event.id} className="rounded-[20px] border border-gray-100 bg-[#fcfcfd] p-4">
+                      <div className="font-semibold text-gray-950">{event.name}</div>
+                      <div className="mt-2 text-sm text-gray-500">{event.dateLabel}</div>
+                      <div className="mt-1 text-sm text-gray-500">{event.location}</div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="rounded-[20px] border border-dashed border-gray-200 bg-gray-50 px-5 py-10 text-center">
+                    <h3 className="text-base font-semibold text-gray-950">No saved events yet</h3>
+                    <p className="mt-2 text-sm text-gray-500">Save events from the campus feed to come back to them later.</p>
+                  </div>
+                )}
+
+                {error ? (
+                  <div aria-live="assertive" className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-700">
+                    {error}
+                  </div>
+                ) : null}
+              </div>
+            </section>
+          </aside>
         </div>
       </div>
+    </div>
+  );
+}
+
+function StatCard({
+  icon,
+  label,
+  value,
+  note,
+}: {
+  icon: ReactNode;
+  label: string;
+  value: number;
+  note: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-gray-200 bg-[#fafafa] p-4">
+      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500">
+        {icon}
+        {label}
+      </div>
+      <div className="mt-2 text-3xl font-black text-gray-950">{value}</div>
+      <p className="mt-1 text-sm text-gray-500">{note}</p>
+    </div>
+  );
+}
+
+function MiniMetric({
+  label,
+  value,
+  helperText,
+}: {
+  label: string;
+  value: number;
+  helperText?: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-gray-200 bg-[#fafafa] p-4">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-sm font-medium text-gray-600">{label}</span>
+        <span className="text-2xl font-black text-gray-950">{value}</span>
+      </div>
+      {helperText ? <p className="mt-2 text-sm text-gray-500">{helperText}</p> : null}
     </div>
   );
 }
