@@ -21,9 +21,6 @@ const QUICK_LINKS = [
 
 export const dynamic = "force-dynamic";
 
-const fallbackHeroImage =
-  "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=1800&auto=format&fit=crop";
-
 const formatHeroDate = (date?: string | null, day?: string | null) => {
   if (date) {
     const parsed = new Date(date);
@@ -43,7 +40,6 @@ export default async function Home() {
   const isAuthenticated = false;
   const [events, clubs] = await Promise.all([getPublicEvents(), getPublicClubs()]);
   const featuredEvent = events[0];
-  const heroImage = featuredEvent?.cover_image_url || clubs[0]?.coverImageUrl || fallbackHeroImage;
   const heroMetrics = [
     { label: "Campus events", value: String(events.length) },
     { label: "Active student groups", value: String(clubs.length) },
@@ -53,74 +49,73 @@ export default async function Home() {
 
   return (
     <div className="flex min-h-screen flex-col bg-[#f7f7f5]">
-      <section className="relative min-h-[580px] overflow-hidden border-b border-gray-200 bg-black text-white">
+      <section className="relative overflow-hidden border-b border-gray-200 bg-black text-white">
         <Image
-          src={heroImage}
-          alt={featuredEvent?.name || "Students walking on a college campus"}
+          src="/montgomery-college-campus.jpg"
+          alt="Montgomery College campus entrance"
           fill
           priority
           className="object-cover"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-black/50" aria-hidden="true" />
-        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/70 to-transparent" aria-hidden="true" />
+        <div className="absolute inset-0 bg-black/60" aria-hidden="true" />
 
-        <div className="relative mx-auto flex min-h-[580px] max-w-7xl flex-col justify-end px-4 pb-10 pt-20 sm:px-6 lg:px-8">
-          <div className="max-w-4xl">
-            <div className="inline-flex items-center gap-2 rounded-md border border-white/25 bg-black/25 px-3 py-2 text-xs font-semibold uppercase text-white">
-              Montgomery College
-            </div>
+        <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 md:py-16 lg:px-8">
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(340px,0.85fr)] lg:items-end">
+            <div className="max-w-4xl">
+              <div className="inline-flex items-center gap-2 rounded-md border border-white/25 bg-black/30 px-3 py-2 text-xs font-semibold uppercase text-white">
+                Montgomery College
+              </div>
 
-            <h1 className="mt-5 max-w-3xl text-5xl font-semibold leading-none text-white md:text-6xl lg:text-7xl">
-              Campus life, all in one place.
-            </h1>
+              <h1 className="mt-5 max-w-3xl text-5xl font-semibold leading-none text-white md:text-6xl lg:text-7xl">
+                Welcome, Raptors.
+              </h1>
 
-            <p className="mt-5 max-w-2xl text-lg leading-8 text-white/90">
-              Find events, student organizations, and campus resources without searching through separate portals.
-            </p>
+              <p className="mt-5 max-w-2xl text-lg leading-8 text-white/90">
+                Find campus events, student organizations, and resources in one place.
+              </p>
 
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-              <Link
-                href="/events"
-                className="inline-flex items-center justify-center gap-2 rounded-md bg-white px-5 py-3 text-sm font-semibold text-gray-950 transition-colors hover:bg-gray-100"
-              >
-                <Compass className="h-4 w-4" />
-                Browse events
-              </Link>
-              <Link
-                href={isAuthenticated ? "/activity" : "/login"}
-                className="inline-flex items-center justify-center gap-2 rounded-md border border-white/35 bg-black/20 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-black/35"
-              >
-                {isAuthenticated ? <BellRing className="h-4 w-4" /> : <LogIn className="h-4 w-4" />}
-                {isAuthenticated ? "Open activity" : "Log in"}
-              </Link>
-            </div>
-          </div>
-
-          <div className="mt-10 grid gap-4 border-t border-white/25 pt-5 md:grid-cols-[1.4fr_1fr] md:items-end">
-            <div>
-              <div className="text-xs font-semibold uppercase text-white/65">Featured event</div>
-              <Link href={featuredEvent ? `/events/${featuredEvent.id}` : "/events"} className="mt-2 block max-w-2xl text-2xl font-semibold leading-tight text-white hover:underline">
-                {featuredEvent?.name || "See what is happening on campus"}
-              </Link>
-              <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm text-white/80">
-                <span className="inline-flex items-center gap-2">
-                  <CalendarDays className="h-4 w-4" />
-                  {formatHeroDate(featuredEvent?.date, featuredEvent?.day)}
-                </span>
-                <span>{featuredEvent?.location || "Montgomery College"}</span>
-                <span>{featuredEvent?.time || "Events updated live"}</span>
+              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+                <Link
+                  href="/events"
+                  className="inline-flex items-center justify-center gap-2 rounded-md bg-white px-5 py-3 text-sm font-semibold text-gray-950 transition-colors hover:bg-gray-100"
+                >
+                  <Compass className="h-4 w-4" />
+                  Browse events
+                </Link>
+                <Link
+                  href={isAuthenticated ? "/activity" : "/login"}
+                  className="inline-flex items-center justify-center gap-2 rounded-md border border-white/35 bg-black/25 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-black/40"
+                >
+                  {isAuthenticated ? <BellRing className="h-4 w-4" /> : <LogIn className="h-4 w-4" />}
+                  {isAuthenticated ? "Open activity" : "Log in"}
+                </Link>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-2">
-              {heroMetrics.map((metric) => (
-                <div key={metric.label} className="border-l border-white/25 pl-4">
-                  <div className="text-2xl font-semibold text-white">{metric.value}</div>
-                  <div className="mt-1 text-xs font-medium uppercase text-white/65">{metric.label}</div>
+            <div className="border-l-4 border-white/70 bg-black/35 px-6 py-5 backdrop-blur-sm">
+              <div className="text-xs font-semibold uppercase text-white/70">Featured event</div>
+              <Link href={featuredEvent ? `/events/${featuredEvent.id}` : "/events"} className="mt-2 block text-2xl font-semibold leading-tight text-white hover:underline">
+                {featuredEvent?.name || "See what is happening on campus"}
+              </Link>
+              <div className="mt-4 space-y-2 text-sm text-white/80">
+                <div className="inline-flex items-center gap-2">
+                  <CalendarDays className="h-4 w-4 text-white" />
+                  <span>{formatHeroDate(featuredEvent?.date, featuredEvent?.day)}</span>
                 </div>
-              ))}
+                <div>{featuredEvent?.location || "Montgomery College"}</div>
+                <div>{featuredEvent?.time || "Events updated live"}</div>
+              </div>
             </div>
+          </div>
+
+          <div className="mt-10 grid gap-4 border-t border-white/25 pt-5 sm:grid-cols-2 lg:grid-cols-4">
+            {heroMetrics.map((metric) => (
+              <div key={metric.label} className="border-l border-white/35 pl-4">
+                <div className="text-2xl font-semibold text-white">{metric.value}</div>
+                <div className="mt-1 text-xs font-medium uppercase text-white/70">{metric.label}</div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
