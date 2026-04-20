@@ -1,26 +1,31 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { ArrowLeft, ShieldCheck, Fingerprint } from "lucide-react";
 import { OtherCollegeLogin } from "@/components/auth/other-college-login";
 import { AUTH_ENABLED } from "@/lib/features";
+import { getCurrentProfile } from "@/lib/auth-session";
 
-const montgomeryCollegeLoginUrl =
-  "https://mymclogin.glb.montgomerycollege.edu/authenticationendpoint/login.do?RelayState=eyJ0ZW5hbnRJZCI6Ijg4M2ZmNDhjLTkwOTItNGYxZi05NGY4LWMzODY4ODlhNzM1NSIsImFjY291bnRJZCI6IjAwMUcwMDAwMDBpSG4zZklBQyIsImp3dENhbGxiYWNrVXJsIjoiaHR0cHM6Ly9leHBlcmllbmNlLmVsbHVjaWFuY2xvdWQuY29tL21jODI1L2F1dGgvY2FsbGJhY2s%2Fc2lkPVMyNW9pTThnN3VqRld1R1hJcHlCYmE2eEF1amROQVNFIiwiaWRwTG9nb3V0VXJsIjoiaHR0cHM6Ly9leHBlcmllbmNlLmVsbHVjaWFuY2xvdWQuY29tL2lkcC1sb2dvdXQiLCJ0b2tlblZlcnNpb24iOiIxLjEuMCJ9&SigAlg=http%3A%2F%2Fwww.w3.org%2F2001%2F04%2Fxmldsig-more%23rsa-sha256&Signature=Be7M8BeRY1wQeE619S5yJ4t5IQa%2BvKHsPKQSLKDVAuBaIo6SojYH66U%2BTT7Vo3a9fthoedp6H9icmmwz3TBZFbXxexUr18hg7u3dYLdurqAfleC2R3Ca3nhmrWe%2FhEcgBnE5yQdKvymJclbBs%2B5CcXvlQV8qqZh3rlLVAd%2B04USPrjAesAlMk5HTCWYdj7%2Fxmn%2F4ydzHV78BnxbomSYKIGKBCMUksUtbTI5%2BA3HMQDf7aRt%2Bx3go4IMGtMY8VQ2Pi9SuZIx4JBoYuMLtMUp59mnq1MPQ51%2F6LpQiUqZN5Yl1O3ekn74AfHdxaqc8KVL%2B4ooToyYWF8RD%2Bc3xXkeQsQ%3D%3D&commonAuthCallerPath=%2Fsamlsso&forceAuth=false&passiveAuth=false&spEntityID=EthosExperience&tenantDomain=carbon.super&sessionDataKey=5cb4ef0d-6a95-4422-9c73-8634bb912af9&relyingParty=EthosExperience&type=samlsso&sp=EthosExperience&isSaaSApp=false&authenticators=BasicAuthenticator:LOCAL";
+export default async function LoginPage() {
+  const profile = await getCurrentProfile();
 
-export default function LoginPage() {
+  if (profile) {
+    redirect("/activity");
+  }
+
   if (!AUTH_ENABLED) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
-        <div className="w-full max-w-md rounded-[2rem] border border-gray-200 bg-white p-10 text-center shadow-sm">
-          <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-purple-50 text-[var(--primary)] mb-6">
+      <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-6">
+        <div className="w-full max-w-md rounded-xl border border-gray-200 bg-white p-8 text-center shadow-sm">
+          <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-lg bg-purple-50 text-[var(--primary)]">
             <Fingerprint size={30} strokeWidth={1.5} />
           </div>
-          <h1 className="text-3xl font-black tracking-tight text-gray-900 mb-3">Institutional login is temporarily disabled</h1>
-          <p className="text-gray-600 leading-relaxed mb-8">
+          <h1 className="mb-3 text-2xl font-bold tracking-tight text-gray-900">Institutional login is temporarily disabled</h1>
+          <p className="mb-8 leading-relaxed text-gray-600">
             The web portal is currently being finalized while deployment and campus SSO setup are completed.
           </p>
           <Link
             href="/"
-            className="inline-flex items-center justify-center rounded-xl bg-[#51237f] px-6 py-3 text-sm font-semibold text-white hover:bg-[#45206b] transition-colors"
+            className="inline-flex items-center justify-center rounded-lg bg-[#51237f] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#45206b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
           >
             Return to homepage
           </Link>
@@ -30,55 +35,66 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 relative overflow-hidden">
-      {/* Premium Background Ambience */}
-      <div className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-[600px] h-[600px] bg-purple-200/40 rounded-full blur-[100px] pointer-events-none -z-10" />
-      <div className="absolute bottom-0 left-0 translate-y-1/4 -translate-x-1/4 w-[600px] h-[600px] bg-blue-100/40 rounded-full blur-[100px] pointer-events-none -z-10" />
-
+    <div className="min-h-screen bg-gray-50 px-4 py-8 sm:px-6 lg:px-8">
       <Link 
         href="/" 
-        className="absolute top-8 left-8 flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-all hover:-translate-x-1"
+        className="mb-10 inline-flex items-center gap-2 rounded-md text-sm font-medium text-gray-600 transition-colors hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
       >
         <ArrowLeft size={16} /> Back to Home
       </Link>
 
-      <div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-700">
-        <div className="bg-white/80 backdrop-blur-2xl p-10 rounded-[2.5rem] shadow-2xl shadow-purple-900/5 border border-white">
-          <div className="text-center mb-10">
-            <div className="inline-flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-purple-100 to-purple-50 text-[var(--primary)] mb-6 shadow-inner border border-purple-100/50">
-              <Fingerprint size={36} strokeWidth={1.5} />
+      <div className="mx-auto grid w-full max-w-5xl gap-8 lg:grid-cols-[1fr_440px] lg:items-start">
+        <section className="rounded-xl border border-gray-200 bg-white p-7 shadow-sm sm:p-10">
+          <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-lg bg-purple-50 text-[var(--primary)]">
+            <Fingerprint size={28} strokeWidth={1.7} />
+          </div>
+          <p className="mb-4 text-xs font-bold uppercase tracking-[0.24em] text-[#51237f]">Student access</p>
+          <h1 className="max-w-xl text-3xl font-bold tracking-tight text-gray-950 sm:text-4xl">
+            Sign in to Raptor Connect.
+          </h1>
+          <p className="mt-4 max-w-2xl text-base leading-7 text-gray-600">
+            Use the account connected to your campus profile to manage RSVPs, club memberships, and student leadership access.
+          </p>
+
+          <div className="mt-8 grid gap-3 text-sm text-gray-700 sm:grid-cols-3">
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+              <div className="font-semibold text-gray-950">Events</div>
+              <p className="mt-1 leading-6">RSVP and check what you have coming up.</p>
             </div>
-            <h1 className="text-3xl font-black tracking-tight text-gray-900 mb-3">Welcome Back</h1>
-            <p className="text-gray-500 font-light leading-relaxed">
-              Authenticate via your institutional portal to access the Raptor Connect dashboard.
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+              <div className="font-semibold text-gray-950">Clubs</div>
+              <p className="mt-1 leading-6">Join groups and keep membership status current.</p>
+            </div>
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+              <div className="font-semibold text-gray-950">Privacy</div>
+              <p className="mt-1 leading-6">Protected details stay behind authentication.</p>
+            </div>
+          </div>
+        </section>
+
+        <section className="animate-in fade-in slide-in-from-bottom-2 duration-500 rounded-xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
+          <div className="mb-7">
+            <h2 className="text-2xl font-bold tracking-tight text-gray-950">Log in</h2>
+            <p className="mt-2 text-sm leading-6 text-gray-600">
+              Enter your account details to continue.
             </p>
           </div>
 
           <div className="space-y-4">
-            <a
-              href={montgomeryCollegeLoginUrl}
-              className="w-full h-16 rounded-2xl border-2 border-transparent bg-gray-900 flex items-center justify-center gap-3 px-6 text-base font-bold text-white hover:bg-[var(--primary)] hover:shadow-xl hover:shadow-[var(--primary)]/20 transition-all duration-300 group hover:-translate-y-1"
-            >
-              <div className="h-6 w-6 rounded bg-white/20 flex items-center justify-center text-white text-[10px] font-black tracking-wider">
-                MC
-              </div>
-              Login with Montgomery College
-            </a>
-
-            <OtherCollegeLogin />
+            <OtherCollegeLogin defaultExpanded />
           </div>
 
-          <div className="mt-12 p-5 rounded-2xl bg-gray-50/50 border border-gray-100 flex items-start gap-4">
-            <ShieldCheck size={20} className="text-[var(--primary)] mt-0.5 flex-shrink-0" />
-            <p className="text-xs text-gray-500 leading-relaxed font-medium">
-              Your session is secured by AES-256 encryption. Raptor Connect never stores your raw institutional credentials.
+          <div className="mt-8 flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
+            <ShieldCheck size={19} className="mt-0.5 flex-shrink-0 text-[var(--primary)]" />
+            <p className="text-xs font-medium leading-relaxed text-gray-600">
+              Raptor Connect uses a secure web session and only shows protected campus information after sign-in.
             </p>
           </div>
-        </div>
 
-        <p className="mt-8 text-center text-sm text-gray-500 font-medium">
-          Not a student yet? <Link href="/" className="text-[var(--primary)] hover:text-purple-700 transition-colors underline underline-offset-4">Learn more about the platform</Link>
-        </p>
+          <p className="mt-7 text-center text-sm font-medium text-gray-500">
+            Need help? <Link href="/docs" className="text-[var(--primary)] underline underline-offset-4 transition-colors hover:text-purple-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2">Read the student guide</Link>
+          </p>
+        </section>
       </div>
     </div>
   );

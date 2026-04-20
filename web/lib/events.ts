@@ -1,4 +1,5 @@
 import type { WebEventCardEvent } from "@/components/events/EventCard";
+import { getAuthenticatedClient } from "@/lib/auth-session";
 import { createServerSupabaseClient } from "@/lib/supabase";
 
 export type EventDetail = WebEventCardEvent & {
@@ -9,6 +10,8 @@ export type EventDetail = WebEventCardEvent & {
   clubDescription?: string | null;
   clubMeetingTime?: string | null;
   isFree?: boolean;
+  hasSession: boolean;
+  isRegistered: boolean;
 };
 
 type EventRow = Pick<
@@ -48,10 +51,13 @@ const normalizeEvent = (row: EventRow): EventDetail => ({
   clubDescription: null,
   clubMeetingTime: null,
   isFree: detectFreeEvent(row.name, row.description),
+  hasSession: false,
+  isRegistered: false,
 });
 
 export async function getPublicEvents(): Promise<EventDetail[]> {
   const client = createServerSupabaseClient();
+  const session = await getAuthenticatedClient();
 
   try {
     const { data, error } = await client
@@ -72,12 +78,19 @@ export async function getPublicEvents(): Promise<EventDetail[]> {
     const eventIds = rows.map((row) => row.id);
     const clubIds = [...new Set(rows.map((row) => row.club_id).filter((value): value is string => Boolean(value)))];
 
-    const [registrationResult, clubResult] = await Promise.all([
+    const [registrationResult, clubResult, viewerRegistrationResult] = await Promise.all([
       eventIds.length
         ? client.from("event_registrations").select("event_id").in("event_id", eventIds)
         : Promise.resolve({ data: [], error: null } as const),
       clubIds.length
         ? client.from("clubs").select("id,name,description,day,time").in("id", clubIds)
+        : Promise.resolve({ data: [], error: null } as const),
+      session && eventIds.length
+        ? session.client
+            .from("event_registrations")
+            .select("event_id")
+            .eq("user_id", session.user.id)
+            .in("event_id", eventIds)
         : Promise.resolve({ data: [], error: null } as const),
     ]);
 
@@ -87,6 +100,10 @@ export async function getPublicEvents(): Promise<EventDetail[]> {
 
     if (clubResult.error) {
       console.error("Error fetching club metadata for events:", clubResult.error);
+    }
+
+    if (viewerRegistrationResult.error) {
+      console.error("Error fetching viewer event registrations:", viewerRegistrationResult.error);
     }
 
     const registrationsByEventId = new Map<string, number>();
@@ -102,6 +119,10 @@ export async function getPublicEvents(): Promise<EventDetail[]> {
       clubsById.set(club.id, club);
     });
 
+    const viewerRegisteredEventIds = new Set(
+      (viewerRegistrationResult.data || []).map((registration: { event_id: string }) => registration.event_id),
+    );
+
     return rows.map((row) => {
       const event = normalizeEvent(row);
       const club = row.club_id ? clubsById.get(row.club_id) : null;
@@ -112,6 +133,8 @@ export async function getPublicEvents(): Promise<EventDetail[]> {
         clubName: club?.name ?? (row.club_id ? "Campus club" : "Campus office"),
         clubDescription: club?.description ?? null,
         clubMeetingTime: [club?.day, club?.time].filter(Boolean).join(" at ") || null,
+        hasSession: Boolean(session),
+        isRegistered: viewerRegisteredEventIds.has(row.id),
       };
     });
   } catch (error) {
@@ -150,6 +173,7 @@ async function getRegistrationsCount(eventId: string) {
 
 export async function getEventById(id: string): Promise<EventDetail | null> {
   const client = createServerSupabaseClient();
+  const session = await getAuthenticatedClient();
 
   try {
     const { data, error } = await client.from("events").select(eventSelect).eq("id", id).maybeSingle();
@@ -160,10 +184,22 @@ export async function getEventById(id: string): Promise<EventDetail | null> {
 
     if (data) {
       const event = normalizeEvent(data as EventRow);
-      const [registrationsCount, club] = await Promise.all([
+      const [registrationsCount, club, viewerRegistrationResult] = await Promise.all([
         getRegistrationsCount(event.id),
         event.club_id ? getClubMetadata(event.club_id) : Promise.resolve(null),
+        session
+          ? session.client
+              .from("event_registrations")
+              .select("id")
+              .eq("event_id", event.id)
+              .eq("user_id", session.user.id)
+              .maybeSingle()
+          : Promise.resolve({ data: null, error: null } as const),
       ]);
+
+      if (viewerRegistrationResult.error) {
+        console.error("Error fetching viewer event registration:", viewerRegistrationResult.error);
+      }
 
       return {
         ...event,
@@ -171,6 +207,8 @@ export async function getEventById(id: string): Promise<EventDetail | null> {
         clubName: club?.name ?? null,
         clubDescription: club?.description ?? null,
         clubMeetingTime: [club?.day, club?.time].filter(Boolean).join(" at ") || null,
+        hasSession: Boolean(session),
+        isRegistered: Boolean(viewerRegistrationResult.data),
       };
     }
 

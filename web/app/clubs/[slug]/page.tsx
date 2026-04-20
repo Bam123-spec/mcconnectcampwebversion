@@ -35,5 +35,12 @@ export default async function ClubProfilePage({
     notFound();
   }
 
-  return <ClubProfilePanel initialClub={data.club} initialEvents={data.events} />;
+  return (
+    <ClubProfilePanel
+      initialClub={data.club}
+      initialEvents={data.events}
+      initialOfficers={data.officers}
+      viewerState={data.viewerState}
+    />
+  );
 }

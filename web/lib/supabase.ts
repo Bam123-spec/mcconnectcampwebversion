@@ -14,3 +14,16 @@ export const createServerSupabaseClient = () =>
       autoRefreshToken: false,
     },
   });
+
+export const createAuthenticatedServerSupabaseClient = (accessToken: string) =>
+  createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+    global: {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  });

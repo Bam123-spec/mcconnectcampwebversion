@@ -20,22 +20,31 @@
   * {
     @apply border-gray-200;
   }
+  html {
+    @apply scroll-smooth;
+  }
   body {
     @apply bg-[var(--background)] text-[var(--foreground)] antialiased;
+  }
+  ::selection {
+    @apply bg-[#51237f] text-white;
+  }
+  :focus-visible {
+    outline-color: #51237f;
   }
 }
 
 @layer components {
   .glass-card {
-    @apply bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300;
+    @apply rounded-xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:shadow-md;
   }
   
   .btn-primary {
-    @apply bg-[var(--primary)] text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all active:scale-[0.98];
+    @apply rounded-lg bg-[var(--primary)] px-6 py-3 font-semibold text-white transition-all hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2 active:scale-[0.98];
   }
 
   .nav-link {
-    @apply flex items-center gap-3 px-4 py-3 rounded-lg text-gray-500 hover:text-[var(--primary)] hover:bg-purple-50 transition-all font-medium;
+    @apply flex items-center gap-3 rounded-lg px-4 py-3 font-medium text-gray-600 transition-all hover:bg-purple-50 hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2;
   }
 
   .nav-link.active {

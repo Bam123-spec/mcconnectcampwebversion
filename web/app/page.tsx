@@ -1,50 +1,172 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
+  ArrowRight,
   BellRing,
+  BookOpen,
   CalendarDays,
   Compass,
   ExternalLink,
+  Library,
   LogIn,
+  Map,
+  ShieldAlert,
   Users,
 } from "lucide-react";
 import { EventCard } from "@/components/events/EventCard";
-import { getPublicClubs } from "@/lib/clubs";
-import { getPublicEvents } from "@/lib/events";
+import { getCurrentProfile } from "@/lib/auth-session";
+import { getPublicClubs, type PublicClub } from "@/lib/clubs";
+import { getPublicEvents, type EventDetail } from "@/lib/events";
 
-const QUICK_LINKS = [
-  { id: "q1", name: "Blackboard Learning", url: "#" },
-  { id: "q2", name: "MyMC Portal", url: "#" },
-  { id: "q3", name: "Interactive Campus Map", url: "#" },
-  { id: "q4", name: "Library Services", url: "#" },
+const CAMPUS_RESOURCES = [
+  {
+    id: "mymc",
+    name: "MyMC Portal",
+    description: "Access student services, registration, billing, and campus tools.",
+    url: "https://mymc.montgomerycollege.edu/",
+    icon: Compass,
+  },
+  {
+    id: "blackboard",
+    name: "Blackboard Support",
+    description: "Get help with course access, assignments, and online learning tools.",
+    url: "https://info.montgomerycollege.edu/offices/information-technology/blackboard-support.html",
+    icon: BookOpen,
+  },
+  {
+    id: "library",
+    name: "MC Libraries",
+    description: "Find research help, databases, study spaces, and library hours.",
+    url: "https://library.montgomerycollege.edu/",
+    icon: Library,
+  },
+  {
+    id: "maps",
+    name: "Campus Maps",
+    description: "Locate buildings, rooms, parking, and services across campuses.",
+    url: "https://www.montgomerycollege.edu/about-mc/campuses-and-locations/",
+    icon: Map,
+  },
+  {
+    id: "raptor-central",
+    name: "Raptor Central",
+    description: "Get help with admissions, financial aid, records, and payments.",
+    url: "https://www.montgomerycollege.edu/welcomecenter",
+    icon: Users,
+  },
+  {
+    id: "mc-alert",
+    name: "MC Alert",
+    description: "Review emergency alerts and campus safety communication.",
+    url: "https://www.montgomerycollege.edu/offices/public-safety-health-emergency-management/public-safety/mc-alert.html",
+    icon: ShieldAlert,
+  },
 ];
 
 export const dynamic = "force-dynamic";
 
-const formatHeroDate = (date?: string | null, day?: string | null) => {
-  if (date) {
-    const parsed = new Date(date);
-    if (!Number.isNaN(parsed.getTime())) {
-      return parsed.toLocaleDateString("en-US", {
-        weekday: "short",
-        month: "short",
-        day: "numeric",
-      });
-    }
-  }
-
-  return day || "Date to be announced";
+const parseLocalDate = (value?: string | null) => {
+  if (!value) return null;
+  const [year, month, day] = value.split("T")[0].split("-").map(Number);
+  if (!year || !month || !day) return null;
+  return new Date(year, month - 1, day);
 };
 
+const formatHeroDate = (event?: EventDetail | null) => {
+  const parsed = parseLocalDate(event?.date);
+
+  if (parsed) {
+    return parsed.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    });
+  }
+
+  return event?.day || "Date to be announced";
+};
+
+const isUpcomingEvent = (event: EventDetail, now: Date) => {
+  const parsed = parseLocalDate(event.date);
+  if (!parsed) return true;
+  parsed.setHours(23, 59, 59, 999);
+  return parsed >= now;
+};
+
+const getFeaturedEvent = (events: EventDetail[]) => {
+  const now = new Date();
+  const upcoming = events.filter((event) => isUpcomingEvent(event, now));
+
+  return [...upcoming].sort((a, b) => {
+    if (a.isRegistered !== b.isRegistered) return a.isRegistered ? -1 : 1;
+    const registrationDelta = (b.registrationsCount || 0) - (a.registrationsCount || 0);
+    if (registrationDelta !== 0) return registrationDelta;
+    return (parseLocalDate(a.date)?.getTime() ?? Number.POSITIVE_INFINITY) -
+      (parseLocalDate(b.date)?.getTime() ?? Number.POSITIVE_INFINITY);
+  })[0] ?? events[0] ?? null;
+};
+
+const getUpcomingEvents = (events: EventDetail[]) => {
+  const now = new Date();
+  return events
+    .filter((event) => isUpcomingEvent(event, now))
+    .sort((a, b) => {
+      const aTime = parseLocalDate(a.date)?.getTime() ?? Number.POSITIVE_INFINITY;
+      const bTime = parseLocalDate(b.date)?.getTime() ?? Number.POSITIVE_INFINITY;
+      return aTime - bTime;
+    })
+    .slice(0, 3);
+};
+
+const getFeaturedClubs = (clubs: PublicClub[]) =>
+  [...clubs]
+    .sort((a, b) => {
+      const memberDelta = b.memberCount - a.memberCount;
+      if (memberDelta !== 0) return memberDelta;
+      return a.name.localeCompare(b.name);
+    })
+    .slice(0, 4);
+
+function EmptyState({
+  title,
+  description,
+  actionHref,
+  actionLabel,
+}: {
+  title: string;
+  description: string;
+  actionHref: string;
+  actionLabel: string;
+}) {
+  return (
+    <div className="rounded-xl border border-dashed border-gray-300 bg-white px-6 py-12 text-center shadow-sm">
+      <h3 className="text-lg font-semibold text-gray-950">{title}</h3>
+      <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-gray-600">{description}</p>
+      <Link
+        href={actionHref}
+        className="mt-5 inline-flex items-center gap-2 rounded-lg bg-[#51237f] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#3f1b63] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
+      >
+        {actionLabel}
+        <ArrowRight className="h-4 w-4" />
+      </Link>
+    </div>
+  );
+}
+
 export default async function Home() {
-  const isAuthenticated = false;
-  const [events, clubs] = await Promise.all([getPublicEvents(), getPublicClubs()]);
-  const featuredEvent = events[0];
+  const [profile, events, clubsResult] = await Promise.all([
+    getCurrentProfile(),
+    getPublicEvents(),
+    getPublicClubs({ limit: 18 }),
+  ]);
+  const isAuthenticated = Boolean(profile);
+  const featuredEvent = getFeaturedEvent(events);
+  const upcomingEvents = getUpcomingEvents(events);
+  const featuredClubs = getFeaturedClubs(clubsResult.clubs);
   const heroMetrics = [
     { label: "Campus events", value: String(events.length) },
-    { label: "Active student groups", value: String(clubs.length) },
-    { label: "Open club listings", value: String(clubs.filter((club) => club.memberCount > 0).length) },
-    { label: "Protected access", value: "On" },
+    { label: "Student groups", value: String(clubsResult.totalCount) },
+    { label: "RSVP status", value: isAuthenticated ? "Connected" : "Login" },
   ];
 
   return (
@@ -58,13 +180,13 @@ export default async function Home() {
           className="object-cover"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-black/60" aria-hidden="true" />
+        <div className="absolute inset-0 bg-black/75" aria-hidden="true" />
 
         <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 md:py-16 lg:px-8">
           <div className="grid gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(340px,0.85fr)] lg:items-end">
             <div className="max-w-4xl">
               <div className="inline-flex items-center gap-2 rounded-md border border-white/25 bg-black/30 px-3 py-2 text-xs font-semibold uppercase text-white">
-                Montgomery College
+                Montgomery College student life
               </div>
 
               <h1 className="mt-5 max-w-3xl text-5xl font-semibold leading-none text-white md:text-6xl lg:text-7xl">
@@ -72,44 +194,48 @@ export default async function Home() {
               </h1>
 
               <p className="mt-5 max-w-2xl text-lg leading-8 text-white/90">
-                Find campus events, student organizations, and resources in one place.
+                Start with what students actually need: what is happening next,
+                where to get help, and which communities are active right now.
               </p>
 
               <div className="mt-7 flex flex-col gap-3 sm:flex-row">
                 <Link
                   href="/events"
-                  className="inline-flex items-center justify-center gap-2 rounded-md bg-white px-5 py-3 text-sm font-semibold text-gray-950 transition-colors hover:bg-gray-100"
+                  className="inline-flex items-center justify-center gap-2 rounded-md bg-white px-5 py-3 text-sm font-semibold text-gray-950 transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                 >
-                  <Compass className="h-4 w-4" />
-                  Browse events
+                  <CalendarDays className="h-4 w-4" />
+                  See upcoming events
                 </Link>
                 <Link
                   href={isAuthenticated ? "/activity" : "/login"}
-                  className="inline-flex items-center justify-center gap-2 rounded-md border border-white/35 bg-black/25 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-black/40"
+                  className="inline-flex items-center justify-center gap-2 rounded-md border border-white/35 bg-black/25 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-black/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                 >
                   {isAuthenticated ? <BellRing className="h-4 w-4" /> : <LogIn className="h-4 w-4" />}
-                  {isAuthenticated ? "Open activity" : "Log in"}
+                  {isAuthenticated ? "Open my activity" : "Log in for my activity"}
                 </Link>
               </div>
             </div>
 
             <div className="border-l-4 border-white/70 bg-black/35 px-6 py-5 backdrop-blur-sm">
-              <div className="text-xs font-semibold uppercase text-white/70">Featured event</div>
-              <Link href={featuredEvent ? `/events/${featuredEvent.id}` : "/events"} className="mt-2 block text-2xl font-semibold leading-tight text-white hover:underline">
-                {featuredEvent?.name || "See what is happening on campus"}
+              <div className="text-xs font-semibold uppercase text-white/70">Recommended next</div>
+              <Link
+                href={featuredEvent ? `/events/${featuredEvent.id}` : "/events"}
+                className="mt-2 block rounded-md text-2xl font-semibold leading-tight text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+              >
+                {featuredEvent?.name || "No upcoming event is listed yet"}
               </Link>
               <div className="mt-4 space-y-2 text-sm text-white/80">
                 <div className="inline-flex items-center gap-2">
                   <CalendarDays className="h-4 w-4 text-white" />
-                  <span>{formatHeroDate(featuredEvent?.date, featuredEvent?.day)}</span>
+                  <span>{formatHeroDate(featuredEvent)}</span>
                 </div>
-                <div>{featuredEvent?.location || "Montgomery College"}</div>
-                <div>{featuredEvent?.time || "Events updated live"}</div>
+                <div>{featuredEvent?.location || "Check back soon"}</div>
+                <div>{featuredEvent?.clubName || "Campus events"}</div>
               </div>
             </div>
           </div>
 
-          <div className="mt-10 grid gap-4 border-t border-white/25 pt-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-10 grid gap-4 border-t border-white/25 pt-5 sm:grid-cols-3">
             {heroMetrics.map((metric) => (
               <div key={metric.label} className="border-l border-white/35 pl-4">
                 <div className="text-2xl font-semibold text-white">{metric.value}</div>
@@ -120,105 +246,128 @@ export default async function Home() {
         </div>
       </section>
 
-      <main className="max-w-7xl mx-auto w-full px-4 py-8 md:py-12 flex flex-col lg:flex-row gap-8">
-        <div className="flex-1 space-y-12">
-          <section>
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
-              <h2 className="text-2xl font-semibold text-gray-800">
-                Upcoming Events <span className="text-gray-500 font-normal text-lg">({events.length})</span>
-              </h2>
-
-              <div className="flex items-center gap-2">
-                <Link href="/events" className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-md text-sm font-semibold hover:bg-gray-50 transition-colors">
-                  View all events
-                </Link>
+      <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 md:py-12 lg:px-8">
+        <section className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(320px,0.6fr)]">
+          <div>
+            <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#51237f]">
+                  Plan your week
+                </p>
+                <h2 className="mt-2 text-2xl font-semibold text-gray-950">Upcoming events</h2>
               </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {events.slice(0, 3).map(event => (
-                <EventCard key={event.id} event={event} authEnabled={false} />
-              ))}
-            </div>
-          </section>
-
-          <section>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-semibold text-gray-800">Recent Campus Listings</h2>
-              <Link href="/events" className="flex items-center gap-2 px-4 py-1.5 bg-gray-200 text-gray-700 rounded-md text-sm font-semibold hover:bg-gray-300 transition-colors">
-                All events
+              <Link
+                href="/events"
+                className="inline-flex items-center gap-2 rounded-md text-sm font-semibold text-[#51237f] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
+              >
+                View all events
+                <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
 
-            <div className="bg-white border text-left border-gray-200 rounded-lg overflow-hidden flex flex-col">
-              {events.slice(3, 5).map((event, index) => (
-                <div 
-                  key={event.id} 
-                  className={`flex items-stretch ${index !== events.slice(3, 5).length - 1 ? 'border-b border-gray-200' : ''}`}
-                >
-                  <div className="w-32 md:w-48 bg-black text-white shrink-0 p-4 flex items-center justify-center font-bold text-center border-r border-gray-200">
-                    <span className="text-base md:text-lg">EVENT</span>
-                  </div>
-                  <div className="flex-1 p-4 md:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div>
-                      <h3 className="text-lg font-bold text-[#51237f] mb-1">{event.name}</h3>
-                      <p className="text-sm text-gray-500">{event.date || event.day || "Date to be announced"} - <span className="font-medium text-gray-700">{event.time || "Time to be announced"}</span></p>
-                      <div className="mt-2 flex items-center gap-2 text-sm text-gray-500">
-                        <Users size={14} /> {event.clubName || "Campus office"}
+            {upcomingEvents.length > 0 ? (
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+                {upcomingEvents.map((event) => (
+                  <EventCard key={event.id} event={event} authEnabled={false} />
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                title="No upcoming events are published"
+                description="When approved campus events are added in Supabase, they will appear here automatically."
+                actionHref="/events"
+                actionLabel="Open events"
+              />
+            )}
+          </div>
+
+          <aside className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#51237f]">
+                  Communities
+                </p>
+                <h2 className="mt-2 text-xl font-semibold text-gray-950">Active clubs</h2>
+              </div>
+              <Users className="h-5 w-5 text-[#51237f]" />
+            </div>
+
+            {featuredClubs.length > 0 ? (
+              <div className="mt-5 space-y-3">
+                {featuredClubs.map((club) => (
+                  <Link
+                    key={club.id}
+                    href={`/clubs/${club.slug}`}
+                    className="block rounded-lg border border-gray-200 bg-white p-4 transition hover:border-[#51237f]/40 hover:bg-[#faf8fc] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <h3 className="font-semibold leading-snug text-gray-950">{club.name}</h3>
+                        <p className="mt-1 text-sm text-gray-500">{club.category}</p>
                       </div>
+                      <span className="rounded-md bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-700">
+                        {club.initials}
+                      </span>
                     </div>
-                    <Link href={`/events/${event.id}`} className="px-4 py-2 border border-gray-300 rounded font-semibold text-sm hover:bg-gray-50 flex items-center gap-2 w-full sm:w-auto justify-center">
-                      View
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        </div>
-
-        <aside className="w-full lg:w-80 space-y-8 shrink-0">
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
-            <div className="bg-[#51237f] px-5 py-4">
-              <h3 className="text-white font-bold text-lg">Featured Groups</h3>
-            </div>
-            <div className="p-5 flex flex-col gap-4">
-              {clubs.slice(0, 3).map(club => (
-                <div key={club.id} className="flex flex-col border-b border-gray-100 last:border-0 pb-4 last:pb-0">
-                  <Link href={`/clubs/${club.slug}`} className="font-bold text-[#51237f] hover:underline mb-1">
-                    {club.name}
+                    <div className="mt-3 flex items-center justify-between text-xs font-medium text-gray-500">
+                      <span>{club.campus}</span>
+                      <span>{club.memberCount} members</span>
+                    </div>
                   </Link>
-                  <div className="flex items-center justify-between text-xs text-gray-500">
-                    <span className="bg-gray-100 px-2 py-0.5 rounded text-gray-600">{club.category}</span>
-                    <span className="flex items-center gap-1"><Users size={12}/> {club.memberCount} members</span>
-                  </div>
-                </div>
-              ))}
-              <Link href="/clubs" className="w-full py-2 border border-gray-300 rounded text-center text-sm font-semibold hover:bg-gray-50 transition-colors mt-2 text-gray-700">
-                View All Groups
-              </Link>
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="mt-5 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-5 text-sm leading-6 text-gray-600">
+                Approved clubs from Supabase will appear here when available.
+              </div>
+            )}
+
+            <Link
+              href="/clubs"
+              className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-800 transition hover:border-[#51237f] hover:text-[#51237f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
+            >
+              Browse all clubs
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </aside>
+        </section>
+
+        <section className="mt-12">
+          <div className="mb-6 max-w-3xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#51237f]">
+              Student resources
+            </p>
+            <h2 className="mt-2 text-2xl font-semibold text-gray-950">Campus links students actually use</h2>
+            <p className="mt-3 text-sm leading-6 text-gray-600">
+              These links leave Connect Camp and open official Montgomery College services.
+            </p>
           </div>
 
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
-            <div className="bg-[#51237f] px-5 py-4">
-              <h3 className="text-white font-bold text-lg">Campus Resources</h3>
-            </div>
-            <div className="flex flex-col">
-              {QUICK_LINKS.map((link, index) => (
-                <Link 
-                  key={link.id} 
-                  href={link.url}
-                  className={`px-5 py-4 flex items-center justify-between text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-[#51237f] transition-colors ${index !== QUICK_LINKS.length -1 ? 'border-b border-gray-100' : ''}`}
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {CAMPUS_RESOURCES.map((resource) => {
+              const Icon = resource.icon;
+
+              return (
+                <Link
+                  key={resource.id}
+                  href={resource.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-[#51237f]/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
                 >
-                  {link.name}
-                  <ExternalLink size={16} className="text-gray-400" />
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-[#51237f]">
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <ExternalLink className="h-4 w-4 text-gray-400 transition group-hover:text-[#51237f]" />
+                  </div>
+                  <h3 className="mt-4 text-lg font-semibold text-gray-950">{resource.name}</h3>
+                  <p className="mt-2 text-sm leading-6 text-gray-600">{resource.description}</p>
                 </Link>
-              ))}
-            </div>
+              );
+            })}
           </div>
-        </aside>
-
+        </section>
       </main>
     </div>
   );

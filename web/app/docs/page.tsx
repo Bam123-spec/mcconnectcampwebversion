@@ -4,8 +4,8 @@ import { ChevronRightIcon } from "lucide-react";
 export default function DocsPage() {
   return (
     <>
-      <nav className="flex items-center text-sm text-gray-500 font-medium mb-8">
-        <Link href="/" className="hover:text-[#51237f] transition-colors">Home</Link>
+      <nav className="mb-8 flex items-center text-sm font-medium text-gray-500">
+        <Link href="/" className="rounded-md transition-colors hover:text-[#51237f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2">Home</Link>
         <ChevronRightIcon size={14} className="mx-2" />
         <span>Docs</span>
         <ChevronRightIcon size={14} className="mx-2" />
@@ -13,8 +13,8 @@ export default function DocsPage() {
       </nav>
 
       <article className="prose prose-gray max-w-none">
-        <h1 className="text-3xl md:text-5xl font-black tracking-tight text-gray-900 mb-6">Getting Started</h1>
-        <p className="text-xl text-gray-600 mb-10 leading-relaxed font-medium">
+        <h1 className="mb-6 text-3xl font-bold tracking-tight text-gray-900 md:text-5xl">Getting Started</h1>
+        <p className="mb-10 text-lg font-medium leading-relaxed text-gray-600 md:text-xl">
           Welcome to the official community platform for Montgomery College. This guide will walk you through the basics of setting up your profile, finding organizations, and registering for events.
         </p>
 
@@ -25,7 +25,7 @@ export default function DocsPage() {
           Before joining any groups, you must set up your student or faculty profile. Your profile helps organizations verify your status and ensures you receive the correct communications for tailored campus events.
         </p>
         
-        <div className="bg-[#f0f4ff] border-l-4 border-blue-600 p-5 rounded-r-lg mb-8 shadow-sm">
+        <div className="mb-8 rounded-r-lg border-l-4 border-blue-600 bg-[#f0f4ff] p-5 shadow-sm">
           <div className="flex">
             <div className="flex-shrink-0">
               <svg className="h-5 w-5 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
@@ -85,8 +85,8 @@ export default function DocsPage() {
           </table>
         </div>
         
-        <div className="mt-16 pt-8 border-t border-gray-100 flex justify-end items-center text-sm font-semibold">
-          <Link href="/docs/navigating" className="text-[#51237f] hover:underline flex items-center gap-1 bg-purple-50 px-4 py-3 rounded-lg transition-colors hover:bg-purple-100">
+        <div className="mt-16 flex items-center justify-end border-t border-gray-100 pt-8 text-sm font-semibold">
+          <Link href="/docs/navigating" className="flex items-center gap-1 rounded-lg bg-purple-50 px-4 py-3 text-[#51237f] transition-colors hover:bg-purple-100 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2">
             Next: Navigating the Dashboard <ChevronRightIcon size={16}/>
           </Link>
         </div>

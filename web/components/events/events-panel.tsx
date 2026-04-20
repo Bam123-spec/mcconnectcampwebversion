@@ -11,6 +11,7 @@ import {
   Users,
   ArrowRight,
 } from "lucide-react";
+import { EventRsvpAction } from "@/components/events/event-rsvp-action";
 import type { EventDetail } from "@/lib/events";
 
 const FILTERS = ["All", "Today", "This Week", "Free", "Clubs"] as const;
@@ -75,7 +76,13 @@ const isThisWeek = (date: Date, now: Date) => {
   return date >= start && date < end;
 };
 
-function EventCard({ event }: { event: EventDetail }) {
+function EventCard({
+  event,
+  onRsvpChange,
+}: {
+  event: EventDetail;
+  onRsvpChange: (payload: { eventId: string; isRegistered: boolean; registrationsCount: number }) => void;
+}) {
   const eventDate = parseEventDate(event);
   const isToday =
     eventDate &&
@@ -85,8 +92,8 @@ function EventCard({ event }: { event: EventDetail }) {
   const attendeeCount = event.registrationsCount || event.audience_count || 0;
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
-      <Link href={`/events/${event.id}`} className="block">
+    <article className="group flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+      <Link href={`/events/${event.id}`} className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2">
         <div className="relative aspect-[16/10] overflow-hidden bg-gray-100">
           <Image
             src={
@@ -105,6 +112,12 @@ function EventCard({ event }: { event: EventDetail }) {
           {event.isFree ? (
             <div className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700 shadow-sm">
               Free
+            </div>
+          ) : null}
+
+          {event.isRegistered ? (
+            <div className="absolute bottom-4 left-4 rounded-full bg-[#51237f] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white shadow-sm">
+              RSVP confirmed
             </div>
           ) : null}
         </div>
@@ -140,15 +153,25 @@ function EventCard({ event }: { event: EventDetail }) {
               <Users size={14} className="text-gray-400" />
               <span>{attendeeCount} attending</span>
             </div>
+            <span className="text-xs font-semibold text-gray-500">
+              {event.isRegistered ? "You are going" : event.hasSession ? "Open RSVP" : "Login needed"}
+            </span>
           </div>
         </div>
 
-        <div className="mt-5">
+        <div className="mt-5 flex flex-wrap items-center gap-3">
+          <EventRsvpAction
+            eventId={event.id}
+            hasSession={event.hasSession}
+            isRegistered={event.isRegistered}
+            variant="compact"
+            onChange={onRsvpChange}
+          />
           <Link
             href={`/events/${event.id}`}
-            className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-800 transition-colors hover:border-gray-400 hover:bg-gray-50"
+            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-800 transition-colors hover:border-gray-400 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
           >
-            {event.isFree ? "Join event" : "View details"}
+            View details
             <ArrowRight size={15} />
           </Link>
         </div>
@@ -158,10 +181,28 @@ function EventCard({ event }: { event: EventDetail }) {
 }
 
 export function EventsPanel({ initialEvents }: { initialEvents: EventDetail[] }) {
+  const [events, setEvents] = useState(initialEvents);
   const [filter, setFilter] = useState<EventFilter>("All");
   const [search, setSearch] = useState("");
   const deferredSearch = useDeferredValue(search.trim().toLowerCase());
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
+  const handleRsvpChange = (payload: {
+    eventId: string;
+    isRegistered: boolean;
+    registrationsCount: number;
+  }) => {
+    setEvents((currentEvents) =>
+      currentEvents.map((event) =>
+        event.id === payload.eventId
+          ? {
+              ...event,
+              isRegistered: payload.isRegistered,
+              registrationsCount: payload.registrationsCount,
+            }
+          : event,
+      ),
+    );
+  };
 
   const filteredEvents = useMemo(() => {
     const now = new Date();
@@ -193,7 +234,7 @@ export function EventsPanel({ initialEvents }: { initialEvents: EventDetail[] })
       return true;
     };
 
-    return initialEvents
+    return events
       .filter((event) => matchesFilter(event))
       .filter((event) => matchesSearch(event, deferredSearch))
       .sort((a, b) => {
@@ -201,7 +242,7 @@ export function EventsPanel({ initialEvents }: { initialEvents: EventDetail[] })
         const bDate = parseEventDate(b)?.getTime() ?? Number.POSITIVE_INFINITY;
         return aDate - bDate;
       });
-  }, [deferredSearch, filter, initialEvents]);
+  }, [deferredSearch, events, filter]);
 
   const visibleEvents = filteredEvents.slice(0, visibleCount);
   const hasMore = visibleCount < filteredEvents.length;
@@ -218,14 +259,15 @@ export function EventsPanel({ initialEvents }: { initialEvents: EventDetail[] })
           </p>
 
           <div className="mt-6 max-w-2xl">
-            <label className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-sm shadow-gray-100">
+            <label htmlFor="event-search" className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm shadow-gray-100">
               <Search size={18} className="text-gray-400" />
               <input
+                id="event-search"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 type="search"
                 placeholder="Search events, clubs, locations"
-                className="w-full bg-transparent text-sm text-gray-950 outline-none placeholder:text-gray-400"
+                className="w-full bg-transparent text-sm text-gray-950 outline-none placeholder:text-gray-400 focus-visible:outline-none"
               />
             </label>
           </div>
@@ -239,11 +281,12 @@ export function EventsPanel({ initialEvents }: { initialEvents: EventDetail[] })
                     key={item}
                     type="button"
                     onClick={() => setFilter(item)}
+                    aria-pressed={active}
                     className={`whitespace-nowrap border-b-2 px-3 py-3 text-sm font-medium transition-colors ${
                       active
                         ? "border-gray-950 text-gray-950"
                         : "border-transparent text-gray-500 hover:text-gray-950"
-                    }`}
+                    } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2`}
                   >
                     {item}
                   </button>
@@ -257,15 +300,26 @@ export function EventsPanel({ initialEvents }: { initialEvents: EventDetail[] })
           {visibleEvents.length > 0 ? (
             <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
               {visibleEvents.map((event) => (
-                <EventCard key={event.id} event={event} />
+                <EventCard key={event.id} event={event} onRsvpChange={handleRsvpChange} />
               ))}
             </div>
           ) : (
-            <div className="rounded-2xl border border-gray-200 bg-white px-6 py-12 text-center shadow-sm">
+            <div className="rounded-xl border border-gray-200 bg-white px-6 py-12 text-center shadow-sm">
               <h2 className="text-xl font-semibold text-gray-950">No events match this view</h2>
               <p className="mt-2 text-sm leading-7 text-gray-600">
                 Try another filter or search term.
               </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setFilter("All");
+                  setSearch("");
+                  setVisibleCount(INITIAL_VISIBLE);
+                }}
+                className="mt-5 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
+              >
+                Reset filters
+              </button>
             </div>
           )}
 
@@ -274,7 +328,7 @@ export function EventsPanel({ initialEvents }: { initialEvents: EventDetail[] })
               <button
                 type="button"
                 onClick={() => setVisibleCount((count) => count + LOAD_MORE_STEP)}
-                className="rounded-full border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition-colors hover:border-gray-400 hover:bg-gray-50 hover:text-gray-900"
+                className="rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition-colors hover:border-gray-400 hover:bg-gray-50 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
               >
                 Load more
               </button>

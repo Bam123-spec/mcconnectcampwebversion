@@ -17,6 +17,13 @@ export type WebEventCardEvent = {
 const fallbackCover =
   "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1600&auto=format&fit=crop";
 
+const parseLocalDate = (value?: string | null) => {
+  if (!value) return null;
+  const [year, month, day] = value.split("T")[0].split("-").map(Number);
+  if (!year || !month || !day) return null;
+  return new Date(year, month - 1, day);
+};
+
 export function EventCard({
   event,
   isPast = false,
@@ -37,7 +44,7 @@ export function EventCard({
   onToggleRsvp?: (eventId: string, isRegistered: boolean) => void | Promise<void>;
 }) {
   // Format dates similarly to "Fri, Apr 3, 2026 At 5:30 PM"
-  const parsedDate = event.date ? new Date(event.date) : null;
+  const parsedDate = parseLocalDate(event.date);
   const dateString = parsedDate && !Number.isNaN(parsedDate.getTime())
     ? parsedDate.toLocaleDateString("en-US", {
         weekday: "short",
@@ -53,7 +60,7 @@ export function EventCard({
         isPast ? "border-gray-150 opacity-90" : "border-gray-200"
       }`}
     >
-      <Link href={detailsHref ?? `/events/${event.id}`} className="relative h-48 w-full bg-gray-100 block">
+      <Link href={detailsHref ?? `/events/${event.id}`} className="relative block h-48 w-full bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2">
         <Image
           src={event.cover_image_url || fallbackCover}
           alt={event.name}
@@ -71,7 +78,7 @@ export function EventCard({
       </Link>
       
       <div className="p-5 flex flex-col flex-1">
-        <Link href={detailsHref ?? `/events/${event.id}`} className="block">
+        <Link href={detailsHref ?? `/events/${event.id}`} className="block rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2">
           <h3 className="font-bold text-[#51237f] text-lg mb-3 line-clamp-2 leading-tight group-hover:text-[#421d68] transition-colors">
             {event.name}
           </h3>
@@ -109,7 +116,7 @@ export function EventCard({
             ) : !authEnabled ? (
               <Link
                 href={detailsHref ?? `/events/${event.id}`}
-                className="inline-flex items-center rounded-md bg-[#51237f] px-3 py-2 text-xs font-semibold text-white hover:bg-[#45206b] transition-colors"
+                className="inline-flex items-center rounded-md bg-[#51237f] px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#45206b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
               >
                 View details
               </Link>
@@ -122,14 +129,14 @@ export function EventCard({
                   isRegistered
                     ? "border border-[#51237f] text-[#51237f] hover:bg-purple-50"
                     : "bg-[#51237f] text-white hover:bg-[#45206b]"
-                } ${isPending ? "cursor-not-allowed opacity-60" : ""}`}
+                } ${isPending ? "cursor-not-allowed opacity-60" : ""} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2`}
               >
                 {isPending ? "Updating..." : isRegistered ? "Cancel RSVP" : "RSVP"}
               </button>
             ) : (
               <Link
                 href="/login"
-                className="inline-flex items-center rounded-md bg-[#51237f] px-3 py-2 text-xs font-semibold text-white hover:bg-[#45206b] transition-colors"
+                className="inline-flex items-center rounded-md bg-[#51237f] px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#45206b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
               >
                 Sign in
               </Link>
