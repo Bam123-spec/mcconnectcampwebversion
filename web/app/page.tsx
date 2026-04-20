@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import {
   BellRing,
@@ -5,9 +6,6 @@ import {
   Compass,
   ExternalLink,
   LogIn,
-  ShieldCheck,
-  ShieldPlus,
-  Sparkles,
   Users,
 } from "lucide-react";
 import { EventCard } from "@/components/events/EventCard";
@@ -21,18 +19,31 @@ const QUICK_LINKS = [
   { id: "q4", name: "Library Services", url: "#" },
 ];
 
-const HERO_HIGHLIGHTS = [
-  "Private event details stay gated until sign-in.",
-  "Student life, clubs, events, and updates in one view.",
-  "Built for commuters, organizers, and campus staff alike.",
-];
-
 export const dynamic = "force-dynamic";
+
+const fallbackHeroImage =
+  "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=1800&auto=format&fit=crop";
+
+const formatHeroDate = (date?: string | null, day?: string | null) => {
+  if (date) {
+    const parsed = new Date(date);
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed.toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      });
+    }
+  }
+
+  return day || "Date to be announced";
+};
 
 export default async function Home() {
   const isAuthenticated = false;
   const [events, clubs] = await Promise.all([getPublicEvents(), getPublicClubs()]);
   const featuredEvent = events[0];
+  const heroImage = featuredEvent?.cover_image_url || clubs[0]?.coverImageUrl || fallbackHeroImage;
   const heroMetrics = [
     { label: "Campus events", value: String(events.length) },
     { label: "Active student groups", value: String(clubs.length) },
@@ -41,166 +52,75 @@ export default async function Home() {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#f6f2ea]">
-      <section className="relative overflow-hidden border-b border-black/5 bg-[linear-gradient(180deg,#f4f1fb_0%,#fbfbfe_56%,#ffffff_100%)]">
-        <div className="hero-mesh absolute inset-0 opacity-35" aria-hidden="true" />
-        <div
-          className="absolute inset-x-0 top-0 h-48 bg-[radial-gradient(circle_at_top,rgba(81,35,127,0.18),transparent_62%)]"
-          aria-hidden="true"
+    <div className="flex min-h-screen flex-col bg-[#f7f7f5]">
+      <section className="relative min-h-[580px] overflow-hidden border-b border-gray-200 bg-black text-white">
+        <Image
+          src={heroImage}
+          alt={featuredEvent?.name || "Students walking on a college campus"}
+          fill
+          priority
+          className="object-cover"
+          sizes="100vw"
         />
-        <div
-          className="absolute -left-20 top-20 h-72 w-72 rounded-full bg-[#51237f]/8 blur-3xl"
-          aria-hidden="true"
-        />
-        <div
-          className="absolute right-0 top-14 h-80 w-80 rounded-full bg-[#00a0df]/8 blur-3xl"
-          aria-hidden="true"
-        />
+        <div className="absolute inset-0 bg-black/50" aria-hidden="true" />
+        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/70 to-transparent" aria-hidden="true" />
 
-        <div className="relative mx-auto flex max-w-7xl flex-col gap-12 px-4 py-16 md:px-6 md:py-20 lg:py-24">
-          <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12">
-            <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/75 px-4 py-2 text-sm font-semibold text-[#51237f] shadow-[0_12px_32px_rgba(81,35,127,0.10)] backdrop-blur">
-                <Sparkles className="h-4 w-4" />
-                Montgomery College&apos;s digital quad
-              </div>
-
-              <h1 className="mt-6 max-w-xl text-5xl font-semibold leading-[0.92] tracking-[-0.04em] text-[#161212] md:text-6xl lg:text-7xl">
-                {isAuthenticated ? "Campus momentum, already in motion." : "Campus life without the scavenger hunt."}
-              </h1>
-
-              <p className="mt-6 max-w-xl text-lg leading-8 text-[#4e4742] md:text-xl">
-                {isAuthenticated
-                  ? "Events, leadership updates, and student activity are waiting in one clean command center."
-                  : "Raptor Connect brings events, clubs, announcements, and protected campus details into a single, polished front door for Montgomery College."}
-              </p>
-
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Link
-                  href="/events"
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-[#161212] px-6 py-3.5 text-sm font-semibold text-white transition-transform duration-200 hover:-translate-y-0.5"
-                >
-                  <Compass className="h-4 w-4" />
-                  Explore what&apos;s happening
-                </Link>
-                <Link
-                  href={isAuthenticated ? "/activity" : "/login"}
-                  className="inline-flex items-center justify-center gap-2 rounded-full border border-[#161212]/12 bg-white/80 px-6 py-3.5 text-sm font-semibold text-[#161212] shadow-[0_10px_30px_rgba(22,18,18,0.08)] backdrop-blur transition-colors hover:bg-white"
-                >
-                  {isAuthenticated ? <BellRing className="h-4 w-4" /> : <LogIn className="h-4 w-4" />}
-                  {isAuthenticated ? "Open activity feed" : "Sign in for full access"}
-                </Link>
-              </div>
-
-              <div className="mt-8 space-y-3">
-                {HERO_HIGHLIGHTS.map((highlight) => (
-                  <div key={highlight} className="flex items-start gap-3 text-sm text-[#413a36] md:text-base">
-                    <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[#51237f]" />
-                    <span>{highlight}</span>
-                  </div>
-                ))}
-              </div>
+        <div className="relative mx-auto flex min-h-[580px] max-w-7xl flex-col justify-end px-4 pb-10 pt-20 sm:px-6 lg:px-8">
+          <div className="max-w-4xl">
+            <div className="inline-flex items-center gap-2 rounded-md border border-white/25 bg-black/25 px-3 py-2 text-xs font-semibold uppercase text-white">
+              Montgomery College
             </div>
 
-            <div className="relative lg:pl-8">
-              <div className="float-gentle relative overflow-hidden rounded-[32px] border border-[#51237f]/10 bg-[#14121a] p-6 text-white shadow-[0_30px_80px_rgba(42,26,71,0.18)]">
-                <div
-                  className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.14),transparent_34%),linear-gradient(180deg,rgba(98,59,149,0.30),transparent_46%)]"
-                  aria-hidden="true"
-                />
-                <div className="relative">
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/60">Tonight at MC</p>
-                      <h2 className="mt-2 text-2xl font-semibold">Campus pulse</h2>
-                    </div>
-                    <div className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium text-white/80">
-                      Live campus data
-                    </div>
-                  </div>
+            <h1 className="mt-5 max-w-3xl text-5xl font-semibold leading-none text-white md:text-6xl lg:text-7xl">
+              Campus life, all in one place.
+            </h1>
 
-                  <div className="mt-6 rounded-[24px] border border-white/8 bg-white/6 p-5 backdrop-blur-sm">
-                    <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
-                      <div>
-                        <p className="text-sm text-white/60">Featured tonight</p>
-                        <p className="mt-2 text-2xl font-semibold">{featuredEvent?.name ?? "Campus events"}</p>
-                        <p className="mt-3 max-w-sm text-sm leading-6 text-white/72">
-                          {featuredEvent?.description ?? "Browse campus events, student organizations, and public campus listings."}
-                        </p>
+            <p className="mt-5 max-w-2xl text-lg leading-8 text-white/90">
+              Find events, student organizations, and campus resources without searching through separate portals.
+            </p>
 
-                        <div className="mt-5 flex flex-wrap items-center gap-3">
-                          <div className="rounded-full bg-[#f0b24d] px-3 py-2 text-right text-[#161212]">
-                            <div className="text-[10px] font-semibold uppercase tracking-[0.2em]">RSVP</div>
-                            <div className="text-2xl font-semibold">{featuredEvent?.registrationsCount ?? 0}</div>
-                          </div>
-                          <div className="rounded-full border border-white/10 bg-white/8 px-4 py-2 text-sm text-white/75">
-                            {featuredEvent?.location ?? "Montgomery College"}
-                          </div>
-                          <div className="rounded-full border border-white/10 bg-white/8 px-4 py-2 text-sm text-white/75">
-                            {featuredEvent?.time || "See events"}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="grid gap-3">
-                        <div className="rounded-[22px] border border-white/10 bg-[#201b28] p-4">
-                          <div className="flex items-start gap-3">
-                            <div className="rounded-2xl bg-white/10 p-2">
-                              <ShieldPlus className="h-4 w-4 text-[#c9b8ff]" />
-                            </div>
-                            <div>
-                              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">Private access</p>
-                              <p className="mt-2 text-base font-semibold">Sensitive details stay gated</p>
-                              <p className="mt-2 text-sm leading-6 text-white/68">
-                                Open browsing is public, but room-level details and protected logistics appear only after authentication.
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="rounded-[22px] border border-white/10 bg-white/6 p-4">
-                          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">Fresh activity</p>
-                          <div className="mt-3 flex items-center justify-between text-sm text-white/82">
-                            <span>{clubs.length} clubs listed</span>
-                            <span>{events.length} events</span>
-                          </div>
-                          <div className="mt-3 h-2 rounded-full bg-white/10">
-                        <div className="h-2 w-[72%] rounded-full bg-[#8cc8ff]" />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mt-6 grid gap-3 sm:grid-cols-3">
-                      <div className="rounded-2xl border border-white/10 bg-white/8 p-4">
-                        <CalendarDays className="h-4 w-4 text-[#f0b24d]" />
-                        <div className="mt-3 text-2xl font-semibold">{events.length}</div>
-                        <p className="mt-1 text-xs uppercase tracking-[0.16em] text-white/55">Events opening registration</p>
-                      </div>
-                      <div className="rounded-2xl border border-white/10 bg-white/8 p-4">
-                        <Users className="h-4 w-4 text-[#9dc9ff]" />
-                        <div className="mt-3 text-2xl font-semibold">{clubs.length}</div>
-                        <p className="mt-1 text-xs uppercase tracking-[0.16em] text-white/55">Clubs posted this week</p>
-                      </div>
-                      <div className="rounded-2xl border border-white/10 bg-white/8 p-4">
-                        <BellRing className="h-4 w-4 text-[#f5a6c6]" />
-                        <div className="mt-3 text-2xl font-semibold">{events.filter((event) => event.club_id).length}</div>
-                        <p className="mt-1 text-xs uppercase tracking-[0.16em] text-white/55">New office alerts</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+              <Link
+                href="/events"
+                className="inline-flex items-center justify-center gap-2 rounded-md bg-white px-5 py-3 text-sm font-semibold text-gray-950 transition-colors hover:bg-gray-100"
+              >
+                <Compass className="h-4 w-4" />
+                Browse events
+              </Link>
+              <Link
+                href={isAuthenticated ? "/activity" : "/login"}
+                className="inline-flex items-center justify-center gap-2 rounded-md border border-white/35 bg-black/20 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-black/35"
+              >
+                {isAuthenticated ? <BellRing className="h-4 w-4" /> : <LogIn className="h-4 w-4" />}
+                {isAuthenticated ? "Open activity" : "Log in"}
+              </Link>
             </div>
           </div>
 
-          <div className="grid gap-4 rounded-[30px] border border-[#51237f]/8 bg-white/82 p-5 shadow-[0_20px_60px_rgba(34,22,60,0.06)] backdrop-blur md:grid-cols-4 md:p-6">
-            {heroMetrics.map((metric) => (
-              <div key={metric.label} className="rounded-[22px] border border-[#51237f]/8 bg-[#faf9fe] px-5 py-4">
-                <div className="text-3xl font-semibold tracking-[-0.04em] text-[#161212]">{metric.value}</div>
-                <div className="mt-1 text-sm text-[#625a54]">{metric.label}</div>
+          <div className="mt-10 grid gap-4 border-t border-white/25 pt-5 md:grid-cols-[1.4fr_1fr] md:items-end">
+            <div>
+              <div className="text-xs font-semibold uppercase text-white/65">Featured event</div>
+              <Link href={featuredEvent ? `/events/${featuredEvent.id}` : "/events"} className="mt-2 block max-w-2xl text-2xl font-semibold leading-tight text-white hover:underline">
+                {featuredEvent?.name || "See what is happening on campus"}
+              </Link>
+              <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm text-white/80">
+                <span className="inline-flex items-center gap-2">
+                  <CalendarDays className="h-4 w-4" />
+                  {formatHeroDate(featuredEvent?.date, featuredEvent?.day)}
+                </span>
+                <span>{featuredEvent?.location || "Montgomery College"}</span>
+                <span>{featuredEvent?.time || "Events updated live"}</span>
               </div>
-            ))}
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-2">
+              {heroMetrics.map((metric) => (
+                <div key={metric.label} className="border-l border-white/25 pl-4">
+                  <div className="text-2xl font-semibold text-white">{metric.value}</div>
+                  <div className="mt-1 text-xs font-medium uppercase text-white/65">{metric.label}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
