@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { LogIn } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function TopNav() {
@@ -73,8 +74,14 @@ export function TopNav() {
       </nav>
 
       {/* Auth / Right Side */}
-      <div className="bg-[#51237f] flex items-center px-6 h-full shrink-0">
-        <div className="text-white font-semibold text-sm">Public Preview</div>
+      <div className="bg-white flex items-center px-5 h-full shrink-0">
+        <Link
+          href="/login"
+          className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-800 shadow-sm transition-colors hover:border-gray-300 hover:bg-gray-50"
+        >
+          <LogIn size={15} />
+          Log in
+        </Link>
       </div>
     </header>
   );

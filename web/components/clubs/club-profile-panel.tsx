@@ -18,6 +18,7 @@ type ClubEvent = {
   id: string;
   name: string;
   date: string;
+  day?: string | null;
   time: string;
   location: string;
 };
@@ -60,7 +61,7 @@ export function ClubProfilePanel({
             Back to clubs
           </Link>
           <span className="rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-500">
-            Preview page
+            Club profile
           </span>
         </div>
 
@@ -129,7 +130,7 @@ export function ClubProfilePanel({
                           <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                             <div>
                               <h3 className="text-base font-bold text-gray-900">{event.name}</h3>
-                              <p className="mt-1 text-sm text-gray-500">{formatEventDate(event.date)} • {event.time}</p>
+                              <p className="mt-1 text-sm text-gray-500">{event.date ? formatEventDate(event.date) : event.day || "Date to be announced"} • {event.time}</p>
                             </div>
                             <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
                               <MapPin size={15} className="text-[#51237f]" />
@@ -161,15 +162,15 @@ export function ClubProfilePanel({
                       href="/activity"
                       className="block rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-semibold text-gray-700 hover:border-[#51237f] hover:text-[#51237f] transition-colors"
                     >
-                      View activity preview
+                      View activity
                     </Link>
                   </div>
                 </section>
 
                 <section className="rounded-xl border border-purple-200 bg-purple-50 p-5">
-                  <h2 className="text-base font-bold text-[#51237f]">Static preview mode</h2>
+                  <h2 className="text-base font-bold text-[#51237f]">Club contact</h2>
                   <p className="mt-2 text-sm leading-6 text-[#51237f]/80">
-                    This club page is currently running on preview content only. Live officer editing and database-backed profile updates will be reconnected later.
+                    Use campus events and club listings to find meeting details, event updates, and ways to get involved.
                   </p>
                 </section>
               </aside>

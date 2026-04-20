@@ -1,33 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Search, Filter, Users, MapPin, Tag } from "lucide-react";
-import { slugifyClubName } from "@/lib/club-utils";
-import { previewClubs } from "@/lib/preview-data";
+import { getPublicClubs } from "@/lib/clubs";
 
 export const metadata = {
   title: "Clubs & Organizations | Raptor Connect",
   description: "Browse and join student organizations at Montgomery College.",
-};
-
-type ClubCardData = {
-  id: string;
-  name: string;
-  description: string;
-  members: number;
-  campus: string;
-  category: string;
-  initials: string;
-  color: string;
-  coverImageUrl: string | null;
-};
-
-const getClubs = (query: string): ClubCardData[] => {
-  const trimmedQuery = query.trim().toLowerCase();
-
-  return previewClubs.filter((club) => {
-    if (!trimmedQuery || trimmedQuery.length < 2) return true;
-    return `${club.name} ${club.description} ${club.category}`.toLowerCase().includes(trimmedQuery);
-  });
 };
 
 export default async function ClubsPage({
@@ -37,7 +15,7 @@ export default async function ClubsPage({
 }) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const query = resolvedSearchParams?.q?.trim() || "";
-  const displayClubs = getClubs(query);
+  const displayClubs = await getPublicClubs(query);
 
   return (
     <div className="bg-[#f5f6f8] min-h-screen py-8">
@@ -122,7 +100,7 @@ export default async function ClubsPage({
 
               <div className="px-6 pb-6 pt-0 flex-1 flex flex-col relative">
                 <div
-                  className={`w-16 h-16 rounded-lg ${club.color} flex items-center justify-center text-white font-black text-2xl shadow-md border-4 border-white absolute -top-8 left-6 group-hover:scale-105 transition-transform`}
+                  className="w-16 h-16 rounded-lg bg-[#51237f] flex items-center justify-center text-white font-black text-2xl shadow-md border-4 border-white absolute -top-8 left-6 group-hover:scale-105 transition-transform"
                 >
                   {club.initials}
                 </div>
@@ -143,15 +121,15 @@ export default async function ClubsPage({
                   <div className="flex items-center justify-between text-xs text-gray-500 font-medium mb-4">
                     <div className="flex items-center gap-1.5">
                       <Users size={14} className="text-[#51237f]" />
-                      {club.members} Members
+                      {club.memberCount} Members
                     </div>
                     <div className="flex items-center gap-1.5">
                       <MapPin size={14} className="text-[#51237f]" />
-                      {club.campus}
+                      {club.location}
                     </div>
                   </div>
                   <Link
-                    href={`/clubs/${slugifyClubName(club.name)}`}
+                    href={`/clubs/${club.slug}`}
                     className="flex justify-center w-full py-2.5 bg-gray-50 hover:bg-[#51237f] hover:text-white text-gray-700 font-semibold rounded-md transition-colors border border-gray-200 hover:border-[#51237f]"
                   >
                     View Profile

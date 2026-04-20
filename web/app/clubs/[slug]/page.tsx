@@ -1,26 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { slugifyClubName } from "@/lib/club-utils";
 import { ClubProfilePanel } from "@/components/clubs/club-profile-panel";
-import { previewClubs, previewClubEvents } from "@/lib/preview-data";
-
-const getClubBySlug = async (slug: string) => {
-  const club = previewClubs.find((entry) => slugifyClubName(entry.name || "") === slug);
-  if (!club?.id) return null;
-
-  return {
-    club: {
-      id: club.id,
-      name: club.name,
-      description: club.description,
-      coverImageUrl: club.coverImageUrl,
-      memberCount: club.members,
-      meetingTime: club.meetingTime,
-      slug: slugifyClubName(club.name),
-    },
-    events: previewClubEvents[slug] || [],
-  };
-};
+import { getClubBySlug } from "@/lib/clubs";
 
 export async function generateMetadata({
   params,

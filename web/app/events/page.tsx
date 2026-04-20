@@ -1,9 +1,16 @@
-import { type WebEventCardEvent } from "@/components/events/EventCard";
+import type { Metadata } from "next";
 import { EventsPanel } from "@/components/events/events-panel";
-import { previewEvents } from "@/lib/preview-data";
+import { getPublicEvents } from "@/lib/events";
+
+export const metadata: Metadata = {
+  title: "Campus Events | Raptor Connect",
+  description: "Browse upcoming and past campus events in one clear, easy-to-scan view.",
+};
+
+export const dynamic = "force-dynamic";
 
 export default async function EventsPage() {
-  const events: WebEventCardEvent[] = previewEvents;
+  const events = await getPublicEvents();
 
   return (
     <EventsPanel initialEvents={events} />

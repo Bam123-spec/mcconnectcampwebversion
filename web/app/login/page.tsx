@@ -16,7 +16,7 @@ export default function LoginPage() {
           </div>
           <h1 className="text-3xl font-black tracking-tight text-gray-900 mb-3">Institutional login is temporarily disabled</h1>
           <p className="text-gray-600 leading-relaxed mb-8">
-            The web portal is currently running in public preview mode while deployment and campus SSO setup are being finalized.
+            The web portal is currently being finalized while deployment and campus SSO setup are completed.
           </p>
           <Link
             href="/"
