@@ -56,35 +56,38 @@ export function EventCard({
 
   return (
     <div
-      className={`group overflow-hidden rounded-lg border bg-white flex flex-col h-full shadow-sm ${
-        isPast ? "border-gray-150 opacity-90" : "border-gray-200"
+      className={`group ui-surface ui-surface-hover flex h-full flex-col overflow-hidden ${
+        isPast ? "opacity-90" : ""
       }`}
     >
-      <Link href={detailsHref ?? `/events/${event.id}`} className="relative block h-48 w-full bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2">
+      <Link href={detailsHref ?? `/events/${event.id}`} className="relative block h-52 w-full bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2">
         <Image
           src={event.cover_image_url || fallbackCover}
           alt={event.name}
           fill
-          className="object-cover"
+          className="object-cover transition-transform duration-300 group-hover:scale-[1.015]"
         />
-        <div className="absolute top-2 left-2 bg-gray-800/60 text-white text-[11px] font-semibold px-2 py-0.5 rounded-full shadow-sm">
+        <div className="absolute left-4 top-4 rounded-full border border-white/70 bg-white/92 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-700 shadow-sm">
           {isPast ? "Past" : "Campus"}
         </div>
         {typeof event.audience_count === "number" ? (
-          <div className="absolute top-2 right-2 bg-gray-800/60 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm flex items-center gap-1">
+          <div className="absolute right-4 top-4 flex items-center gap-1 rounded-full border border-white/70 bg-white/92 px-3 py-1 text-[11px] font-semibold text-gray-700 shadow-sm">
             <Users size={12} /> {event.audience_count}
           </div>
         ) : null}
       </Link>
       
-      <div className="p-5 flex flex-col flex-1">
+      <div className="flex flex-1 flex-col p-6">
+        <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#51237f]">
+          {isPast ? "Past event" : "Campus event"}
+        </div>
         <Link href={detailsHref ?? `/events/${event.id}`} className="block rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2">
-          <h3 className="font-bold text-[#51237f] text-lg mb-3 line-clamp-2 leading-tight group-hover:text-[#421d68] transition-colors">
+          <h3 className="mb-3 line-clamp-2 text-xl font-semibold leading-tight text-gray-950 transition-colors group-hover:text-[#421d68]">
             {event.name}
           </h3>
         </Link>
         
-        <div className="mt-auto space-y-2">
+        <div className="mt-auto space-y-2.5">
           <div className="flex items-start gap-2 text-sm text-gray-600">
             <Clock size={16} className="text-gray-400 shrink-0 mt-0.5" />
             <span>
@@ -96,7 +99,7 @@ export function EventCard({
             <span className="line-clamp-2">{event.location}</span>
           </div>
 
-          <div className="mt-4 flex items-center justify-between gap-3">
+          <div className="mt-5 flex items-center justify-between gap-3 border-t border-gray-100 pt-4">
             <span className="text-xs font-medium text-gray-500">
               {isPast
                 ? "Event closed"
@@ -116,7 +119,7 @@ export function EventCard({
             ) : !authEnabled ? (
               <Link
                 href={detailsHref ?? `/events/${event.id}`}
-                className="inline-flex items-center rounded-md bg-[#51237f] px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#45206b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
+                className="inline-flex items-center rounded-lg bg-[#51237f] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#45206b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
               >
                 View details
               </Link>
@@ -125,7 +128,7 @@ export function EventCard({
                 type="button"
                 onClick={() => onToggleRsvp(event.id, isRegistered)}
                 disabled={isPending}
-                className={`inline-flex items-center rounded-md px-3 py-2 text-xs font-semibold transition-colors ${
+                className={`inline-flex items-center rounded-lg px-3.5 py-2 text-xs font-semibold transition-colors ${
                   isRegistered
                     ? "border border-[#51237f] text-[#51237f] hover:bg-purple-50"
                     : "bg-[#51237f] text-white hover:bg-[#45206b]"
@@ -136,7 +139,7 @@ export function EventCard({
             ) : (
               <Link
                 href="/login"
-                className="inline-flex items-center rounded-md bg-[#51237f] px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#45206b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
+                className="inline-flex items-center rounded-lg bg-[#51237f] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#45206b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
               >
                 Sign in
               </Link>

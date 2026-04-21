@@ -32,7 +32,7 @@ export default async function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans`}>
         <div className="flex flex-col min-h-screen">
           <TopNav profile={profile} />
-          <main className="flex-1 w-full bg-white relative">
+          <main className="relative flex-1 w-full bg-[var(--page-background)]">
             {children}
           </main>
           <Footer />

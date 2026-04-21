@@ -14,9 +14,9 @@ const docsLinks = [
 ];
 
 const quickLinks = [
-  { href: "/docs#completing-your-profile", label: "1. Completing Your Profile" },
-  { href: "/docs#finding-groups", label: "2. Finding and Joining Groups" },
-  { href: "/docs#managing-rsvps", label: "3. Managing Event RSVPs" },
+  { href: "/docs#account-access", label: "1. Account Access" },
+  { href: "/docs#event-help", label: "2. Event Help" },
+  { href: "/docs#report-issue", label: "3. Reporting Issues" },
 ];
 
 export function DocsSidebar() {
@@ -37,7 +37,7 @@ export function DocsSidebar() {
           >
             <div className="flex items-center gap-2">
               <BookOpen size={16} className={pathname === "/docs" ? "text-[#51237f]" : "text-gray-400"}/>
-              <span>Getting Started</span>
+              <span>Support Overview</span>
             </div>
             {gettingStartedOpen ? <ChevronDown size={16} className="text-gray-400" /> : <ChevronRight size={16} className="text-gray-400" />}
           </button>
@@ -45,7 +45,7 @@ export function DocsSidebar() {
           {gettingStartedOpen && (
             <div className="ml-4 mt-1 flex flex-col gap-1 border-l-2 border-gray-100 pl-7">
               <Link href="/docs" className="rounded-md px-3 py-1.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2">
-                Overview
+                Help Center
               </Link>
               {quickLinks.map((link) => (
                 <Link key={link.href} href={link.href} className="rounded-md px-3 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2">
@@ -94,7 +94,7 @@ export function MobileDocsNav() {
         )}
       >
         <BookOpen size={16} />
-        Getting Started
+        Support Overview
       </Link>
       <div className="grid gap-1 sm:grid-cols-2">
         {docsLinks.map((link) => {

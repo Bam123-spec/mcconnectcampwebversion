@@ -4,12 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useDeferredValue, useMemo, useState } from "react";
 import {
+  ArrowRight,
   CalendarDays,
   Clock,
   MapPin,
   Search,
-  Users,
-  ArrowRight,
 } from "lucide-react";
 import { EventRsvpAction } from "@/components/events/event-rsvp-action";
 import type { EventDetail } from "@/lib/events";
@@ -53,6 +52,24 @@ const formatEventDate = (event: EventDetail) => {
   return event.day || "Date to be announced";
 };
 
+const getDateParts = (event: EventDetail) => {
+  const parsed = parseEventDate(event);
+
+  if (!parsed) {
+    return {
+      month: "TBA",
+      day: "--",
+      weekday: "Date",
+    };
+  }
+
+  return {
+    month: parsed.toLocaleDateString("en-US", { month: "short" }).toUpperCase(),
+    day: parsed.toLocaleDateString("en-US", { day: "numeric" }),
+    weekday: parsed.toLocaleDateString("en-US", { weekday: "short" }),
+  };
+};
+
 const matchesSearch = (event: EventDetail, query: string) => {
   if (!query) return true;
   const haystack = [
@@ -76,6 +93,11 @@ const isThisWeek = (date: Date, now: Date) => {
   return date >= start && date < end;
 };
 
+const isTodayDate = (date: Date, now: Date) =>
+  date.getFullYear() === now.getFullYear() &&
+  date.getMonth() === now.getMonth() &&
+  date.getDate() === now.getDate();
+
 function EventCard({
   event,
   onRsvpChange,
@@ -84,16 +106,23 @@ function EventCard({
   onRsvpChange: (payload: { eventId: string; isRegistered: boolean; registrationsCount: number }) => void;
 }) {
   const eventDate = parseEventDate(event);
-  const isToday =
-    eventDate &&
-    eventDate.getFullYear() === new Date().getFullYear() &&
-    eventDate.getMonth() === new Date().getMonth() &&
-    eventDate.getDate() === new Date().getDate();
+  const now = useMemo(() => new Date(), []);
+  const dateParts = getDateParts(event);
   const attendeeCount = event.registrationsCount || event.audience_count || 0;
+  const timingLabel = eventDate
+    ? isTodayDate(eventDate, now)
+      ? "Today"
+      : isThisWeek(eventDate, now)
+        ? "This week"
+        : "Upcoming"
+    : "Campus";
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
-      <Link href={`/events/${event.id}`} className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2">
+    <article className="ui-surface ui-surface-hover group flex h-full flex-col overflow-hidden">
+      <Link
+        href={`/events/${event.id}`}
+        className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
+      >
         <div className="relative aspect-[16/10] overflow-hidden bg-gray-100">
           <Image
             src={
@@ -105,12 +134,24 @@ function EventCard({
             className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
           />
 
-          <div className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-700 shadow-sm">
-            {isToday ? "Today" : eventDate ? "Event" : "Campus"}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/0 to-transparent" />
+
+          <div className="absolute left-4 top-4 flex items-center gap-2">
+            <div className="rounded-2xl border border-white/75 bg-white/95 px-3 py-2 text-center text-gray-900 shadow-sm">
+              <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#51237f]">
+                {dateParts.month}
+              </div>
+              <div className="mt-1 text-2xl font-semibold leading-none">{dateParts.day}</div>
+              <div className="mt-1 text-[11px] font-medium text-gray-500">{dateParts.weekday}</div>
+            </div>
+
+            <div className="rounded-full border border-white/70 bg-white/92 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-700 shadow-sm">
+              {timingLabel}
+            </div>
           </div>
 
           {event.isFree ? (
-            <div className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700 shadow-sm">
+            <div className="absolute right-4 top-4 rounded-full border border-white/70 bg-white/92 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700 shadow-sm">
               Free
             </div>
           ) : null}
@@ -123,39 +164,44 @@ function EventCard({
         </div>
       </Link>
 
-      <div className="flex flex-1 flex-col p-5">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-gray-500">
-          {event.clubName || "Campus event"}
+      <div className="flex flex-1 flex-col p-6">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#51237f]">
+              {event.clubName || "Campus event"}
+            </div>
+            <h3 className="mt-2 line-clamp-2 text-xl font-semibold tracking-tight text-gray-950">
+              {event.name}
+            </h3>
+          </div>
+          <div className="shrink-0 rounded-lg bg-gray-100 px-3 py-1.5 text-xs font-semibold text-gray-600">
+            {attendeeCount} attending
+          </div>
         </div>
 
-        <h3 className="mt-2 text-lg font-semibold tracking-tight text-gray-950">
-          {event.name}
-        </h3>
+        <p className="mt-4 line-clamp-3 text-sm leading-7 text-gray-600">
+          {event.description || "Open this event to read full details, timing, and attendance information."}
+        </p>
 
-        <div className="mt-4 space-y-2 text-sm text-gray-600">
+        <div className="mt-5 space-y-2.5 text-sm text-gray-600">
           <div className="flex items-center gap-2">
-            <CalendarDays size={14} className="text-gray-400" />
+            <CalendarDays size={15} className="text-gray-400" />
             <span>{formatEventDate(event)}</span>
           </div>
           <div className="flex items-center gap-2">
-            <Clock size={14} className="text-gray-400" />
+            <Clock size={15} className="text-gray-400" />
             <span>{(event.time || "TBA").split(" - ")[0]}</span>
           </div>
           <div className="flex items-center gap-2">
-            <MapPin size={14} className="text-gray-400" />
+            <MapPin size={15} className="text-gray-400" />
             <span className="line-clamp-1">{event.location}</span>
           </div>
         </div>
 
-        <div className="mt-4 border-t border-gray-100 pt-4">
-          <div className="flex items-center justify-between gap-3 text-sm text-gray-600">
-            <div className="flex items-center gap-2">
-              <Users size={14} className="text-gray-400" />
-              <span>{attendeeCount} attending</span>
-            </div>
-            <span className="text-xs font-semibold text-gray-500">
-              {event.isRegistered ? "You are going" : event.hasSession ? "Open RSVP" : "Login needed"}
-            </span>
+        <div className="mt-5 border-t border-gray-100 pt-4">
+          <div className="flex items-center justify-between gap-3 text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">
+            <span>{event.isRegistered ? "You are going" : event.hasSession ? "RSVP open" : "Login needed"}</span>
+            <span>{event.club_id ? "Club hosted" : "Campus hosted"}</span>
           </div>
         </div>
 
@@ -169,7 +215,7 @@ function EventCard({
           />
           <Link
             href={`/events/${event.id}`}
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-800 transition-colors hover:border-gray-400 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
+            className="btn-secondary inline-flex items-center gap-2 text-sm"
           >
             View details
             <ArrowRight size={15} />
@@ -186,6 +232,7 @@ export function EventsPanel({ initialEvents }: { initialEvents: EventDetail[] })
   const [search, setSearch] = useState("");
   const deferredSearch = useDeferredValue(search.trim().toLowerCase());
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
+
   const handleRsvpChange = (payload: {
     eventId: string;
     isRegistered: boolean;
@@ -204,19 +251,23 @@ export function EventsPanel({ initialEvents }: { initialEvents: EventDetail[] })
     );
   };
 
-  const filteredEvents = useMemo(() => {
-    const now = new Date();
+  const now = useMemo(() => new Date(), []);
+  const sortedEvents = useMemo(
+    () =>
+      [...events].sort((a, b) => {
+        const aDate = parseEventDate(a)?.getTime() ?? Number.POSITIVE_INFINITY;
+        const bDate = parseEventDate(b)?.getTime() ?? Number.POSITIVE_INFINITY;
+        return aDate - bDate;
+      }),
+    [events],
+  );
 
+  const filteredEvents = useMemo(() => {
     const matchesFilter = (event: EventDetail) => {
       const date = parseEventDate(event);
 
       if (filter === "Today") {
-        return Boolean(
-          date &&
-            date.getFullYear() === now.getFullYear() &&
-            date.getMonth() === now.getMonth() &&
-            date.getDate() === now.getDate(),
-        );
+        return Boolean(date && isTodayDate(date, now));
       }
 
       if (filter === "This Week") {
@@ -234,77 +285,157 @@ export function EventsPanel({ initialEvents }: { initialEvents: EventDetail[] })
       return true;
     };
 
-    return events
+    return sortedEvents
       .filter((event) => matchesFilter(event))
-      .filter((event) => matchesSearch(event, deferredSearch))
-      .sort((a, b) => {
-        const aDate = parseEventDate(a)?.getTime() ?? Number.POSITIVE_INFINITY;
-        const bDate = parseEventDate(b)?.getTime() ?? Number.POSITIVE_INFINITY;
-        return aDate - bDate;
-      });
-  }, [deferredSearch, events, filter]);
+      .filter((event) => matchesSearch(event, deferredSearch));
+  }, [deferredSearch, filter, now, sortedEvents]);
+
+  const upcomingCount = sortedEvents.filter((event) => {
+    const date = parseEventDate(event);
+    if (!date) return true;
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+    return endOfDay >= now;
+  }).length;
+
+  const todayCount = sortedEvents.filter((event) => {
+    const date = parseEventDate(event);
+    return Boolean(date && isTodayDate(date, now));
+  }).length;
+
+  const freeCount = sortedEvents.filter((event) => event.isFree).length;
+  const clubHostCount = new Set(sortedEvents.map((event) => event.clubName).filter(Boolean)).size;
 
   const visibleEvents = filteredEvents.slice(0, visibleCount);
   const hasMore = visibleCount < filteredEvents.length;
+  const nextEvent = filteredEvents[0] ?? sortedEvents[0] ?? null;
 
   return (
-    <div className="min-h-screen bg-[#fbfbf9]">
-      <div className="mx-auto max-w-[1480px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-        <header className="pb-8">
-          <h1 className="text-3xl font-semibold tracking-tight text-gray-950 sm:text-4xl">
-            Events
-          </h1>
-          <p className="mt-3 max-w-2xl text-base leading-7 text-gray-600">
-            Browse upcoming campus events, filter quickly, and open any event for the details you need.
-          </p>
+    <div className="min-h-screen bg-[var(--page-background)]">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+        <header className="grid gap-6 xl:grid-cols-[minmax(0,1.14fr)_360px]">
+          <section className="ui-surface p-8">
+            <div className="max-w-3xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#51237f]">
+                Campus calendar
+              </p>
+              <h1 className="mt-3 text-4xl font-semibold tracking-tight text-gray-950 sm:text-5xl">
+                Events
+              </h1>
+              <p className="mt-4 text-base leading-8 text-gray-600">
+                Browse upcoming campus events, filter quickly, and open the details students need
+                most often: date, location, host, and RSVP status.
+              </p>
+            </div>
 
-          <div className="mt-6 max-w-2xl">
-            <label htmlFor="event-search" className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm shadow-gray-100">
-              <Search size={18} className="text-gray-400" />
-              <input
-                id="event-search"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                type="search"
-                placeholder="Search events, clubs, locations"
-                className="w-full bg-transparent text-sm text-gray-950 outline-none placeholder:text-gray-400 focus-visible:outline-none"
-              />
-            </label>
-          </div>
+            <div className="mt-8 max-w-3xl">
+              <label htmlFor="event-search" className="field-shell flex items-center gap-3">
+                <Search size={18} className="text-gray-400" />
+                <input
+                  id="event-search"
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  type="search"
+                  placeholder="Search events, clubs, locations, or keywords"
+                  className="w-full bg-transparent text-sm text-gray-950 outline-none placeholder:text-gray-400 focus-visible:outline-none"
+                />
+              </label>
+            </div>
 
-          <div className="mt-5 border-b border-gray-200">
-            <div className="flex gap-1 overflow-x-auto">
+            <div className="mt-6 flex flex-wrap gap-2">
               {FILTERS.map((item) => {
                 const active = filter === item;
+
                 return (
                   <button
                     key={item}
                     type="button"
                     onClick={() => setFilter(item)}
                     aria-pressed={active}
-                    className={`whitespace-nowrap border-b-2 px-3 py-3 text-sm font-medium transition-colors ${
+                    className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2 ${
                       active
-                        ? "border-gray-950 text-gray-950"
-                        : "border-transparent text-gray-500 hover:text-gray-950"
-                    } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2`}
+                        ? "bg-[#51237f] text-white"
+                        : "border border-[var(--line-soft)] bg-white text-gray-700 hover:bg-gray-50"
+                    }`}
                   >
                     {item}
                   </button>
                 );
               })}
             </div>
-          </div>
+
+            <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-gray-100 pt-5">
+              <div className="rounded-xl border border-[var(--line-soft)] bg-[var(--surface-muted)] px-4 py-3">
+                <div className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Showing</div>
+                <div className="mt-1 text-lg font-semibold text-gray-950">{filteredEvents.length} events</div>
+              </div>
+              <div className="rounded-xl border border-[var(--line-soft)] bg-[var(--surface-muted)] px-4 py-3">
+                <div className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Upcoming</div>
+                <div className="mt-1 text-lg font-semibold text-gray-950">{upcomingCount}</div>
+              </div>
+              <div className="rounded-xl border border-[var(--line-soft)] bg-[var(--surface-muted)] px-4 py-3">
+                <div className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Today</div>
+                <div className="mt-1 text-lg font-semibold text-gray-950">{todayCount}</div>
+              </div>
+            </div>
+          </section>
+
+          <aside className="ui-muted-panel p-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#51237f]">Up next</p>
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-gray-950">
+              {nextEvent?.name || "No event selected"}
+            </h2>
+            <p className="mt-3 text-sm leading-7 text-gray-600">
+              {nextEvent?.description
+                ? nextEvent.description
+                : "Use the calendar and filters to find the next event that fits your week."}
+            </p>
+
+            <div className="mt-5 space-y-3 rounded-2xl border border-[var(--line-soft)] bg-white p-4">
+              <div className="flex items-center gap-2 text-sm text-gray-700">
+                <CalendarDays className="h-4 w-4 text-gray-400" />
+                <span>{nextEvent ? formatEventDate(nextEvent) : "Date to be announced"}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-700">
+                <Clock className="h-4 w-4 text-gray-400" />
+                <span>{nextEvent ? (nextEvent.time || "TBA").split(" - ")[0] : "Time to be announced"}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-700">
+                <MapPin className="h-4 w-4 text-gray-400" />
+                <span>{nextEvent?.location || "Location to be announced"}</span>
+              </div>
+            </div>
+
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              <div className="rounded-xl border border-[var(--line-soft)] bg-white p-4">
+                <div className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Free events</div>
+                <div className="mt-2 text-2xl font-semibold text-gray-950">{freeCount}</div>
+              </div>
+              <div className="rounded-xl border border-[var(--line-soft)] bg-white p-4">
+                <div className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Club hosts</div>
+                <div className="mt-2 text-2xl font-semibold text-gray-950">{clubHostCount}</div>
+              </div>
+            </div>
+
+            <Link
+              href={nextEvent ? `/events/${nextEvent.id}` : "/events"}
+              className="mt-6 inline-flex items-center gap-2 rounded-lg bg-[#51237f] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#421d68] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
+            >
+              Open highlighted event
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </aside>
         </header>
 
-        <main>
+        <main className="mt-10">
           {visibleEvents.length > 0 ? (
-            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+            <div className="grid gap-6 lg:grid-cols-2 2xl:grid-cols-3">
               {visibleEvents.map((event) => (
                 <EventCard key={event.id} event={event} onRsvpChange={handleRsvpChange} />
               ))}
             </div>
           ) : (
-            <div className="rounded-xl border border-gray-200 bg-white px-6 py-12 text-center shadow-sm">
+            <div className="ui-surface px-6 py-12 text-center">
               <h2 className="text-xl font-semibold text-gray-950">No events match this view</h2>
               <p className="mt-2 text-sm leading-7 text-gray-600">
                 Try another filter or search term.
@@ -316,7 +447,7 @@ export function EventsPanel({ initialEvents }: { initialEvents: EventDetail[] })
                   setSearch("");
                   setVisibleCount(INITIAL_VISIBLE);
                 }}
-                className="mt-5 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
+                className="btn-secondary mt-5 text-sm"
               >
                 Reset filters
               </button>
@@ -328,7 +459,7 @@ export function EventsPanel({ initialEvents }: { initialEvents: EventDetail[] })
               <button
                 type="button"
                 onClick={() => setVisibleCount((count) => count + LOAD_MORE_STEP)}
-                className="rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition-colors hover:border-gray-400 hover:bg-gray-50 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
+                className="btn-secondary text-sm text-gray-700"
               >
                 Load more
               </button>
