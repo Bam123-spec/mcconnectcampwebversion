@@ -33,6 +33,7 @@ export function EventCard({
   authEnabled = true,
   detailsHref,
   onToggleRsvp,
+  variant = "default",
 }: {
   event: WebEventCardEvent;
   isPast?: boolean;
@@ -42,6 +43,7 @@ export function EventCard({
   authEnabled?: boolean;
   detailsHref?: string;
   onToggleRsvp?: (eventId: string, isRegistered: boolean) => void | Promise<void>;
+  variant?: "default" | "compact";
 }) {
   // Format dates similarly to "Fri, Apr 3, 2026 At 5:30 PM"
   const parsedDate = parseLocalDate(event.date);
@@ -54,53 +56,63 @@ export function EventCard({
       })
     : event.day || "Date TBA";
 
+  const compact = variant === "compact";
+
   return (
     <div
-      className={`group ui-surface ui-surface-hover flex h-full flex-col overflow-hidden ${
+      className={`group flex h-full flex-col overflow-hidden rounded-[22px] border border-[var(--line-soft)] bg-white shadow-[0_10px_26px_rgba(15,23,42,0.04)] transition-shadow hover:shadow-[0_14px_34px_rgba(15,23,42,0.06)] ${
         isPast ? "opacity-90" : ""
       }`}
     >
-      <Link href={detailsHref ?? `/events/${event.id}`} className="relative block h-52 w-full bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2">
+      <Link
+        href={detailsHref ?? `/events/${event.id}`}
+        className={`relative block w-full bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2 ${
+          compact ? "h-36" : "h-52"
+        }`}
+      >
         <Image
           src={event.cover_image_url || fallbackCover}
           alt={event.name}
           fill
           className="object-cover transition-transform duration-300 group-hover:scale-[1.015]"
         />
-        <div className="absolute left-4 top-4 rounded-full border border-white/70 bg-white/92 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-700 shadow-sm">
+        <div className="absolute left-4 top-4 rounded-full border border-white/70 bg-white/92 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-gray-700 shadow-sm">
           {isPast ? "Past" : "Campus"}
         </div>
         {typeof event.audience_count === "number" ? (
-          <div className="absolute right-4 top-4 flex items-center gap-1 rounded-full border border-white/70 bg-white/92 px-3 py-1 text-[11px] font-semibold text-gray-700 shadow-sm">
+          <div className="absolute right-4 top-4 flex items-center gap-1 rounded-full border border-white/70 bg-white/92 px-2.5 py-1 text-[10px] font-semibold text-gray-700 shadow-sm">
             <Users size={12} /> {event.audience_count}
           </div>
         ) : null}
       </Link>
       
-      <div className="flex flex-1 flex-col p-6">
-        <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#51237f]">
+      <div className={`flex flex-1 flex-col ${compact ? "p-4" : "p-6"}`}>
+        <div className={`mb-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#51237f] ${compact ? "text-[10px]" : ""}`}>
           {isPast ? "Past event" : "Campus event"}
         </div>
-        <Link href={detailsHref ?? `/events/${event.id}`} className="block rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2">
-          <h3 className="mb-3 line-clamp-2 text-xl font-semibold leading-tight text-gray-950 transition-colors group-hover:text-[#421d68]">
+        <Link
+          href={detailsHref ?? `/events/${event.id}`}
+          className="block rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
+        >
+          <h3 className={`mb-3 line-clamp-2 font-semibold leading-tight text-gray-950 transition-colors group-hover:text-[#421d68] ${compact ? "text-lg" : "text-xl"}`}>
             {event.name}
           </h3>
         </Link>
         
-        <div className="mt-auto space-y-2.5">
-          <div className="flex items-start gap-2 text-sm text-gray-600">
+        <div className={`mt-auto ${compact ? "space-y-2" : "space-y-2.5"}`}>
+          <div className={`flex items-start gap-2 text-gray-600 ${compact ? "text-xs" : "text-sm"}`}>
             <Clock size={16} className="text-gray-400 shrink-0 mt-0.5" />
             <span>
               {dateString} At {(event.time || "TBA").split(" - ")[0]}
             </span>
           </div>
-          <div className="flex items-start gap-2 text-sm text-gray-600">
+          <div className={`flex items-start gap-2 text-gray-600 ${compact ? "text-xs" : "text-sm"}`}>
             <MapPin size={16} className="text-gray-400 shrink-0 mt-0.5" />
             <span className="line-clamp-2">{event.location}</span>
           </div>
 
-          <div className="mt-5 flex items-center justify-between gap-3 border-t border-gray-100 pt-4">
-            <span className="text-xs font-medium text-gray-500">
+          <div className={`mt-5 flex items-center justify-between gap-3 border-t border-gray-100 ${compact ? "pt-3" : "pt-4"}`}>
+            <span className={`font-medium text-gray-500 ${compact ? "text-[11px]" : "text-xs"}`}>
               {isPast
                 ? "Event closed"
                 : !authEnabled
@@ -119,7 +131,9 @@ export function EventCard({
             ) : !authEnabled ? (
               <Link
                 href={detailsHref ?? `/events/${event.id}`}
-                className="inline-flex items-center rounded-lg bg-[#51237f] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#45206b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
+                className={`inline-flex items-center rounded-lg bg-[#51237f] font-semibold text-white transition-colors hover:bg-[#45206b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2 ${
+                  compact ? "px-3 py-1.5 text-[11px]" : "px-3.5 py-2 text-xs"
+                }`}
               >
                 View details
               </Link>
@@ -128,7 +142,9 @@ export function EventCard({
                 type="button"
                 onClick={() => onToggleRsvp(event.id, isRegistered)}
                 disabled={isPending}
-                className={`inline-flex items-center rounded-lg px-3.5 py-2 text-xs font-semibold transition-colors ${
+                className={`inline-flex items-center rounded-lg font-semibold transition-colors ${
+                  compact ? "px-3 py-1.5 text-[11px]" : "px-3.5 py-2 text-xs"
+                } ${
                   isRegistered
                     ? "border border-[#51237f] text-[#51237f] hover:bg-purple-50"
                     : "bg-[#51237f] text-white hover:bg-[#45206b]"
@@ -139,7 +155,9 @@ export function EventCard({
             ) : (
               <Link
                 href="/login"
-                className="inline-flex items-center rounded-lg bg-[#51237f] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#45206b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
+                className={`inline-flex items-center rounded-lg bg-[#51237f] font-semibold text-white transition-colors hover:bg-[#45206b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2 ${
+                  compact ? "px-3 py-1.5 text-[11px]" : "px-3.5 py-2 text-xs"
+                }`}
               >
                 Sign in
               </Link>
