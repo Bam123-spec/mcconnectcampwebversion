@@ -244,36 +244,6 @@ export default async function Home() {
                 ))}
               </div>
 
-              <div className="mt-10 border-t border-[var(--line-soft)] pt-6">
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#51237f]">What the app helps with</p>
-                <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                  <div className="rounded-2xl border border-[var(--line-soft)] bg-white px-4 py-4 shadow-sm">
-                    <div className="text-sm font-semibold text-gray-950">Upcoming events</div>
-                    <p className="mt-1 text-sm leading-6 text-gray-600">
-                      See what is happening next and move straight to the details that matter.
-                    </p>
-                  </div>
-                  <div className="rounded-2xl border border-[var(--line-soft)] bg-white px-4 py-4 shadow-sm">
-                    <div className="text-sm font-semibold text-gray-950">Active clubs</div>
-                    <p className="mt-1 text-sm leading-6 text-gray-600">
-                      Browse student organizations by interest, campus, and meeting cadence.
-                    </p>
-                  </div>
-                  <div className="rounded-2xl border border-[var(--line-soft)] bg-white px-4 py-4 shadow-sm">
-                    <div className="text-sm font-semibold text-gray-950">Campus resources</div>
-                    <p className="mt-1 text-sm leading-6 text-gray-600">
-                      Jump to official Montgomery College links without hunting through menus.
-                    </p>
-                  </div>
-                  <div className="rounded-2xl border border-[var(--line-soft)] bg-white px-4 py-4 shadow-sm">
-                    <div className="text-sm font-semibold text-gray-950">Support &amp; help</div>
-                    <p className="mt-1 text-sm leading-6 text-gray-600">
-                      Open the support center when you need account or platform guidance.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
               <p className="mt-8 max-w-2xl text-sm leading-7 text-gray-500">
                 Central home for events, clubs, campus resources, and support.
               </p>
