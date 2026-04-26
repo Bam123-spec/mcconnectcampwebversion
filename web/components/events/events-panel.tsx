@@ -313,20 +313,18 @@ export function EventsPanel({ initialEvents }: { initialEvents: EventDetail[] })
   return (
     <div className="min-h-screen bg-[var(--page-background)]">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-        <header className="grid gap-6 xl:grid-cols-[minmax(0,1.14fr)_360px]">
-          <section className="ui-surface p-8">
-            <div className="max-w-3xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#51237f]">
-                Campus calendar
-              </p>
-              <h1 className="mt-3 text-4xl font-semibold tracking-tight text-gray-950 sm:text-5xl">
-                Events
-              </h1>
-              <p className="mt-4 text-base leading-8 text-gray-600">
-                Browse upcoming campus events, filter quickly, and open the details students need
-                most often: date, location, host, and RSVP status.
-              </p>
-            </div>
+        <header className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
+          <section className="pb-8">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#51237f]">
+              Campus calendar
+            </p>
+            <h1 className="mt-3 text-4xl font-semibold tracking-tight text-gray-950 sm:text-5xl">
+              Events
+            </h1>
+            <p className="mt-4 max-w-3xl text-base leading-8 text-gray-600">
+              Browse upcoming campus events, filter quickly, and open the details students need
+              most often: date, location, host, and RSVP status.
+            </p>
 
             <div className="mt-8 max-w-3xl">
               <label htmlFor="event-search" className="field-shell flex items-center gap-3">
@@ -342,7 +340,7 @@ export function EventsPanel({ initialEvents }: { initialEvents: EventDetail[] })
               </label>
             </div>
 
-            <div className="mt-6 flex flex-wrap gap-2">
+            <div className="mt-5 flex flex-wrap gap-2">
               {FILTERS.map((item) => {
                 const active = filter === item;
 
@@ -354,8 +352,8 @@ export function EventsPanel({ initialEvents }: { initialEvents: EventDetail[] })
                     aria-pressed={active}
                     className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2 ${
                       active
-                        ? "bg-[#51237f] text-white"
-                        : "border border-[var(--line-soft)] bg-white text-gray-700 hover:bg-gray-50"
+                        ? "border border-[var(--line-soft)] bg-white text-gray-950 shadow-sm"
+                        : "border border-[var(--line-soft)] bg-transparent text-gray-600 hover:bg-white"
                     }`}
                   >
                     {item}
@@ -364,23 +362,27 @@ export function EventsPanel({ initialEvents }: { initialEvents: EventDetail[] })
               })}
             </div>
 
-            <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-gray-100 pt-5">
-              <div className="rounded-xl border border-[var(--line-soft)] bg-[var(--surface-muted)] px-4 py-3">
-                <div className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Showing</div>
-                <div className="mt-1 text-lg font-semibold text-gray-950">{filteredEvents.length} events</div>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <div className="rounded-full border border-[var(--line-soft)] bg-white px-4 py-2 text-sm text-gray-700 shadow-sm">
+                <span className="font-semibold text-gray-950">{filteredEvents.length}</span>
+                <span className="ml-2 text-gray-500">Showing</span>
               </div>
-              <div className="rounded-xl border border-[var(--line-soft)] bg-[var(--surface-muted)] px-4 py-3">
-                <div className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Upcoming</div>
-                <div className="mt-1 text-lg font-semibold text-gray-950">{upcomingCount}</div>
+              <div className="rounded-full border border-[var(--line-soft)] bg-white px-4 py-2 text-sm text-gray-700 shadow-sm">
+                <span className="font-semibold text-gray-950">{upcomingCount}</span>
+                <span className="ml-2 text-gray-500">Upcoming</span>
               </div>
-              <div className="rounded-xl border border-[var(--line-soft)] bg-[var(--surface-muted)] px-4 py-3">
-                <div className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Today</div>
-                <div className="mt-1 text-lg font-semibold text-gray-950">{todayCount}</div>
+              <div className="rounded-full border border-[var(--line-soft)] bg-white px-4 py-2 text-sm text-gray-700 shadow-sm">
+                <span className="font-semibold text-gray-950">{todayCount}</span>
+                <span className="ml-2 text-gray-500">Today</span>
+              </div>
+              <div className="rounded-full border border-[var(--line-soft)] bg-white px-4 py-2 text-sm text-gray-700 shadow-sm">
+                <span className="font-semibold text-gray-950">{freeCount}</span>
+                <span className="ml-2 text-gray-500">Free</span>
               </div>
             </div>
           </section>
 
-          <aside className="ui-muted-panel p-6">
+          <aside className="self-start rounded-[24px] border border-[var(--line-soft)] bg-white p-6 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#51237f]">Up next</p>
             <h2 className="mt-2 text-2xl font-semibold tracking-tight text-gray-950">
               {nextEvent?.name || "No event selected"}
@@ -391,7 +393,7 @@ export function EventsPanel({ initialEvents }: { initialEvents: EventDetail[] })
                 : "Use the calendar and filters to find the next event that fits your week."}
             </p>
 
-            <div className="mt-5 space-y-3 rounded-2xl border border-[var(--line-soft)] bg-white p-4">
+            <div className="mt-5 space-y-3 border-t border-[var(--line-soft)] pt-5">
               <div className="flex items-center gap-2 text-sm text-gray-700">
                 <CalendarDays className="h-4 w-4 text-gray-400" />
                 <span>{nextEvent ? formatEventDate(nextEvent) : "Date to be announced"}</span>
@@ -407,11 +409,11 @@ export function EventsPanel({ initialEvents }: { initialEvents: EventDetail[] })
             </div>
 
             <div className="mt-5 grid grid-cols-2 gap-3">
-              <div className="rounded-xl border border-[var(--line-soft)] bg-white p-4">
+              <div className="rounded-xl border border-[var(--line-soft)] bg-[var(--surface-muted)] p-4">
                 <div className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Free events</div>
                 <div className="mt-2 text-2xl font-semibold text-gray-950">{freeCount}</div>
               </div>
-              <div className="rounded-xl border border-[var(--line-soft)] bg-white p-4">
+              <div className="rounded-xl border border-[var(--line-soft)] bg-[var(--surface-muted)] p-4">
                 <div className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Club hosts</div>
                 <div className="mt-2 text-2xl font-semibold text-gray-950">{clubHostCount}</div>
               </div>
@@ -429,13 +431,13 @@ export function EventsPanel({ initialEvents }: { initialEvents: EventDetail[] })
 
         <main className="mt-10">
           {visibleEvents.length > 0 ? (
-            <div className="grid gap-6 lg:grid-cols-2 2xl:grid-cols-3">
+            <div className="grid gap-5 lg:grid-cols-2 2xl:grid-cols-3">
               {visibleEvents.map((event) => (
                 <EventCard key={event.id} event={event} onRsvpChange={handleRsvpChange} />
               ))}
             </div>
           ) : (
-            <div className="ui-surface px-6 py-12 text-center">
+            <div className="rounded-[24px] border border-dashed border-gray-300 bg-white px-6 py-12 text-center">
               <h2 className="text-xl font-semibold text-gray-950">No events match this view</h2>
               <p className="mt-2 text-sm leading-7 text-gray-600">
                 Try another filter or search term.
