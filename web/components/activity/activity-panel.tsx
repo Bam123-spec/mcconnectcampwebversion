@@ -240,7 +240,7 @@ export function ActivityPanel({
             <p className="mt-5 max-w-2xl text-base leading-8 text-gray-600">
               {hasSession
                 ? "This page keeps your event reminders, group updates, and revisits in one simple place."
-                : "Browse the public campus pulse, see what students are engaging with, and sign in when you want your personal activity to appear here."}
+                : "Browse the public campus pulse, see what students are engaging with, and sign in when you want your activity to appear here."}
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">

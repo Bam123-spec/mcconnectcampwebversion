@@ -1,5 +1,5 @@
-import Image from "next/image";
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowRight,
   BellRing,
@@ -224,21 +224,17 @@ export default async function Home() {
               </div>
             </div>
 
-            <div className="relative z-10 self-start lg:pt-20 lg:pr-3">
-              <div className="relative mx-auto w-full max-w-[320px] overflow-hidden rounded-[20px] border border-[var(--line-soft)] bg-white shadow-[0_10px_24px_rgba(15,23,42,0.08)] lg:mr-0">
-                <div className="relative aspect-[1.28] w-full">
-                  <Image
-                    src="/hero-preview.png"
-                    alt="Montgomery College student app preview"
-                    fill
-                    priority
-                    className="object-cover"
-                    sizes="(min-width: 1024px) 320px, 100vw"
-                  />
-                </div>
-              </div>
+            <div className="relative z-10 self-start lg:pt-14 lg:pr-3">
+              <Image
+                src="/hero-preview-v2.png"
+                alt="RaptorConnect app preview"
+                width={1356}
+                height={1028}
+                priority
+                className="block h-auto w-full max-w-[560px]"
+              />
             </div>
-          </div>
+        </div>
         </div>
       </section>
 
