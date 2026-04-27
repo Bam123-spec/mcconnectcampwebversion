@@ -92,14 +92,14 @@ export default function DocsPage() {
       <nav className="mb-8 flex items-center text-sm font-medium text-gray-500">
         <Link
           href="/"
-          className="rounded-md transition-colors hover:text-[#51237f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
+          className="rounded-md transition-colors hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
         >
           Home
         </Link>
         <ChevronRightIcon size={14} className="mx-2" />
         <span>Support</span>
         <ChevronRightIcon size={14} className="mx-2" />
-        <span className="font-semibold text-[#51237f]">Help Center</span>
+        <span className="font-semibold text-[var(--primary)]">Help Center</span>
       </nav>
 
       <div className="space-y-10">
@@ -145,7 +145,7 @@ export default function DocsPage() {
         <section className="grid gap-6 xl:grid-cols-[minmax(0,1.08fr)_340px]">
           <div className="ui-surface p-6 sm:p-8">
             <div className="max-w-3xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#51237f]">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--primary)]">
                 Start here
               </p>
               <h2 className="mt-2 text-3xl font-semibold tracking-tight text-gray-950">
@@ -165,13 +165,13 @@ export default function DocsPage() {
                   <Link
                     key={action.title}
                     href={action.href}
-                    className="group rounded-2xl border border-[var(--line-soft)] bg-white p-5 shadow-[var(--shadow-soft)] transition hover:border-[#51237f]/25 hover:bg-[#fbf9fe] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
+                    className="group rounded-2xl border border-[var(--line-soft)] bg-white p-5 shadow-[var(--shadow-soft)] transition hover:border-[rgba(71,10,104,0.25)] hover:bg-[rgba(71,10,104,0.04)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
                   >
                     <div className="flex items-start justify-between gap-4">
-                      <div className="rounded-xl bg-[#f3eef8] p-3 text-[#51237f]">
+                      <div className="rounded-xl bg-[rgba(71,10,104,0.08)] p-3 text-[var(--primary)]">
                         <Icon className="h-5 w-5" />
                       </div>
-                      <ArrowRight className="h-4 w-4 text-gray-400 transition group-hover:text-[#51237f]" />
+                      <ArrowRight className="h-4 w-4 text-gray-400 transition group-hover:text-[var(--primary)]" />
                     </div>
                     <h3 className="mt-4 text-lg font-semibold text-gray-950">{action.title}</h3>
                     <p className="mt-2 text-sm leading-7 text-gray-600">{action.description}</p>
@@ -184,14 +184,14 @@ export default function DocsPage() {
           <aside className="ui-muted-panel p-6">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#51237f]">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--primary)]">
                   Guidance
                 </p>
                 <h2 className="mt-2 text-2xl font-semibold tracking-tight text-gray-950">
                   Before you contact support
                 </h2>
               </div>
-              <FileWarning className="h-5 w-5 text-[#51237f]" />
+              <FileWarning className="h-5 w-5 text-[var(--primary)]" />
             </div>
 
             <div className="mt-5 space-y-3">
@@ -219,7 +219,7 @@ export default function DocsPage() {
 
         <section className="ui-surface overflow-hidden">
           <div className="border-b border-gray-100 px-6 py-5 sm:px-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#51237f]">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--primary)]">
               Common tasks
             </p>
             <h2 className="mt-2 text-3xl font-semibold tracking-tight text-gray-950">
@@ -238,7 +238,7 @@ export default function DocsPage() {
                 <p className="mt-3 text-sm leading-7 text-gray-600">{task.body}</p>
                 <Link
                   href={task.actionHref}
-                  className="mt-5 inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-800 transition hover:border-[#51237f]/30 hover:text-[#51237f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
+                  className="mt-5 inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-800 transition hover:border-[rgba(71,10,104,0.30)] hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
                 >
                   {task.actionLabel}
                   <ArrowRight className="h-4 w-4" />
@@ -250,7 +250,7 @@ export default function DocsPage() {
 
         <section id="contact-routes" className="ui-surface overflow-hidden">
           <div className="border-b border-gray-100 px-6 py-5 sm:px-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#51237f]">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--primary)]">
               Contact routes
             </p>
             <h2 className="mt-2 text-3xl font-semibold tracking-tight text-gray-950">
@@ -269,13 +269,13 @@ export default function DocsPage() {
                 href={path.href}
                 target="_blank"
                 rel="noreferrer"
-                className="group border-b border-gray-100 px-6 py-6 transition hover:bg-[#fbf9fe] md:border-b-0 md:border-r last:border-r-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-inset"
+                className="group border-b border-gray-100 px-6 py-6 transition hover:bg-[rgba(71,10,104,0.04)] md:border-b-0 md:border-r last:border-r-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-inset"
               >
                 <div className="flex items-start justify-between gap-4">
-                  <div className="rounded-xl bg-[#f3eef8] p-3 text-[#51237f]">
+                  <div className="rounded-xl bg-[rgba(71,10,104,0.08)] p-3 text-[var(--primary)]">
                     <MessageSquare className="h-5 w-5" />
                   </div>
-                  <ArrowRight className="h-4 w-4 text-gray-400 transition group-hover:text-[#51237f]" />
+                  <ArrowRight className="h-4 w-4 text-gray-400 transition group-hover:text-[var(--primary)]" />
                 </div>
                 <h3 className="mt-4 text-xl font-semibold text-gray-950">{path.title}</h3>
                 <p className="mt-2 text-sm leading-7 text-gray-600">{path.description}</p>

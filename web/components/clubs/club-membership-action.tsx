@@ -19,7 +19,7 @@ export function ClubMembershipAction({ clubId, viewerState }: ClubMembershipActi
     return (
       <Link
         href="/login"
-        className="inline-flex items-center justify-center rounded-lg bg-[#51237f] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#3f1b63] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
+        className="inline-flex items-center justify-center rounded-lg bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
       >
         Log in to join
       </Link>
@@ -53,7 +53,7 @@ export function ClubMembershipAction({ clubId, viewerState }: ClubMembershipActi
         type="button"
         onClick={submit}
         disabled={isPending || isWaiting}
-        className="inline-flex w-full items-center justify-center rounded-lg bg-[#51237f] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#3f1b63] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-600 sm:w-auto"
+        className="inline-flex w-full items-center justify-center rounded-lg bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-600 sm:w-auto"
       >
         {isPending
           ? "Updating..."

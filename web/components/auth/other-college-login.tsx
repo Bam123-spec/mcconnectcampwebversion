@@ -69,7 +69,7 @@ export function OtherCollegeLogin({ defaultExpanded = false }: { defaultExpanded
       <button
         type="button"
         onClick={() => setExpanded(true)}
-        className="flex h-14 w-full items-center justify-center gap-3 rounded-lg border border-gray-200 bg-white px-6 text-base font-semibold text-gray-700 shadow-sm transition-all duration-300 hover:border-gray-300 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
+        className="flex h-14 w-full items-center justify-center gap-3 rounded-lg border border-gray-200 bg-white px-6 text-base font-semibold text-gray-700 shadow-sm transition-all duration-300 hover:border-gray-300 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
       >
         Other College Login
       </button>
@@ -88,7 +88,7 @@ export function OtherCollegeLogin({ defaultExpanded = false }: { defaultExpanded
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           placeholder="name@college.edu"
-          className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-[#51237f] focus:ring-2 focus:ring-[#51237f]/15"
+          className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/15"
           autoComplete="email"
           required
           aria-invalid={Boolean(error)}
@@ -106,7 +106,7 @@ export function OtherCollegeLogin({ defaultExpanded = false }: { defaultExpanded
           value={password}
           onChange={(event) => setPassword(event.target.value)}
           placeholder="Enter your password"
-          className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-[#51237f] focus:ring-2 focus:ring-[#51237f]/15"
+          className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/15"
           autoComplete="current-password"
           required
           aria-invalid={Boolean(error)}
@@ -125,7 +125,7 @@ export function OtherCollegeLogin({ defaultExpanded = false }: { defaultExpanded
         <button
           type="submit"
           disabled={!canSubmit || loading}
-          className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[#51237f] px-5 text-sm font-semibold text-white transition hover:bg-[#421d68] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[var(--primary)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? <LoaderCircle size={16} className="animate-spin" /> : null}
           {loading ? "Signing in..." : "Continue"}
@@ -138,7 +138,7 @@ export function OtherCollegeLogin({ defaultExpanded = false }: { defaultExpanded
             setPassword("");
             setError(null);
           }}
-          className="inline-flex min-h-12 items-center justify-center rounded-lg border border-gray-300 bg-white px-5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
+          className="inline-flex min-h-12 items-center justify-center rounded-lg border border-gray-300 bg-white px-5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
         >
           Cancel
         </button>

@@ -28,7 +28,7 @@ export function Sidebar() {
     <aside className="fixed left-0 top-0 h-screen w-[var(--sidebar-width)] bg-white/80 backdrop-blur-xl border-r border-gray-100/50 flex flex-col z-50 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
       <div className="p-8 pb-10">
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="h-10 w-10 bg-gradient-to-br from-[var(--primary)] to-purple-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-[var(--primary)]/20 group-hover:scale-105 transition-transform duration-300">
+          <div className="h-10 w-10 bg-gradient-to-br from-[var(--primary)] to-[var(--primary)] rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-[var(--primary)]/20 group-hover:scale-105 transition-transform duration-300">
             R
           </div>
           <span className="text-2xl font-black tracking-tight text-gray-900 group-hover:text-[var(--primary)] transition-colors">
@@ -47,7 +47,7 @@ export function Sidebar() {
               className={cn(
                 "flex items-center gap-3 px-4 py-3.5 rounded-xl font-medium transition-all duration-300 group relative overflow-hidden",
                 isActive 
-                  ? "text-[var(--primary)] bg-purple-50/80 shadow-sm"
+                  ? "text-[var(--primary)] bg-[rgba(71,10,104,0.08)] shadow-sm"
                   : "text-gray-500 hover:text-[var(--primary)] hover:bg-gray-50"
               )}
             >

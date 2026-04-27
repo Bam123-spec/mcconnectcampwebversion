@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, CalendarDays, MapPin, Search, Tag, Users } from "lucide-react";
+import { ArrowRight, CalendarDays, MapPin, Users } from "lucide-react";
+import { ClubsFilterBar } from "@/components/clubs/clubs-filter-bar";
 import { getPublicClubs } from "@/lib/clubs";
 
 export const metadata: Metadata = {
@@ -88,179 +89,58 @@ export default async function ClubsPage({
     limit,
   });
   const clubs = clubsResult.clubs;
-  const featuredClubs = clubs.slice(0, 3);
 
   return (
     <main className="min-h-screen bg-[var(--page-background)]">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-        <section className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-8">
+        <section className="max-w-3xl">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#51237f]">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--primary)]">
               Student communities
             </p>
-            <h1 className="mt-3 text-4xl font-semibold tracking-tight text-gray-950 sm:text-5xl">
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-gray-950 sm:text-4xl">
               Clubs
             </h1>
-            <p className="mt-4 max-w-3xl text-base leading-8 text-gray-600">
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-gray-600 sm:text-base">
               Browse student organizations by category, campus, and meeting day. The page stays
               simple on purpose so students can quickly see which communities feel active and
               relevant.
             </p>
 
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="mt-6 flex flex-wrap gap-2.5">
               <StatPill label="Organizations" value={clubsResult.totalCount} />
               <StatPill label="Categories" value={clubsResult.categories.length} />
               <StatPill label="Campuses" value={clubsResult.campuses.length} />
             </div>
 
-            <div className="mt-6 flex flex-wrap gap-2">
+            <div className="mt-4 flex flex-wrap gap-2">
               {clubsResult.categories.slice(0, 6).map((category) => (
                 <Link
                   key={category}
                   href={buildFilterHref(resolvedSearchParams, "category", category)}
-                  className="rounded-full border border-[var(--line-soft)] bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:border-[#51237f]/25 hover:text-[#51237f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
+                  className="rounded-full border border-[var(--line-soft)] bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:border-[rgba(71,10,104,0.25)] hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
                 >
                   {category}
                 </Link>
               ))}
             </div>
           </div>
-
-          <aside className="rounded-[24px] border border-[var(--line-soft)] bg-white p-6 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#51237f]">
-                  Active clubs now
-                </p>
-                <h2 className="mt-2 text-2xl font-semibold tracking-tight text-gray-950">
-                  Highlights
-                </h2>
-              </div>
-              <Tag className="h-5 w-5 text-[#51237f]" />
-            </div>
-
-            <div className="mt-5 space-y-3">
-              {featuredClubs.length > 0 ? (
-                featuredClubs.map((club) => (
-                  <Link
-                    key={club.id}
-                    href={`/clubs/${club.slug}`}
-                    className="group flex items-start gap-4 rounded-2xl border border-[var(--line-soft)] bg-[var(--surface-muted)] p-4 transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
-                  >
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[var(--line-soft)] bg-white text-sm font-semibold text-[#51237f]">
-                      {club.initials}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#51237f]">
-                            {club.category}
-                          </p>
-                          <h3 className="mt-2 truncate text-base font-semibold text-gray-950 transition-colors group-hover:text-[#421d68]">
-                            {club.name}
-                          </h3>
-                        </div>
-                        <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-gray-400 transition group-hover:text-[#51237f]" />
-                      </div>
-                      <div className="mt-2 flex items-center gap-4 text-xs text-gray-500">
-                        <span>{club.campus}</span>
-                        <span>{club.memberCount} members</span>
-                      </div>
-                    </div>
-                  </Link>
-                ))
-              ) : (
-                <div className="rounded-2xl border border-dashed border-gray-300 bg-[var(--surface-muted)] px-4 py-8 text-sm leading-6 text-gray-600">
-                  Club highlights will appear here when organizations are available.
-                </div>
-              )}
-            </div>
-
-            <div className="mt-6 rounded-2xl border border-[var(--line-soft)] bg-[var(--surface-muted)] p-4">
-              <div className="text-sm font-semibold text-gray-950">How to browse</div>
-              <p className="mt-2 text-sm leading-6 text-gray-600">
-                Start with a category, then narrow by campus or meeting day if you want a club that
-                fits your schedule.
-              </p>
-            </div>
-          </aside>
         </section>
 
-        <section className="mt-10 rounded-[24px] border border-[var(--line-soft)] bg-white p-5 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
-          <form className="grid gap-4 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,0.85fr)_minmax(0,0.85fr)_minmax(0,0.85fr)_auto]" action="/clubs">
-            <label className="field-shell flex items-center gap-3">
-              <Search size={18} className="text-gray-400" />
-              <input
-                type="search"
-                name="q"
-                defaultValue={query}
-                placeholder="Search clubs by name or keyword"
-                className="w-full bg-transparent text-sm text-gray-950 outline-none placeholder:text-gray-400 focus-visible:outline-none"
-              />
-            </label>
+        <ClubsFilterBar
+          key={`${query}|${resolvedSearchParams.category || ""}|${resolvedSearchParams.campus || ""}|${resolvedSearchParams.day || ""}`}
+          initialQuery={query}
+          initialCategory={resolvedSearchParams.category}
+          initialCampus={resolvedSearchParams.campus}
+          initialDay={resolvedSearchParams.day}
+          categories={clubsResult.categories}
+          campuses={clubsResult.campuses}
+          days={clubsResult.days}
+        />
 
-            <label className="block">
-              <span className="sr-only">Category</span>
-              <select
-                name="category"
-                defaultValue={resolvedSearchParams.category || "All"}
-                className="field-shell h-12 w-full text-sm font-medium text-gray-700 outline-none"
-              >
-                <option value="All">All categories</option>
-                {clubsResult.categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="block">
-              <span className="sr-only">Campus</span>
-              <select
-                name="campus"
-                defaultValue={resolvedSearchParams.campus || "All"}
-                className="field-shell h-12 w-full text-sm font-medium text-gray-700 outline-none"
-              >
-                <option value="All">All campuses</option>
-                {clubsResult.campuses.map((campus) => (
-                  <option key={campus} value={campus}>
-                    {campus}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="block">
-              <span className="sr-only">Meeting day</span>
-              <select
-                name="day"
-                defaultValue={resolvedSearchParams.day || "All"}
-                className="field-shell h-12 w-full text-sm font-medium text-gray-700 outline-none"
-              >
-                <option value="All">Any day</option>
-                {clubsResult.days.map((day) => (
-                  <option key={day} value={day}>
-                    {day}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <div className="flex gap-3">
-              <button type="submit" className="btn-primary h-12 px-5 text-sm">
-                Search
-              </button>
-              <Link href="/clubs" className="btn-secondary inline-flex h-12 items-center justify-center px-5 text-sm">
-                Reset
-              </Link>
-            </div>
-          </form>
-        </section>
-
-        <section className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <section className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#51237f]">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--primary)]">
               Campus directory
             </p>
             <h2 className="mt-2 text-2xl font-semibold tracking-tight text-gray-950">
@@ -284,85 +164,79 @@ export default async function ClubsPage({
           </div>
         </section>
 
-        <section className="mt-8">
+        <section className="mt-6">
           {clubs.length > 0 ? (
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 2xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
               {clubs.map((club) => (
                 <article
                   key={club.id}
-                  className="group flex min-h-full flex-col overflow-hidden rounded-[20px] border border-[var(--line-soft)] bg-white shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition hover:shadow-[0_14px_28px_rgba(15,23,42,0.06)]"
+                  className="group flex h-full min-h-full flex-col overflow-hidden rounded-2xl border border-[var(--line-soft)] bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-[0_12px_26px_rgba(15,23,42,0.07)]"
                 >
-                  <div className="relative aspect-[16/9] bg-gray-100">
+                  <div className="relative h-28 bg-gray-100 sm:h-32">
                     {club.coverImageUrl ? (
                       <Image
                         src={club.coverImageUrl}
                         alt=""
                         fill
-                        className="object-cover"
-                        sizes="(min-width: 1536px) 30vw, (min-width: 768px) 50vw, 100vw"
+                        className="object-cover transition-transform duration-300 ease-out group-hover:scale-[1.03]"
+                        sizes="(min-width: 1024px) 30vw, (min-width: 768px) 50vw, 100vw"
                       />
                     ) : (
-                      <div className="flex h-full items-center justify-center bg-[linear-gradient(135deg,#f8f9fc_0%,#eef1f7_100%)] text-3xl font-semibold text-gray-400">
+                      <div className="flex h-full items-center justify-center bg-[linear-gradient(135deg,#f8f9fc_0%,#eef1f7_100%)] text-2xl font-semibold text-gray-400 transition-transform duration-300 ease-out group-hover:scale-[1.03]">
                         {club.initials}
                       </div>
                     )}
 
-                    <div className="absolute left-4 top-4 rounded-full border border-white/80 bg-white/95 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-700 shadow-sm">
+                    <div className="absolute left-3 top-3 rounded-full border border-white/80 bg-white/95 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-700 shadow-sm">
                       {club.category}
                     </div>
-                    <div className="absolute right-4 top-4 rounded-full border border-white/80 bg-white/95 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-700 shadow-sm">
+                    <div className="absolute right-3 top-3 rounded-full border border-white/80 bg-white/95 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-700 shadow-sm">
                       {club.campus}
                     </div>
                   </div>
 
-                  <div className="flex flex-1 flex-col p-5">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="min-w-0">
-                        <h3 className="text-lg font-semibold leading-snug text-gray-950 transition-colors group-hover:text-[#421d68]">
+                  <div className="flex flex-1 flex-col p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-h-[4.5rem] min-w-0 flex-1">
+                        <h3 className="line-clamp-2 text-base font-semibold leading-snug text-gray-950 transition-colors group-hover:text-[var(--primary)]">
                           {club.name}
                         </h3>
-                        <div className="mt-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">
-                          <Tag className="h-3.5 w-3.5" />
+                        <div className="mt-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500">
                           {club.initials}
                         </div>
                       </div>
-                      <div className="rounded-full border border-[var(--line-soft)] bg-[var(--surface-muted)] px-3 py-1.5 text-xs font-semibold text-gray-700">
+                      <div className="shrink-0 rounded-full border border-[var(--line-soft)] bg-[var(--surface-muted)] px-2.5 py-1 text-xs font-semibold text-gray-700">
                         {club.memberCount} members
                       </div>
                     </div>
 
-                    <p className="mt-4 line-clamp-3 text-sm leading-7 text-gray-600">
+                    <p className="mt-3 min-h-[4.5rem] line-clamp-2 text-sm leading-6 text-gray-600">
                       {club.description}
                     </p>
 
-                    <div className="mt-5 space-y-2.5 border-t border-[var(--line-soft)] pt-4 text-sm text-gray-600">
+                    <div className="mt-4 min-h-[5.5rem] space-y-2 border-t border-[var(--line-soft)] pt-3 text-xs text-gray-600">
                       <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4 text-gray-400" />
+                        <MapPin className="h-3.5 w-3.5 text-gray-400" />
                         <span className="line-clamp-1">{club.location}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <CalendarDays className="h-4 w-4 text-gray-400" />
-                        <span>{club.meetingTime}</span>
+                        <CalendarDays className="h-3.5 w-3.5 text-gray-400" />
+                        <span className="line-clamp-1">{club.meetingTime}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4 text-gray-400" />
+                        <Users className="h-3.5 w-3.5 text-gray-400" />
                         <span>{club.memberCount} students connected</span>
                       </div>
                     </div>
 
-                    <div className="mt-5 border-t border-[var(--line-soft)] pt-4">
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">
-                          Open details
-                        </div>
-                        <Link
-                          href={`/clubs/${club.slug}`}
-                          className="inline-flex items-center gap-2 rounded-lg border border-[var(--line-soft)] bg-white px-4 py-2 text-sm font-semibold text-gray-800 transition hover:border-[#51237f]/25 hover:text-[#51237f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
-                        >
-                          View club
-                          <ArrowRight className="h-4 w-4" />
-                        </Link>
-                      </div>
+                    <div className="mt-auto border-t border-[var(--line-soft)] pt-3">
+                      <Link
+                        href={`/clubs/${club.slug}`}
+                        className="inline-flex items-center gap-2 rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
+                      >
+                        View club
+                        <ArrowRight className="h-4 w-4" />
+                      </Link>
                     </div>
                   </div>
                 </article>
@@ -376,7 +250,7 @@ export default async function ClubsPage({
               </p>
               <Link
                 href="/clubs"
-                className="mt-5 inline-flex rounded-lg bg-[#51237f] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#3f1b63] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
+                className="mt-5 inline-flex rounded-lg bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
               >
                 View all clubs
               </Link>

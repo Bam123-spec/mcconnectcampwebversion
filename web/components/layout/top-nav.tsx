@@ -24,11 +24,11 @@ export function TopNav({ profile }: { profile: WebSessionProfile | null }) {
   const isActive = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-[var(--line-soft)] bg-white/90 backdrop-blur-sm">
+    <header className="sticky top-0 z-50 w-full border-b border-[var(--line-soft)] bg-white">
       <div className="mx-auto flex min-h-[76px] max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
         <Link
           href="/"
-          className="relative flex h-11 w-52 shrink-0 items-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2 sm:w-60"
+          className="relative flex h-11 w-52 shrink-0 items-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2 sm:w-60"
           onClick={() => setMenuOpen(false)}
         >
           <Image
@@ -41,7 +41,7 @@ export function TopNav({ profile }: { profile: WebSessionProfile | null }) {
         </Link>
 
         <nav
-          className="hidden items-center gap-1 rounded-2xl border border-[var(--line-soft)] bg-[var(--surface-muted)] p-1 lg:flex"
+          className="hidden items-center gap-1 rounded-2xl border border-[var(--line-soft)] bg-white p-1 lg:flex"
           aria-label="Primary navigation"
         >
           {NAV_ITEMS.map((item) => (
@@ -49,10 +49,10 @@ export function TopNav({ profile }: { profile: WebSessionProfile | null }) {
               key={item.href}
               href={item.href}
               className={cn(
-                "rounded-xl px-4 py-2.5 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2",
+                "rounded-xl px-4 py-2.5 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2",
                 isActive(item.href)
-                  ? "bg-white text-gray-950 shadow-[0_1px_2px_rgba(15,23,42,0.06),0_10px_24px_rgba(15,23,42,0.06)]"
-                  : "text-gray-600 hover:bg-white/70 hover:text-gray-950",
+                  ? "bg-[var(--surface-muted)] text-gray-950 shadow-[0_1px_2px_rgba(15,23,42,0.05)]"
+                  : "text-gray-600 hover:bg-[var(--surface-muted)] hover:text-gray-950",
               )}
             >
               {item.label}
@@ -71,7 +71,7 @@ export function TopNav({ profile }: { profile: WebSessionProfile | null }) {
             onClick={() => setMenuOpen((open) => !open)}
             aria-expanded={menuOpen}
             aria-controls="mobile-navigation"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--line-soft)] bg-white text-gray-700 transition hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--line-soft)] bg-white text-gray-700 transition hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
           >
             <span className="sr-only">{menuOpen ? "Close navigation" : "Open navigation"}</span>
             {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -94,9 +94,9 @@ export function TopNav({ profile }: { profile: WebSessionProfile | null }) {
               href={item.href}
               onClick={() => setMenuOpen(false)}
               className={cn(
-                "rounded-xl px-3 py-3 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2",
+                "rounded-xl px-3 py-3 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2",
                 isActive(item.href)
-                  ? "bg-[#f3eef8] text-[#51237f]"
+                  ? "bg-[rgba(71,10,104,0.08)] text-[var(--primary)]"
                   : "text-gray-700 hover:bg-gray-50 hover:text-gray-950",
               )}
             >

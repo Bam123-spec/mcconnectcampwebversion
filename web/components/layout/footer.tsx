@@ -9,7 +9,7 @@ export function Footer() {
           <div className="col-span-1 md:col-span-2">
             <Link
               href="/"
-              className="relative mb-5 flex h-12 w-48 shrink-0 items-center rounded-lg transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
+              className="relative mb-5 flex h-12 w-48 shrink-0 items-center rounded-lg transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
             >
               <Image 
                 src="/connect-camp-logo.png" 
@@ -21,28 +21,23 @@ export function Footer() {
             <p className="mb-5 max-w-md text-sm leading-7 text-gray-600">
               A unified campus experience for Montgomery College students to find events, join organizations, and reach trusted student life resources.
             </p>
-            <div className="flex flex-wrap gap-2">
-              <Link href="/events" className="btn-secondary text-sm">Events</Link>
-              <Link href="/clubs" className="btn-secondary text-sm">Clubs</Link>
-              <Link href="/docs" className="btn-secondary text-sm">Help</Link>
-            </div>
           </div>
           
           <div>
             <h4 className="mb-4 text-xs font-bold uppercase tracking-[0.24em] text-gray-900">Campus Resources</h4>
             <ul className="space-y-2.5 text-gray-600">
-               <li><a href="https://mymc.montgomerycollege.edu/" className="transition-colors hover:text-[#51237f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2">MyMC Portal</a></li>
-               <li><a href="https://library.montgomerycollege.edu/" className="transition-colors hover:text-[#51237f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2">MC Library</a></li>
-               <li><a href="https://www.montgomerycollege.edu/about-mc/campuses-and-locations/" className="transition-colors hover:text-[#51237f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2">Campuses and Locations</a></li>
+               <li><a href="https://mymc.montgomerycollege.edu/" className="transition-colors hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2">MyMC Portal</a></li>
+               <li><a href="https://library.montgomerycollege.edu/" className="transition-colors hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2">MC Library</a></li>
+               <li><a href="https://www.montgomerycollege.edu/about-mc/campuses-and-locations/" className="transition-colors hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2">Campuses and Locations</a></li>
             </ul>
           </div>
           
           <div>
             <h4 className="mb-4 text-xs font-bold uppercase tracking-[0.24em] text-gray-900">Connect Camp</h4>
             <ul className="space-y-2.5 text-gray-600">
-               <li><Link href="/docs" className="transition-colors hover:text-[#51237f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2">Help and FAQ</Link></li>
-               <li><Link href="/events" className="transition-colors hover:text-[#51237f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2">Campus Events</Link></li>
-               <li><Link href="/clubs" className="transition-colors hover:text-[#51237f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2">Student Clubs</Link></li>
+               <li><Link href="/docs" className="transition-colors hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2">Help and FAQ</Link></li>
+               <li><Link href="/events" className="transition-colors hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2">Campus Events</Link></li>
+               <li><Link href="/clubs" className="transition-colors hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2">Student Clubs</Link></li>
             </ul>
           </div>
         </div>

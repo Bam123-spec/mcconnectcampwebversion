@@ -3,13 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useDeferredValue, useMemo, useState } from "react";
-import {
-  ArrowRight,
-  CalendarDays,
-  Clock,
-  MapPin,
-  Search,
-} from "lucide-react";
+import { ArrowRight, CalendarDays, Clock, MapPin, Search, Users } from "lucide-react";
 import { EventRsvpAction } from "@/components/events/event-rsvp-action";
 import type { EventDetail } from "@/lib/events";
 
@@ -72,12 +66,7 @@ const getDateParts = (event: EventDetail) => {
 
 const matchesSearch = (event: EventDetail, query: string) => {
   if (!query) return true;
-  const haystack = [
-    event.name,
-    event.description,
-    event.location,
-    event.clubName,
-  ]
+  const haystack = [event.name, event.description, event.location, event.clubName]
     .filter(Boolean)
     .join(" ")
     .toLowerCase();
@@ -118,72 +107,64 @@ function EventCard({
     : "Campus";
 
   return (
-    <article className="ui-surface ui-surface-hover group flex h-full flex-col overflow-hidden">
+    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--line-soft)] bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-[0_12px_26px_rgba(15,23,42,0.07)]">
       <Link
         href={`/events/${event.id}`}
-        className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
+        className="relative block aspect-[16/9] overflow-hidden bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
       >
-        <div className="relative aspect-[16/10] overflow-hidden bg-gray-100">
-          <Image
-            src={
-              event.cover_image_url ||
-              "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=1600&auto=format&fit=crop"
-            }
-            alt={event.name}
-            fill
-            className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-          />
+        <Image
+          src={
+            event.cover_image_url ||
+            "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=1600&auto=format&fit=crop"
+          }
+          alt={event.name}
+          fill
+          className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-black/0 to-transparent" />
 
-          <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/0 to-transparent" />
-
-          <div className="absolute left-4 top-4 flex items-center gap-2">
-            <div className="rounded-2xl border border-white/75 bg-white/95 px-3 py-2 text-center text-gray-900 shadow-sm">
-              <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#51237f]">
-                {dateParts.month}
-              </div>
-              <div className="mt-1 text-2xl font-semibold leading-none">{dateParts.day}</div>
-              <div className="mt-1 text-[11px] font-medium text-gray-500">{dateParts.weekday}</div>
-            </div>
-
-            <div className="rounded-full border border-white/70 bg-white/92 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-700 shadow-sm">
-              {timingLabel}
-            </div>
+        <div className="absolute left-4 top-4 flex items-center gap-2">
+          <div className="rounded-full border border-white/80 bg-white/95 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-700 shadow-sm">
+            {dateParts.weekday} · {dateParts.month} {dateParts.day}
           </div>
-
-          {event.isFree ? (
-            <div className="absolute right-4 top-4 rounded-full border border-white/70 bg-white/92 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700 shadow-sm">
-              Free
-            </div>
-          ) : null}
-
-          {event.isRegistered ? (
-            <div className="absolute bottom-4 left-4 rounded-full bg-[#51237f] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white shadow-sm">
-              RSVP confirmed
-            </div>
-          ) : null}
+          <div className="rounded-full border border-white/80 bg-white/95 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--primary)] shadow-sm">
+            {timingLabel}
+          </div>
         </div>
+
+        {event.isFree ? (
+          <div className="absolute right-4 top-4 rounded-full border border-white/80 bg-white/95 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-700 shadow-sm">
+            Free
+          </div>
+        ) : null}
+
+        {typeof event.audience_count === "number" ? (
+          <div className="absolute bottom-4 right-4 flex items-center gap-1 rounded-full border border-white/80 bg-white/95 px-3 py-1 text-[10px] font-semibold text-gray-700 shadow-sm">
+            <Users size={12} /> {event.audience_count}
+          </div>
+        ) : null}
       </Link>
 
-      <div className="flex flex-1 flex-col p-6">
+      <div className="flex flex-1 flex-col p-5">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#51237f]">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[var(--primary)]">
               {event.clubName || "Campus event"}
             </div>
-            <h3 className="mt-2 line-clamp-2 text-xl font-semibold tracking-tight text-gray-950">
+            <h3 className="mt-2 line-clamp-2 text-lg font-semibold tracking-tight text-gray-950 transition-colors group-hover:text-[var(--primary)]">
               {event.name}
             </h3>
           </div>
-          <div className="shrink-0 rounded-lg bg-gray-100 px-3 py-1.5 text-xs font-semibold text-gray-600">
+          <div className="shrink-0 rounded-full border border-[var(--line-soft)] bg-[var(--surface-muted)] px-2.5 py-1 text-xs font-semibold text-gray-700">
             {attendeeCount} attending
           </div>
         </div>
 
-        <p className="mt-4 line-clamp-3 text-sm leading-7 text-gray-600">
+        <p className="mt-3 line-clamp-2 text-sm leading-6 text-gray-600">
           {event.description || "Open this event to read full details, timing, and attendance information."}
         </p>
 
-        <div className="mt-5 space-y-2.5 text-sm text-gray-600">
+        <div className="mt-4 space-y-2 text-sm text-gray-600">
           <div className="flex items-center gap-2">
             <CalendarDays size={15} className="text-gray-400" />
             <span>{formatEventDate(event)}</span>
@@ -198,7 +179,7 @@ function EventCard({
           </div>
         </div>
 
-        <div className="mt-5 border-t border-gray-100 pt-4">
+        <div className="mt-5 border-t border-[var(--line-soft)] pt-4">
           <div className="flex items-center justify-between gap-3 text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">
             <span>{event.isRegistered ? "You are going" : event.hasSession ? "RSVP open" : "Login needed"}</span>
             <span>{event.club_id ? "Club hosted" : "Campus hosted"}</span>
@@ -215,7 +196,7 @@ function EventCard({
           />
           <Link
             href={`/events/${event.id}`}
-            className="btn-secondary inline-flex items-center gap-2 text-sm"
+            className="inline-flex items-center gap-2 rounded-lg border border-[var(--line-soft)] bg-white px-4 py-2 text-sm font-semibold text-gray-800 transition hover:border-[rgba(71,10,104,0.25)] hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
           >
             View details
             <ArrowRight size={15} />
@@ -308,138 +289,121 @@ export function EventsPanel({ initialEvents }: { initialEvents: EventDetail[] })
 
   const visibleEvents = filteredEvents.slice(0, visibleCount);
   const hasMore = visibleCount < filteredEvents.length;
-  const nextEvent = filteredEvents[0] ?? sortedEvents[0] ?? null;
 
   return (
     <div className="min-h-screen bg-[var(--page-background)]">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-        <header className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
-          <section className="pb-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#51237f]">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-8">
+        <section className="max-w-3xl">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--primary)]">
               Campus calendar
             </p>
-            <h1 className="mt-3 text-4xl font-semibold tracking-tight text-gray-950 sm:text-5xl">
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-gray-950 sm:text-4xl">
               Events
             </h1>
-            <p className="mt-4 max-w-3xl text-base leading-8 text-gray-600">
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-gray-600 sm:text-base">
               Browse upcoming campus events, filter quickly, and open the details students need
               most often: date, location, host, and RSVP status.
             </p>
 
-            <div className="mt-8 max-w-3xl">
-              <label htmlFor="event-search" className="field-shell flex items-center gap-3">
-                <Search size={18} className="text-gray-400" />
-                <input
-                  id="event-search"
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  type="search"
-                  placeholder="Search events, clubs, locations, or keywords"
-                  className="w-full bg-transparent text-sm text-gray-950 outline-none placeholder:text-gray-400 focus-visible:outline-none"
-                />
-              </label>
-            </div>
-
-            <div className="mt-5 flex flex-wrap gap-2">
-              {FILTERS.map((item) => {
-                const active = filter === item;
-
-                return (
-                  <button
-                    key={item}
-                    type="button"
-                    onClick={() => setFilter(item)}
-                    aria-pressed={active}
-                    className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2 ${
-                      active
-                        ? "border border-[var(--line-soft)] bg-white text-gray-950 shadow-sm"
-                        : "border border-[var(--line-soft)] bg-transparent text-gray-600 hover:bg-white"
-                    }`}
-                  >
-                    {item}
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="mt-6 flex flex-wrap gap-3">
-              <div className="rounded-full border border-[var(--line-soft)] bg-white px-4 py-2 text-sm text-gray-700 shadow-sm">
+            <div className="mt-6 flex flex-wrap gap-2.5">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[var(--line-soft)] bg-white px-4 py-2 text-sm text-gray-700 shadow-sm">
                 <span className="font-semibold text-gray-950">{filteredEvents.length}</span>
-                <span className="ml-2 text-gray-500">Showing</span>
+                <span className="text-gray-500">Showing</span>
               </div>
-              <div className="rounded-full border border-[var(--line-soft)] bg-white px-4 py-2 text-sm text-gray-700 shadow-sm">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[var(--line-soft)] bg-white px-4 py-2 text-sm text-gray-700 shadow-sm">
                 <span className="font-semibold text-gray-950">{upcomingCount}</span>
-                <span className="ml-2 text-gray-500">Upcoming</span>
+                <span className="text-gray-500">Upcoming</span>
               </div>
-              <div className="rounded-full border border-[var(--line-soft)] bg-white px-4 py-2 text-sm text-gray-700 shadow-sm">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[var(--line-soft)] bg-white px-4 py-2 text-sm text-gray-700 shadow-sm">
                 <span className="font-semibold text-gray-950">{todayCount}</span>
-                <span className="ml-2 text-gray-500">Today</span>
+                <span className="text-gray-500">Today</span>
               </div>
-              <div className="rounded-full border border-[var(--line-soft)] bg-white px-4 py-2 text-sm text-gray-700 shadow-sm">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[var(--line-soft)] bg-white px-4 py-2 text-sm text-gray-700 shadow-sm">
                 <span className="font-semibold text-gray-950">{freeCount}</span>
-                <span className="ml-2 text-gray-500">Free</span>
+                <span className="text-gray-500">Free</span>
+              </div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-[var(--line-soft)] bg-white px-4 py-2 text-sm text-gray-700 shadow-sm">
+                <span className="font-semibold text-gray-950">{clubHostCount}</span>
+                <span className="text-gray-500">Club hosts</span>
               </div>
             </div>
-          </section>
+          </div>
+        </section>
 
-          <aside className="self-start rounded-[24px] border border-[var(--line-soft)] bg-white p-6 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#51237f]">Up next</p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-gray-950">
-              {nextEvent?.name || "No event selected"}
-            </h2>
-            <p className="mt-3 text-sm leading-7 text-gray-600">
-              {nextEvent?.description
-                ? nextEvent.description
-                : "Use the calendar and filters to find the next event that fits your week."}
+        <section className="mt-8 max-w-5xl">
+          <label htmlFor="event-search" className="field-shell flex items-center gap-3">
+            <Search size={18} className="text-gray-400" />
+            <input
+              id="event-search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              type="search"
+              placeholder="Search events, clubs, locations, or keywords"
+              className="w-full bg-transparent text-sm text-gray-950 outline-none placeholder:text-gray-400 focus-visible:outline-none"
+            />
+          </label>
+        </section>
+
+        <section className="mt-5 flex flex-wrap gap-2">
+          {FILTERS.map((item) => {
+            const active = filter === item;
+
+            return (
+              <button
+                key={item}
+                type="button"
+                onClick={() => setFilter(item)}
+                aria-pressed={active}
+                className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2 ${
+                  active
+                    ? "border border-[var(--line-soft)] bg-white text-gray-950 shadow-sm"
+                    : "border border-[var(--line-soft)] bg-transparent text-gray-600 hover:bg-white"
+                }`}
+              >
+                {item}
+              </button>
+            );
+          })}
+        </section>
+
+        <section className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--primary)]">
+              Campus directory
             </p>
-
-            <div className="mt-5 space-y-3 border-t border-[var(--line-soft)] pt-5">
-              <div className="flex items-center gap-2 text-sm text-gray-700">
-                <CalendarDays className="h-4 w-4 text-gray-400" />
-                <span>{nextEvent ? formatEventDate(nextEvent) : "Date to be announced"}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-700">
-                <Clock className="h-4 w-4 text-gray-400" />
-                <span>{nextEvent ? (nextEvent.time || "TBA").split(" - ")[0] : "Time to be announced"}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-700">
-                <MapPin className="h-4 w-4 text-gray-400" />
-                <span>{nextEvent?.location || "Location to be announced"}</span>
-              </div>
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-gray-950">
+              Event listings
+            </h2>
+            <p className="mt-2 text-sm leading-7 text-gray-600">
+              Showing {filteredEvents.length} of {sortedEvents.length} event
+              {sortedEvents.length === 1 ? "" : "s"}
+              {search ? ` matching "${search}"` : ""}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <div className="rounded-full border border-[var(--line-soft)] bg-white px-4 py-2 text-sm text-gray-700 shadow-sm">
+              <span className="font-semibold text-gray-950">{todayCount}</span>
+              <span className="ml-2 text-gray-500">Today</span>
             </div>
-
-            <div className="mt-5 grid grid-cols-2 gap-3">
-              <div className="rounded-xl border border-[var(--line-soft)] bg-[var(--surface-muted)] p-4">
-                <div className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Free events</div>
-                <div className="mt-2 text-2xl font-semibold text-gray-950">{freeCount}</div>
-              </div>
-              <div className="rounded-xl border border-[var(--line-soft)] bg-[var(--surface-muted)] p-4">
-                <div className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Club hosts</div>
-                <div className="mt-2 text-2xl font-semibold text-gray-950">{clubHostCount}</div>
-              </div>
+            <div className="rounded-full border border-[var(--line-soft)] bg-white px-4 py-2 text-sm text-gray-700 shadow-sm">
+              <span className="font-semibold text-gray-950">{clubHostCount}</span>
+              <span className="ml-2 text-gray-500">Club hosts</span>
             </div>
+          </div>
+        </section>
 
-            <Link
-              href={nextEvent ? `/events/${nextEvent.id}` : "/events"}
-              className="mt-6 inline-flex items-center gap-2 rounded-lg bg-[#51237f] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#421d68] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
-            >
-              Open highlighted event
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </aside>
-        </header>
-
-        <main className="mt-10">
+        <main className="mt-6">
           {visibleEvents.length > 0 ? (
-            <div className="grid gap-5 lg:grid-cols-2 2xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
               {visibleEvents.map((event) => (
                 <EventCard key={event.id} event={event} onRsvpChange={handleRsvpChange} />
               ))}
             </div>
           ) : (
-            <div className="rounded-[24px] border border-dashed border-gray-300 bg-white px-6 py-12 text-center">
+            <div className="rounded-[24px] border border-dashed border-gray-300 bg-white px-6 py-12 text-center shadow-sm">
               <h2 className="text-xl font-semibold text-gray-950">No events match this view</h2>
-              <p className="mt-2 text-sm leading-7 text-gray-600">
+              <p className="mx-auto mt-2 max-w-md text-sm leading-7 text-gray-600">
                 Try another filter or search term.
               </p>
               <button
@@ -449,7 +413,7 @@ export function EventsPanel({ initialEvents }: { initialEvents: EventDetail[] })
                   setSearch("");
                   setVisibleCount(INITIAL_VISIBLE);
                 }}
-                className="btn-secondary mt-5 text-sm"
+                className="mt-5 inline-flex items-center gap-2 rounded-lg bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#3C0957] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
               >
                 Reset filters
               </button>
@@ -461,7 +425,7 @@ export function EventsPanel({ initialEvents }: { initialEvents: EventDetail[] })
               <button
                 type="button"
                 onClick={() => setVisibleCount((count) => count + LOAD_MORE_STEP)}
-                className="btn-secondary text-sm text-gray-700"
+                className="inline-flex items-center gap-2 rounded-lg bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#3C0957] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
               >
                 Load more
               </button>

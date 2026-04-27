@@ -31,12 +31,12 @@ export function DocsSidebar() {
             onClick={() => setGettingStartedOpen(!gettingStartedOpen)}
             aria-expanded={gettingStartedOpen}
             className={cn(
-              "flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2",
+              "flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2",
               pathname === "/docs" ? "bg-gray-50 text-[#0a2342]" : "text-gray-700 hover:bg-gray-50",
             )}
           >
             <div className="flex items-center gap-2">
-              <BookOpen size={16} className={pathname === "/docs" ? "text-[#51237f]" : "text-gray-400"}/>
+              <BookOpen size={16} className={pathname === "/docs" ? "text-[var(--primary)]" : "text-gray-400"}/>
               <span>Support Overview</span>
             </div>
             {gettingStartedOpen ? <ChevronDown size={16} className="text-gray-400" /> : <ChevronRight size={16} className="text-gray-400" />}
@@ -44,11 +44,11 @@ export function DocsSidebar() {
           
           {gettingStartedOpen && (
             <div className="ml-4 mt-1 flex flex-col gap-1 border-l-2 border-gray-100 pl-7">
-              <Link href="/docs" className="rounded-md px-3 py-1.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2">
+              <Link href="/docs" className="rounded-md px-3 py-1.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2">
                 Help Center
               </Link>
               {quickLinks.map((link) => (
-                <Link key={link.href} href={link.href} className="rounded-md px-3 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2">
+                <Link key={link.href} href={link.href} className="rounded-md px-3 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2">
                   {link.label}
                 </Link>
               ))}
@@ -66,11 +66,11 @@ export function DocsSidebar() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2",
-                  active ? "bg-purple-50 text-[#51237f]" : "text-gray-700 hover:bg-gray-50",
+                  "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2",
+                  active ? "bg-[rgba(71,10,104,0.08)] text-[var(--primary)]" : "text-gray-700 hover:bg-gray-50",
                 )}
               >
-                <Icon size={16} className={active ? "text-[#51237f]" : "text-gray-400"} />
+                <Icon size={16} className={active ? "text-[var(--primary)]" : "text-gray-400"} />
                 {link.label}
               </Link>
             );
@@ -89,8 +89,8 @@ export function MobileDocsNav() {
       <Link
         href="/docs"
         className={cn(
-          "mb-2 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2",
-          pathname === "/docs" ? "bg-purple-50 text-[#51237f]" : "text-gray-700 hover:bg-gray-50",
+          "mb-2 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2",
+          pathname === "/docs" ? "bg-[rgba(71,10,104,0.08)] text-[var(--primary)]" : "text-gray-700 hover:bg-gray-50",
         )}
       >
         <BookOpen size={16} />
@@ -106,8 +106,8 @@ export function MobileDocsNav() {
               key={link.href}
               href={link.href}
               className={cn(
-                "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2",
-                active ? "bg-purple-50 text-[#51237f]" : "text-gray-700 hover:bg-gray-50",
+                "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2",
+                active ? "bg-[rgba(71,10,104,0.08)] text-[var(--primary)]" : "text-gray-700 hover:bg-gray-50",
               )}
             >
               <Icon size={16} />

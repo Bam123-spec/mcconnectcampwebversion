@@ -10,7 +10,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --primary: #51237f;
+  --primary: #470A68;
   --primary-foreground: #ffffff;
   --page-background: #f5f7fb;
   --surface: #ffffff;
@@ -34,10 +34,10 @@
     @apply bg-[var(--page-background)] text-[var(--foreground)] antialiased;
   }
   ::selection {
-    @apply bg-[#51237f] text-white;
+    @apply bg-[var(--primary)] text-white;
   }
   :focus-visible {
-    outline-color: #51237f;
+    outline-color: var(--primary);
   }
 }
 
@@ -69,16 +69,16 @@
   }
   
   .btn-primary {
-    @apply rounded-lg bg-[var(--primary)] px-6 py-3 font-semibold text-white transition-all hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2 active:scale-[0.98];
+    @apply rounded-lg bg-[var(--primary)] px-6 py-3 font-semibold text-white transition-all hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2 active:scale-[0.98];
   }
 
   .btn-secondary {
-    @apply rounded-lg border bg-white px-4 py-2.5 font-semibold text-gray-800 transition-colors hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2;
+    @apply rounded-lg border bg-white px-4 py-2.5 font-semibold text-gray-800 transition-colors hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2;
     border-color: var(--line-soft);
   }
 
   .btn-tertiary {
-    @apply rounded-lg border px-4 py-2.5 font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2;
+    @apply rounded-lg border px-4 py-2.5 font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2;
     border-color: rgba(255, 255, 255, 0.18);
     background-color: rgba(255, 255, 255, 0.08);
     color: white;
@@ -91,11 +91,11 @@
   }
 
   .nav-link {
-    @apply flex items-center gap-3 rounded-lg px-4 py-3 font-medium text-gray-600 transition-all hover:bg-purple-50 hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2;
+    @apply flex items-center gap-3 rounded-lg px-4 py-3 font-medium text-gray-600 transition-all hover:bg-[rgba(71,10,104,0.08)] hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2;
   }
 
   .nav-link.active {
-    @apply text-[var(--primary)] bg-purple-50;
+    @apply text-[var(--primary)] bg-[rgba(71,10,104,0.08)];
   }
 
   .hero-mesh {

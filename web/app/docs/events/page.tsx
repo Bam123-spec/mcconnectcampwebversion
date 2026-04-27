@@ -5,11 +5,11 @@ export default function EventManagementPage() {
   return (
     <>
       <nav className="flex items-center text-sm text-gray-500 font-medium mb-8">
-        <Link href="/" className="hover:text-[#51237f] transition-colors">Home</Link>
+        <Link href="/" className="hover:text-[var(--primary)] transition-colors">Home</Link>
         <ChevronRightIcon size={14} className="mx-2" />
-        <Link href="/docs" className="hover:text-[#51237f] transition-colors">Docs</Link>
+        <Link href="/docs" className="hover:text-[var(--primary)] transition-colors">Docs</Link>
         <ChevronRightIcon size={14} className="mx-2" />
-        <span className="text-[#51237f] font-semibold">Event Management</span>
+        <span className="text-[var(--primary)] font-semibold">Event Management</span>
       </nav>
 
       <article className="prose prose-gray max-w-none">
@@ -26,10 +26,10 @@ export default function EventManagementPage() {
         </p>
 
         <div className="mt-16 pt-8 border-t border-gray-100 flex justify-between items-center text-sm font-semibold">
-          <Link href="/docs/navigating" className="text-[#51237f] hover:underline flex items-center gap-1 bg-purple-50 px-4 py-3 rounded-lg transition-colors hover:bg-purple-100">
+          <Link href="/docs/navigating" className="text-[var(--primary)] hover:underline flex items-center gap-1 bg-[rgba(71,10,104,0.08)] px-4 py-3 rounded-lg transition-colors hover:bg-[rgba(71,10,104,0.12)]">
             <ChevronRightIcon size={16} className="rotate-180"/> Previous: Navigating the Dashboard
           </Link>
-          <Link href="/docs/messaging" className="text-[#51237f] hover:underline flex items-center gap-1 bg-purple-50 px-4 py-3 rounded-lg transition-colors hover:bg-purple-100">
+          <Link href="/docs/messaging" className="text-[var(--primary)] hover:underline flex items-center gap-1 bg-[rgba(71,10,104,0.08)] px-4 py-3 rounded-lg transition-colors hover:bg-[rgba(71,10,104,0.12)]">
             Next: Messaging & Forums <ChevronRightIcon size={16}/>
           </Link>
         </div>

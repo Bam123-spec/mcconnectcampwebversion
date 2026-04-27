@@ -77,7 +77,7 @@ export function EventCard({
     >
       <Link
         href={detailsHref ?? `/events/${event.id}`}
-        className={`relative block w-full bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2 ${
+        className={`relative block w-full bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2 ${
           compact ? "aspect-[16/9]" : "aspect-[16/10]"
         }`}
       >
@@ -96,7 +96,7 @@ export function EventCard({
           </div>
         ) : null}
         <div className="absolute bottom-4 left-4 rounded-2xl border border-white/80 bg-white/95 px-3 py-2 text-center shadow-sm backdrop-blur">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#51237f]">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--primary)]">
             {dateParts.weekday}
           </div>
           <div className="mt-1 text-lg font-semibold leading-none text-gray-950">{dateParts.day}</div>
@@ -112,9 +112,9 @@ export function EventCard({
         </div>
         <Link
           href={detailsHref ?? `/events/${event.id}`}
-          className="block rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
+          className="block rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
         >
-          <h3 className={`mb-3 line-clamp-2 font-semibold leading-tight text-gray-950 transition-colors group-hover:text-[#421d68] ${compact ? "text-base" : "text-lg"}`}>
+          <h3 className={`mb-3 line-clamp-2 font-semibold leading-tight text-gray-950 transition-colors group-hover:text-[var(--primary)] ${compact ? "text-base" : "text-lg"}`}>
             {event.name}
           </h3>
         </Link>
@@ -151,7 +151,7 @@ export function EventCard({
             ) : !authEnabled ? (
               <Link
                 href={detailsHref ?? `/events/${event.id}`}
-                className={`inline-flex items-center rounded-lg bg-[#51237f] font-semibold text-white transition-colors hover:bg-[#45206b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2 ${
+                className={`inline-flex items-center rounded-lg bg-[var(--primary)] font-semibold text-white transition-colors hover:bg-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2 ${
                   compact ? "px-3 py-1.5 text-[11px]" : "px-3.5 py-2 text-xs"
                 }`}
               >
@@ -166,16 +166,16 @@ export function EventCard({
                   compact ? "px-3 py-1.5 text-[11px]" : "px-3.5 py-2 text-xs"
                 } ${
                   isRegistered
-                    ? "border border-[#51237f] text-[#51237f] hover:bg-purple-50"
-                    : "bg-[#51237f] text-white hover:bg-[#45206b]"
-                } ${isPending ? "cursor-not-allowed opacity-60" : ""} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2`}
+                    ? "border border-[var(--primary)] text-[var(--primary)] hover:bg-[rgba(71,10,104,0.08)]"
+                    : "bg-[var(--primary)] text-white hover:bg-[var(--primary)]"
+                } ${isPending ? "cursor-not-allowed opacity-60" : ""} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2`}
               >
                 {isPending ? "Updating..." : isRegistered ? "Cancel RSVP" : "RSVP"}
               </button>
             ) : (
               <Link
                 href="/login"
-                className={`inline-flex items-center rounded-lg bg-[#51237f] font-semibold text-white transition-colors hover:bg-[#45206b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2 ${
+                className={`inline-flex items-center rounded-lg bg-[var(--primary)] font-semibold text-white transition-colors hover:bg-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2 ${
                   compact ? "px-3 py-1.5 text-[11px]" : "px-3.5 py-2 text-xs"
                 }`}
               >

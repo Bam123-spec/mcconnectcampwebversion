@@ -6,7 +6,6 @@ import {
   BookOpen,
   CalendarDays,
   Compass,
-  ExternalLink,
   Library,
   LogIn,
   Map,
@@ -116,14 +115,14 @@ function SectionHeader({
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div className="max-w-2xl">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#51237f]">{eyebrow}</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--primary)]">{eyebrow}</p>
         <h2 className="mt-2 text-2xl font-semibold tracking-tight text-gray-950 sm:text-3xl">{title}</h2>
         <p className="mt-3 text-sm leading-7 text-gray-600 sm:text-base">{description}</p>
       </div>
       {href && linkLabel ? (
         <Link
           href={href}
-          className="inline-flex items-center gap-2 rounded-md text-sm font-semibold text-[#51237f] transition-colors hover:text-[#421d68] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
+          className="inline-flex items-center gap-2 rounded-md text-sm font-semibold text-[var(--primary)] transition-colors hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
         >
           {linkLabel}
           <ArrowRight className="h-4 w-4" />
@@ -150,7 +149,7 @@ function EmptyState({
       <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-gray-600">{description}</p>
       <Link
         href={actionHref}
-        className="mt-5 inline-flex items-center gap-2 rounded-lg bg-[#51237f] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#3f1b63] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
+        className="mt-5 inline-flex items-center gap-2 rounded-lg bg-[var(--primary)] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
       >
         {actionLabel}
         <ArrowRight className="h-4 w-4" />
@@ -179,7 +178,6 @@ export default async function Home() {
     { label: "Active clubs", value: String(clubsResult.totalCount) },
     { label: "Campus resources", value: String(CAMPUS_RESOURCES.length) },
   ];
-  const featuredResources = CAMPUS_RESOURCES.slice(0, 4);
 
   return (
     <div className="min-h-screen bg-[var(--page-background)]">
@@ -188,7 +186,7 @@ export default async function Home() {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(81,35,127,0.08),transparent_34%),radial-gradient(circle_at_right,rgba(15,23,42,0.04),transparent_30%)]" />
           <div className="mx-auto grid max-w-7xl gap-12 px-4 py-14 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(280px,340px)] lg:items-start lg:px-8 lg:py-16">
             <div className="relative z-10 flex flex-col justify-center lg:pt-4">
-              <div className="inline-flex w-fit items-center rounded-full border border-[var(--line-soft)] bg-white/80 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#51237f] shadow-sm backdrop-blur">
+              <div className="inline-flex w-fit items-center rounded-full border border-[var(--line-soft)] bg-white/80 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--primary)] shadow-sm backdrop-blur">
                 Montgomery College student portal
               </div>
 
@@ -203,14 +201,14 @@ export default async function Home() {
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link
                   href="/events"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#51237f] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#3f1b63] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#470A68] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#3C0957] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
                 >
                   <CalendarDays className="h-4 w-4" />
                   Browse events
                 </Link>
                 <Link
                   href={isAuthenticated ? "/activity" : "/login"}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--line-soft)] bg-white px-5 py-3 text-sm font-semibold text-gray-900 transition hover:border-[#51237f]/30 hover:text-[#51237f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--line-soft)] bg-white px-5 py-3 text-sm font-semibold text-gray-900 transition hover:border-[rgba(71,10,104,0.30)] hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
                 >
                   {isAuthenticated ? <BellRing className="h-4 w-4" /> : <LogIn className="h-4 w-4" />}
                   {isAuthenticated ? "Open my activity" : "Sign in"}
@@ -255,42 +253,42 @@ export default async function Home() {
       <main className="mx-auto w-full max-w-7xl px-4 py-2 sm:px-6 md:py-4 lg:px-8">
         <section className="grid gap-8 md:grid-cols-3">
           <article className="border-t border-[var(--line-soft)] pt-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#51237f]">Events</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--primary)]">Events</p>
             <h2 className="mt-3 text-xl font-semibold text-gray-950">Plan the week ahead</h2>
             <p className="mt-3 max-w-sm text-sm leading-7 text-gray-600">
               See what is happening across campus and move directly to the event page that matters.
             </p>
             <Link
               href="/events"
-              className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#51237f] transition hover:text-[#3f1b63] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
+              className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[var(--primary)] transition hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
             >
               Open events
               <ArrowRight className="h-4 w-4" />
             </Link>
           </article>
           <article className="border-t border-[var(--line-soft)] pt-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#51237f]">Organizations</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--primary)]">Organizations</p>
             <h2 className="mt-3 text-xl font-semibold text-gray-950">Find your communities</h2>
             <p className="mt-3 max-w-sm text-sm leading-7 text-gray-600">
               Browse active groups by interest, campus, and meeting schedule without hunting through clutter.
             </p>
             <Link
               href="/clubs"
-              className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#51237f] transition hover:text-[#3f1b63] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
+              className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[var(--primary)] transition hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
             >
               Explore clubs
               <ArrowRight className="h-4 w-4" />
             </Link>
           </article>
           <article className="border-t border-[var(--line-soft)] pt-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#51237f]">Resources</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--primary)]">Resources</p>
             <h2 className="mt-3 text-xl font-semibold text-gray-950">Open official campus links fast</h2>
             <p className="mt-3 max-w-sm text-sm leading-7 text-gray-600">
               Keep the high-traffic Montgomery College tools one tap away from the homepage.
             </p>
             <Link
               href="/docs"
-              className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#51237f] transition hover:text-[#3f1b63] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
+              className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[var(--primary)] transition hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
             >
               Support &amp; help
               <ArrowRight className="h-4 w-4" />
@@ -340,16 +338,16 @@ export default async function Home() {
                 <Link
                   key={club.id}
                   href={`/clubs/${club.slug}`}
-                  className="group rounded-[24px] border border-[var(--line-soft)] bg-white p-5 shadow-[0_10px_26px_rgba(15,23,42,0.04)] transition hover:border-[#51237f]/25 hover:shadow-[0_14px_30px_rgba(15,23,42,0.06)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
+                  className="group rounded-[24px] border border-[var(--line-soft)] bg-white p-5 shadow-[0_10px_26px_rgba(15,23,42,0.04)] transition hover:border-[rgba(71,10,104,0.25)] hover:shadow-[0_14px_30px_rgba(15,23,42,0.06)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">
-                      <h3 className="text-base font-semibold leading-snug text-gray-950 transition-colors group-hover:text-[#421d68]">
+                      <h3 className="text-base font-semibold leading-snug text-gray-950 transition-colors group-hover:text-[var(--primary)]">
                         {club.name}
                       </h3>
                       <p className="mt-1 text-sm text-gray-500">{club.category}</p>
                     </div>
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[var(--line-soft)] bg-[var(--surface-muted)] text-sm font-semibold text-[#51237f]">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[var(--line-soft)] bg-[var(--surface-muted)] text-sm font-semibold text-[var(--primary)]">
                       {club.initials}
                     </span>
                   </div>
@@ -375,38 +373,6 @@ export default async function Home() {
           )}
         </section>
 
-        <section className="mt-16">
-          <SectionHeader
-            eyebrow="Official links"
-            title="Campus resources students actually use"
-            description="A curated set of official Montgomery College services that belong on the homepage."
-          />
-
-          <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {featuredResources.map((resource) => {
-              const Icon = resource.icon;
-
-              return (
-                <Link
-                  key={resource.id}
-                  href={resource.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="group rounded-[22px] border border-[var(--line-soft)] bg-white p-5 shadow-[0_10px_26px_rgba(15,23,42,0.04)] transition hover:border-[#51237f]/25 hover:shadow-[0_14px_30px_rgba(15,23,42,0.06)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#51237f] focus-visible:ring-offset-2"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="rounded-lg border border-[var(--line-soft)] bg-[var(--surface-muted)] p-3 text-[#51237f]">
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <ExternalLink className="h-4 w-4 text-gray-400 transition group-hover:text-[#51237f]" />
-                  </div>
-                  <h3 className="mt-4 text-lg font-semibold text-gray-950">{resource.name}</h3>
-                  <p className="mt-2 text-sm leading-6 text-gray-600">{resource.description}</p>
-                </Link>
-              );
-            })}
-          </div>
-        </section>
       </main>
     </div>
   );
