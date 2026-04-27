@@ -333,13 +333,13 @@ export function EventDetailPanel({ event }: EventDetailPanelProps) {
         </section>
 
         <section className="mt-8 border border-[var(--line-soft)] bg-white p-6 lg:p-7">
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.24em] text-[var(--primary)]">
+          <div className="flex items-center gap-2 text-base font-semibold tracking-tight text-[var(--primary)]">
             <Ticket className="h-4 w-4" />
             Registration
           </div>
 
           <div className="mt-5 overflow-hidden border border-[var(--line-soft)] bg-white">
-            <div className="grid grid-cols-1 gap-4 border-b border-[var(--line-soft)] bg-[var(--surface-muted)]/70 px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-gray-500 sm:grid-cols-5 sm:px-5">
+            <div className="grid grid-cols-1 gap-4 border-b border-[var(--line-soft)] bg-[var(--surface-muted)]/70 px-4 py-3 text-sm font-semibold tracking-normal text-gray-700 sm:grid-cols-5 sm:px-5">
               <div>Options</div>
               <div>Sales Start</div>
               <div>Sales End</div>
@@ -366,7 +366,7 @@ export function EventDetailPanel({ event }: EventDetailPanelProps) {
         </section>
 
         <section className="mt-8 border border-[var(--line-soft)] bg-white p-6 lg:p-7">
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.24em] text-[var(--primary)]">
+          <div className="flex items-center gap-2 text-base font-semibold tracking-tight text-[var(--primary)]">
             <FileText className="h-4 w-4" />
             Details
           </div>
@@ -390,7 +390,7 @@ export function EventDetailPanel({ event }: EventDetailPanelProps) {
         </section>
 
         <section className="mt-8 border border-[var(--line-soft)] bg-white p-6 lg:p-7">
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.24em] text-[var(--primary)]">
+          <div className="flex items-center gap-2 text-base font-semibold tracking-tight text-[var(--primary)]">
             <Users className="h-4 w-4" />
             Hosted by
           </div>

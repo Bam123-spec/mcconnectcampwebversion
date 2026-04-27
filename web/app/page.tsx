@@ -186,16 +186,12 @@ export default async function Home() {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(81,35,127,0.08),transparent_34%),radial-gradient(circle_at_right,rgba(15,23,42,0.04),transparent_30%)]" />
           <div className="mx-auto grid max-w-7xl gap-12 px-4 py-14 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(280px,340px)] lg:items-start lg:px-8 lg:py-16">
             <div className="relative z-10 flex flex-col justify-center lg:pt-4">
-              <div className="inline-flex w-fit items-center rounded-full border border-[var(--line-soft)] bg-white/80 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--primary)] shadow-sm backdrop-blur">
-                Montgomery College student portal
-              </div>
-
               <h1 className="mt-6 max-w-3xl text-4xl font-semibold leading-[1.04] tracking-tight text-gray-950 sm:text-5xl lg:text-[4rem]">
-                {isAuthenticated ? `Welcome back, ${firstName}.` : "The student home for events, clubs, campus resources, and support."}
+                {isAuthenticated ? `Welcome back, ${firstName}.` : "Welcome to RaptorConnect!"}
               </h1>
 
-              <p className="mt-5 max-w-2xl text-base leading-8 text-gray-600 sm:text-lg">
-                Raptor Connect gives Montgomery College students one calm place to check what is happening next, find the right organization, and open the official campus tools they use every day.
+              <p className="mt-5 max-w-2xl text-base leading-7 text-gray-600 sm:text-lg">
+                A modern hub for events, student organizations, and campus resources.
               </p>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -226,10 +222,6 @@ export default async function Home() {
                   </div>
                 ))}
               </div>
-
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-gray-500">
-                Central home for events, clubs, campus resources, and support.
-              </p>
             </div>
 
             <div className="relative z-10 self-start lg:pt-20 lg:pr-3">

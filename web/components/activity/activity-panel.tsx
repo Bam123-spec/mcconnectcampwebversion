@@ -8,7 +8,6 @@ import {
   Compass,
   MapPin,
   MessageSquare,
-  ShieldCheck,
   Sparkles,
   Ticket,
   Users,
@@ -234,11 +233,6 @@ export function ActivityPanel({
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-8">
         <section className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_340px]">
           <div className="pt-2">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--line-soft)] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--primary)] shadow-sm">
-              <ShieldCheck size={14} />
-              Student engagement hub
-            </div>
-
             <h1 className="mt-6 max-w-3xl text-4xl font-semibold tracking-tight text-gray-950 sm:text-5xl">
               {hasSession ? `Activity for ${firstName}.` : "Campus activity, updates, and discussion starters."}
             </h1>
@@ -420,12 +414,9 @@ export function ActivityPanel({
                     </div>
                   )}
                 </div>
-              </section>
+            </section>
 
-              <section className="border-t border-[var(--line-soft)] pt-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--primary)]">
-                  Communities to revisit
-                </p>
+            <section className="border-t border-[var(--line-soft)] pt-5">
                 <h2 className="mt-2 text-2xl font-semibold tracking-tight text-gray-950">
                   Suggested clubs
                 </h2>

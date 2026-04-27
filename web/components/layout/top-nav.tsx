@@ -40,22 +40,26 @@ export function TopNav({ profile }: { profile: WebSessionProfile | null }) {
           />
         </Link>
 
-        <nav
-          className="hidden items-center gap-1 rounded-2xl border border-[var(--line-soft)] bg-white p-1 lg:flex"
-          aria-label="Primary navigation"
-        >
+        <nav className="hidden items-center gap-8 lg:flex" aria-label="Primary navigation">
           {NAV_ITEMS.map((item) => (
             <Link
               key={item.href}
               href={item.href}
+              aria-current={isActive(item.href) ? "page" : undefined}
               className={cn(
-                "rounded-xl px-4 py-2.5 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2",
+                "relative py-2 text-[15px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2",
                 isActive(item.href)
-                  ? "bg-[var(--surface-muted)] text-gray-950 shadow-[0_1px_2px_rgba(15,23,42,0.05)]"
-                  : "text-gray-600 hover:bg-[var(--surface-muted)] hover:text-gray-950",
+                  ? "text-gray-950"
+                  : "text-gray-600 hover:text-gray-950",
               )}
             >
               {item.label}
+              <span
+                className={cn(
+                  "absolute inset-x-0 -bottom-[11px] h-0.5 rounded-full bg-[var(--primary)] transition-opacity",
+                  isActive(item.href) ? "opacity-100" : "opacity-0",
+                )}
+              />
             </Link>
           ))}
         </nav>
