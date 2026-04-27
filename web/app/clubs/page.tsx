@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, CalendarDays, MapPin, Users } from "lucide-react";
+import { ArrowRight, CalendarDays, CheckCircle2, MapPin, Users } from "lucide-react";
 import { ClubsFilterBar } from "@/components/clubs/clubs-filter-bar";
-import { getPublicClubs } from "@/lib/clubs";
+import { getCurrentUserClubMemberships, getPublicClubs } from "@/lib/clubs";
 
 export const metadata: Metadata = {
   title: "Clubs & Organizations | Raptor Connect",
@@ -81,14 +81,24 @@ export default async function ClubsPage({
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const query = resolvedSearchParams.q?.trim() || "";
   const limit = Math.max(DEFAULT_LIMIT, Number(resolvedSearchParams.limit) || DEFAULT_LIMIT);
-  const clubsResult = await getPublicClubs({
-    q: query,
-    category: normalizeFilter(resolvedSearchParams.category),
-    campus: normalizeFilter(resolvedSearchParams.campus),
-    day: normalizeFilter(resolvedSearchParams.day),
-    limit,
-  });
+  const [clubsResult, viewerMemberships] = await Promise.all([
+    getPublicClubs({
+      q: query,
+      category: normalizeFilter(resolvedSearchParams.category),
+      campus: normalizeFilter(resolvedSearchParams.campus),
+      day: normalizeFilter(resolvedSearchParams.day),
+      limit,
+    }),
+    getCurrentUserClubMemberships(),
+  ]);
   const clubs = clubsResult.clubs;
+  const joinedClubIds = viewerMemberships.membershipByClubId;
+  const joinedClubs = clubs.filter((club) => joinedClubIds.get(club.id) === "approved");
+  const highlightedClubs = [...clubs].sort((left, right) => {
+    const leftJoined = joinedClubIds.get(left.id) === "approved" ? 1 : 0;
+    const rightJoined = joinedClubIds.get(right.id) === "approved" ? 1 : 0;
+    return rightJoined - leftJoined || left.name.localeCompare(right.name);
+  });
 
   return (
     <main className="min-h-screen bg-[var(--page-background)]">
@@ -109,6 +119,25 @@ export default async function ClubsPage({
               <StatPill label="Categories" value={clubsResult.categories.length} />
               <StatPill label="Campuses" value={clubsResult.campuses.length} />
             </div>
+
+            {viewerMemberships.isAuthenticated && joinedClubs.length > 0 ? (
+              <div className="mt-4 flex flex-wrap items-center gap-2 rounded-2xl border border-[rgba(71,10,104,0.14)] bg-[rgba(71,10,104,0.05)] px-4 py-3 text-sm text-gray-700">
+                <span className="inline-flex items-center gap-1.5 font-semibold text-[var(--primary)]">
+                  <CheckCircle2 className="h-4 w-4" />
+                  Your clubs
+                </span>
+                <span className="text-gray-500">
+                  You are already in {joinedClubs.length} club{joinedClubs.length === 1 ? "" : "s"}.
+                </span>
+                <Link
+                  href="/activity"
+                  className="ml-auto inline-flex items-center gap-2 font-semibold text-[var(--primary)] transition hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
+                >
+                  Open activity
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            ) : null}
 
             <div className="mt-4 flex flex-wrap gap-2">
               {clubsResult.categories.slice(0, 6).map((category) => (
@@ -164,7 +193,10 @@ export default async function ClubsPage({
         <section className="mt-6">
           {clubs.length > 0 ? (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {clubs.map((club) => (
+              {highlightedClubs.map((club) => {
+                const isJoined = joinedClubIds.get(club.id) === "approved";
+
+                return (
                 <article
                   key={club.id}
                   className="group flex h-full min-h-full flex-col overflow-hidden rounded-2xl border border-[var(--line-soft)] bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-[0_12px_26px_rgba(15,23,42,0.07)]"
@@ -207,6 +239,13 @@ export default async function ClubsPage({
                       </div>
                     </div>
 
+                    {isJoined ? (
+                      <div className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full border border-[rgba(71,10,104,0.14)] bg-[rgba(71,10,104,0.08)] px-2.5 py-1 text-xs font-semibold text-[var(--primary)]">
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                        In your clubs
+                      </div>
+                    ) : null}
+
                     <p className="mt-3 min-h-[4.5rem] line-clamp-2 text-sm leading-6 text-gray-600">
                       {club.description}
                     </p>
@@ -231,13 +270,14 @@ export default async function ClubsPage({
                         href={`/clubs/${club.slug}`}
                         className="inline-flex items-center gap-2 rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
                       >
-                        View club
+                        {isJoined ? "Open club" : "View club"}
                         <ArrowRight className="h-4 w-4" />
                       </Link>
                     </div>
                   </div>
                 </article>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="rounded-[24px] border border-dashed border-gray-300 bg-white px-6 py-14 text-center shadow-sm">

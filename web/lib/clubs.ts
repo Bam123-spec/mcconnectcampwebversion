@@ -60,6 +60,11 @@ export type ClubViewerState = {
   membershipStatus: "pending" | "approved" | "rejected" | null;
 };
 
+export type ClubMembershipSummary = {
+  clubId: string;
+  status: "pending" | "approved" | "rejected" | null;
+};
+
 type ClubRow = {
   id: string;
   name: string | null;
@@ -98,6 +103,11 @@ type OfficerRow = {
 };
 
 type MembershipRow = {
+  status: "pending" | "approved" | "rejected" | null;
+};
+
+type MembershipSummaryRow = {
+  club_id: string;
   status: "pending" | "approved" | "rejected" | null;
 };
 
@@ -324,5 +334,38 @@ export async function getClubViewerState(clubId: string): Promise<ClubViewerStat
     isAuthenticated: true,
     isMember: membershipStatus === "approved",
     membershipStatus,
+  };
+}
+
+export async function getCurrentUserClubMemberships(): Promise<{
+  isAuthenticated: boolean;
+  membershipByClubId: Map<string, ClubMembershipSummary["status"]>;
+}> {
+  const session = await getAuthenticatedClient();
+
+  if (!session) {
+    return {
+      isAuthenticated: false,
+      membershipByClubId: new Map(),
+    };
+  }
+
+  const { data, error } = await session.client
+    .from("club_members")
+    .select("club_id,status")
+    .eq("user_id", session.user.id);
+
+  if (error) {
+    console.error("Error fetching current user club memberships:", error);
+  }
+
+  const membershipByClubId = new Map<string, ClubMembershipSummary["status"]>();
+  for (const row of ((data || []) as MembershipSummaryRow[])) {
+    membershipByClubId.set(row.club_id, row.status);
+  }
+
+  return {
+    isAuthenticated: true,
+    membershipByClubId,
   };
 }
