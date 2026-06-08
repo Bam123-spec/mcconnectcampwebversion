@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 
 export function Footer() {
   return (
@@ -9,14 +8,12 @@ export function Footer() {
           <div className="col-span-1 md:col-span-2">
             <Link
               href="/"
-              className="relative mb-5 flex h-12 w-48 shrink-0 items-center rounded-lg transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
+              className="mb-5 inline-flex items-center gap-3 rounded-lg transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
             >
-              <Image 
-                src="/connect-camp-logo.png" 
-                alt="Connect Camp Logo" 
-                fill
-                className="object-contain object-left"
-              />
+              <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--primary)] text-sm font-bold text-white">
+                CC
+              </span>
+              <span className="text-xl font-semibold tracking-tight text-gray-950">Campus Cord</span>
             </Link>
             <p className="mb-5 max-w-md text-sm leading-7 text-gray-600">
               A unified campus experience for Montgomery College students to find events, join organizations, and reach trusted student life resources.
@@ -33,7 +30,7 @@ export function Footer() {
           </div>
           
           <div>
-            <h4 className="mb-4 text-xs font-bold uppercase tracking-[0.24em] text-gray-900">Connect Camp</h4>
+            <h4 className="mb-4 text-xs font-bold uppercase tracking-[0.24em] text-gray-900">Campus Cord</h4>
             <ul className="space-y-2.5 text-gray-600">
                <li><Link href="/docs" className="transition-colors hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2">Help and FAQ</Link></li>
                <li><Link href="/events" className="transition-colors hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2">Campus Events</Link></li>
@@ -43,7 +40,7 @@ export function Footer() {
         </div>
         
         <div className="flex flex-col items-start justify-between gap-3 border-t border-gray-100 pt-6 text-xs font-medium text-gray-500 md:flex-row md:items-center">
-          <div>© {new Date().getFullYear()} Connect Camp. All rights reserved.</div>
+          <div>© {new Date().getFullYear()} Campus Cord. All rights reserved.</div>
           <div>Modern tools for campus participation, built around Montgomery College.</div>
         </div>
       </div>

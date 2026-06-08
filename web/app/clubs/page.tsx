@@ -6,7 +6,7 @@ import { ClubsFilterBar } from "@/components/clubs/clubs-filter-bar";
 import { getCurrentUserClubMemberships, getPublicClubs } from "@/lib/clubs";
 
 export const metadata: Metadata = {
-  title: "Clubs & Organizations | Raptor Connect",
+  title: "Clubs & Organizations | Campus Cord",
   description: "Browse and join student organizations at Montgomery College.",
 };
 
@@ -130,10 +130,10 @@ export default async function ClubsPage({
                   You are already in {joinedClubs.length} club{joinedClubs.length === 1 ? "" : "s"}.
                 </span>
                 <Link
-                  href="/activity"
+                  href="/profile"
                   className="ml-auto inline-flex items-center gap-2 font-semibold text-[var(--primary)] transition hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
                 >
-                  Open activity
+                  Open profile
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>

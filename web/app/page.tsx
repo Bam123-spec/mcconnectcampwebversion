@@ -171,7 +171,7 @@ export default async function Home() {
   const firstName =
     profile?.full_name?.split(" ").find(Boolean) ||
     profile?.email?.split("@")[0] ||
-    "Raptors";
+    "there";
 
   const heroMetrics = [
     { label: "Events live", value: String(events.length) },
@@ -187,7 +187,7 @@ export default async function Home() {
           <div className="mx-auto grid max-w-7xl gap-12 px-4 py-14 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(280px,340px)] lg:items-start lg:px-8 lg:py-16">
             <div className="relative z-10 flex flex-col justify-center lg:pt-4">
               <h1 className="mt-6 max-w-3xl text-4xl font-semibold leading-[1.04] tracking-tight text-gray-950 sm:text-5xl lg:text-[4rem]">
-                {isAuthenticated ? `Welcome back, ${firstName}.` : "Welcome to RaptorConnect!"}
+                {isAuthenticated ? `Welcome back, ${firstName}.` : "Welcome to Campus Cord!"}
               </h1>
 
               <p className="mt-5 max-w-2xl text-base leading-7 text-gray-600 sm:text-lg">
@@ -203,11 +203,11 @@ export default async function Home() {
                   Browse events
                 </Link>
                 <Link
-                  href={isAuthenticated ? "/activity" : "/login"}
+                  href={isAuthenticated ? "/profile" : "/login"}
                   className="inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--line-soft)] bg-white px-5 py-3 text-sm font-semibold text-gray-900 transition hover:border-[rgba(71,10,104,0.30)] hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
                 >
                   {isAuthenticated ? <BellRing className="h-4 w-4" /> : <LogIn className="h-4 w-4" />}
-                  {isAuthenticated ? "Open my activity" : "Sign in"}
+                  {isAuthenticated ? "Open my profile" : "Sign in"}
                 </Link>
               </div>
 
@@ -227,7 +227,7 @@ export default async function Home() {
             <div className="relative z-10 self-start lg:pt-14 lg:pr-3">
               <Image
                 src="/hero-preview-v2.png"
-                alt="RaptorConnect app preview"
+                alt="Campus Cord app preview"
                 width={1356}
                 height={1028}
                 priority

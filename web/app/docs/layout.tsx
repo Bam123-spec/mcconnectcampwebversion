@@ -2,8 +2,8 @@ import { DocsSidebar, MobileDocsNav } from "@/components/docs/sidebar";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Support & Help | Raptor Connect",
-  description: "Find answers, support paths, and student guidance for Raptor Connect.",
+  title: "Support & Help | Campus Cord",
+  description: "Find answers, support paths, and student guidance for Campus Cord.",
 };
 
 export default function DocsLayout({

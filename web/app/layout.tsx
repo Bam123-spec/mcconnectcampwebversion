@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Raptor Connect | Montgomery College Campus Life",
+  title: "Campus Cord | Montgomery College Campus Life",
   description: "The official campus dashboard for Montgomery College students and staff.",
 };
 

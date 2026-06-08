@@ -13,7 +13,7 @@ const NAV_ITEMS = [
   { href: "/", label: "Home" },
   { href: "/clubs", label: "Clubs" },
   { href: "/events", label: "Events" },
-  { href: "/activity", label: "Activity" },
+  { href: "/profile", label: "Profile" },
   { href: "/docs", label: "Support & Help" },
 ];
 
@@ -28,7 +28,7 @@ export function TopNav({ profile }: { profile: WebSessionProfile | null }) {
       <div className="mx-auto flex min-h-[76px] max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
         <Link
           href="/"
-          className="relative flex h-11 w-52 shrink-0 items-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2 sm:w-60"
+          className="relative flex h-11 w-36 shrink-0 items-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2 sm:w-60"
           onClick={() => setMenuOpen(false)}
         >
           <Image

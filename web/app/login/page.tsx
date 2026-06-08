@@ -9,7 +9,7 @@ export default async function LoginPage() {
   const profile = await getCurrentProfile();
 
   if (profile) {
-    redirect("/activity");
+    redirect("/profile");
   }
 
   if (!AUTH_ENABLED) {
@@ -50,7 +50,7 @@ export default async function LoginPage() {
           </div>
           <p className="mb-4 text-xs font-bold uppercase tracking-[0.24em] text-[var(--primary)]">Student access</p>
           <h1 className="max-w-xl text-3xl font-bold tracking-tight text-gray-950 sm:text-4xl">
-            Sign in to Raptor Connect.
+            Sign in to Campus Cord.
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-gray-600">
             Use the account connected to your campus profile to manage RSVPs, club memberships, and student leadership access.
@@ -87,7 +87,7 @@ export default async function LoginPage() {
           <div className="mt-8 flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
             <ShieldCheck size={19} className="mt-0.5 flex-shrink-0 text-[var(--primary)]" />
             <p className="text-xs font-medium leading-relaxed text-gray-600">
-              Raptor Connect uses a secure web session and only shows protected campus information after sign-in.
+              Campus Cord uses a secure web session and only shows protected campus information after sign-in.
             </p>
           </div>
 

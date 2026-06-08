@@ -3,7 +3,7 @@ import { EventsPanel } from "@/components/events/events-panel";
 import { getPublicEvents } from "@/lib/events";
 
 export const metadata: Metadata = {
-  title: "Campus Events | Raptor Connect",
+  title: "Campus Events | Campus Cord",
   description: "Browse upcoming and past campus events in one clear, easy-to-scan view.",
 };
 

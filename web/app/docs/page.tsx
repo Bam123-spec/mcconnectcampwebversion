@@ -31,7 +31,7 @@ const QUICK_ACTIONS = [
   },
   {
     title: "Platform navigation",
-    description: "Understand where to go for clubs, events, activity, and support without guesswork.",
+    description: "Understand where to go for clubs, events, profile details, and support without guesswork.",
     href: "/docs/navigating",
     icon: CircleHelp,
   },
@@ -59,7 +59,7 @@ const COMMON_TASKS = [
   {
     id: "account-access",
     title: "I cannot sign in or my account looks wrong",
-    body: "Start by confirming you are using the same campus account connected to your Montgomery College profile. If the issue is broader than Raptor Connect access, use the official MyMC and student services channels.",
+    body: "Start by confirming you are using the same campus account connected to your Montgomery College profile. If the issue is broader than Campus Cord access, use the official MyMC and student services channels.",
     actionLabel: "Open login",
     actionHref: "/login",
   },
@@ -73,7 +73,7 @@ const COMMON_TASKS = [
   {
     id: "club-help",
     title: "I want to find a club or check a membership",
-    body: "Use the clubs directory to search by category, campus, or meeting day. If you have already joined a group, your activity page will help you reopen the organizations tied to your account.",
+    body: "Use the clubs directory to search by category, campus, or meeting day. If you have already joined a group, your profile page will help you reopen the organizations tied to your account.",
     actionLabel: "Open clubs",
     actionHref: "/clubs",
   },
@@ -114,7 +114,7 @@ export default function DocsPage() {
                 Clear answers, calm guidance, and the right support path.
               </h1>
               <p className="mt-5 max-w-2xl text-base leading-8 text-white/84">
-                Use this page to understand how Raptor Connect works, find the right campus support route,
+                Use this page to understand how Campus Cord works, find the right campus support route,
                 and resolve common student questions without having to guess where to go next.
               </p>
 
@@ -204,7 +204,7 @@ export default function DocsPage() {
               <div className="rounded-2xl border border-[var(--line-soft)] bg-white p-4">
                 <div className="text-sm font-semibold text-gray-950">Use the right office</div>
                 <p className="mt-2 text-sm leading-6 text-gray-600">
-                  Raptor Connect helps with campus engagement, but account, coursework, and records issues may belong to another MC service.
+                  Campus Cord helps with campus engagement, but account, coursework, and records issues may belong to another MC service.
                 </p>
               </div>
               <div className="rounded-2xl border border-[var(--line-soft)] bg-white p-4">

@@ -23,12 +23,12 @@ export function SessionNavAction({ profile }: { profile: WebSessionProfile | nul
     return (
       <Link
         href="/login"
-        className="inline-flex items-center gap-2.5 rounded-xl bg-[var(--primary)] px-4 py-2.5 text-sm font-semibold text-white shadow-none transition-colors hover:bg-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2"
+        className="inline-flex items-center gap-2.5 rounded-xl bg-[var(--primary)] px-2.5 py-2.5 text-sm font-semibold text-white shadow-none transition-colors hover:bg-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2 sm:px-4"
       >
         <span className="flex h-7 w-7 items-center justify-center rounded-sm border border-white">
           <LogIn size={15} />
         </span>
-        <span>Sign In</span>
+        <span className="hidden sm:inline">Sign In</span>
       </Link>
     );
   }
@@ -43,7 +43,7 @@ export function SessionNavAction({ profile }: { profile: WebSessionProfile | nul
   return (
     <div className="flex items-center gap-3">
       <Link
-        href="/activity"
+        href="/profile"
         className="hidden items-center gap-3 rounded-2xl border border-[var(--line-soft)] bg-[var(--surface-muted)] px-3 py-2 shadow-[var(--shadow-soft)] transition-colors hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2 md:flex"
       >
         <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--primary)] text-xs font-semibold text-white">

@@ -48,7 +48,7 @@ export default function ScanNearbyScreen() {
         if (!currentUser) return;
 
         const profileLink = ScanNearbyService.generateQRData(currentUser);
-        const message = `Connect with me on Connect Camp! ${profileLink}`;
+        const message = `Connect with me on Campus Cord! ${profileLink}`;
 
         try {
             const result = await Share.share({

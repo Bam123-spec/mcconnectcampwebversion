@@ -13,13 +13,13 @@ export async function generateMetadata({
 
   if (!data) {
     return {
-      title: "Club Not Found | Raptor Connect",
+      title: "Club Not Found | Campus Cord",
     };
   }
 
   return {
-    title: `${data.club.name} | Raptor Connect`,
-    description: data.club.description || `Explore ${data.club.name} on Raptor Connect.`,
+    title: `${data.club.name} | Campus Cord`,
+    description: data.club.description || `Explore ${data.club.name} on Campus Cord.`,
   };
 }
 

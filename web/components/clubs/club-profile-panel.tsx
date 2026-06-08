@@ -69,6 +69,9 @@ export function ClubProfilePanel({
   initialOfficers: ClubOfficer[];
   viewerState: ClubViewerState;
 }) {
+  const isMember = viewerState.isMember;
+  const isPending = viewerState.membershipStatus === "pending";
+
   return (
     <main className="min-h-screen bg-[var(--page-background)]">
       <div className="border-b border-[var(--line-soft)] bg-white/85 backdrop-blur">
@@ -107,6 +110,22 @@ export function ClubProfilePanel({
                   <span>{initialClub.campus}</span>
                   <span className="h-1 w-1 rounded-full bg-white/70" />
                   <span>{initialClub.memberCount} members</span>
+                  {viewerState.isAuthenticated ? (
+                    <>
+                      <span className="h-1 w-1 rounded-full bg-white/70" />
+                      <span
+                        className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${
+                          isMember
+                            ? "border-emerald-300/40 bg-emerald-500/20 text-emerald-50"
+                            : isPending
+                              ? "border-amber-300/40 bg-amber-500/20 text-amber-50"
+                              : "border-white/20 bg-white/10 text-white/85"
+                        }`}
+                      >
+                        {isMember ? "You’re in this club" : isPending ? "Request pending" : "Not joined"}
+                      </span>
+                    </>
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -179,11 +198,28 @@ export function ClubProfilePanel({
               <div className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--primary)]">
                 Get involved
               </div>
-              <p className="mt-2 text-sm leading-6 text-gray-600">
-                Join to add this club to your activity page and keep track of its events.
-              </p>
-              <div className="mt-4">
-                <ClubMembershipAction clubId={initialClub.id} viewerState={viewerState} />
+              <div className="mt-3 rounded-[20px] border border-[var(--line-soft)] bg-white p-4 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
+                <p className="text-sm font-semibold text-gray-950">
+                  {viewerState.isAuthenticated
+                    ? isMember
+                      ? "You’re in this club"
+                      : isPending
+                        ? "Membership request pending"
+                        : "Join this club"
+                    : "Log in to join"}
+                </p>
+                <p className="mt-1 text-sm leading-6 text-gray-600">
+                  {viewerState.isAuthenticated
+                    ? isMember
+                      ? "This club appears in your profile and keeps track of the events you follow."
+                      : isPending
+                        ? "Your request is waiting for approval. You’ll see this club in your profile once it’s approved."
+                        : "Join to add this club to your profile and keep track of its events."
+                    : "Log in to join and add this club to your profile."}
+                </p>
+                <div className="mt-4">
+                  <ClubMembershipAction clubId={initialClub.id} viewerState={viewerState} />
+                </div>
               </div>
             </section>
 

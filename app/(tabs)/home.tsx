@@ -356,7 +356,7 @@ const AnnouncementCard = () => {
         </View>
         <Text className="text-[11px] font-button text-white/90 uppercase tracking-widest">ANNOUNCEMENT</Text>
       </View>
-      <Text className="text-[20px] font-h1 text-white mb-2 leading-tight">Welcome to Connect Camp!</Text>
+      <Text className="text-[20px] font-h1 text-white mb-2 leading-tight">Welcome to Campus Cord!</Text>
       <Text className="text-[14px] text-white/80 leading-6 mb-6 font-body">Explore clubs, join events, and connect with your campus community in a whole new way.</Text>
       <Pressable 
         onPress={() => router.push("/search")}

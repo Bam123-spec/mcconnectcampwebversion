@@ -1,4 +1,4 @@
-# Raptor Connect Next.js Website Plan
+# Campus Cord Next.js Website Plan
 
 ## Purpose
 

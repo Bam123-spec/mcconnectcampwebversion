@@ -29,10 +29,10 @@ export function Sidebar() {
       <div className="p-8 pb-10">
         <Link href="/" className="flex items-center gap-3 group">
           <div className="h-10 w-10 bg-gradient-to-br from-[var(--primary)] to-[var(--primary)] rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-[var(--primary)]/20 group-hover:scale-105 transition-transform duration-300">
-            R
+            C
           </div>
           <span className="text-2xl font-black tracking-tight text-gray-900 group-hover:text-[var(--primary)] transition-colors">
-            Raptor<span className="text-[var(--primary)] opacity-80">Connect</span>
+            Campus<span className="text-[var(--primary)] opacity-80">Cord</span>
           </span>
         </Link>
       </div>

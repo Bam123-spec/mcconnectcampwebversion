@@ -13,7 +13,7 @@ export async function generateMetadata(
 
   if (!event) {
     return {
-      title: "Event Details | Raptor Connect",
+      title: "Event Details | Campus Cord",
       description: "View campus event details.",
     };
   }
