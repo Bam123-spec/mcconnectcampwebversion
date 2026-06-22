@@ -1,6 +1,9 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, CalendarDays, Clock, FileText, MapPin, Ticket, Users } from "lucide-react";
+import { useState } from "react";
 import { EventRsvpAction } from "@/components/events/event-rsvp-action";
 import { slugifyClubName } from "@/lib/club-utils";
 import type { EventDetail } from "@/lib/events";
@@ -146,13 +149,14 @@ const splitParagraphs = (value: string) =>
     .filter(Boolean);
 
 export function EventDetailPanel({ event }: EventDetailPanelProps) {
+  const [isRegistered, setIsRegistered] = useState(event.isRegistered);
+  const [registrationCount, setRegistrationCount] = useState(event.registrationsCount || event.audience_count || 0);
   const dateBadge = getDateBadge(event);
   const calendarUrl = buildCalendarUrl(event);
   const mapUrl = buildMapUrl(event.location);
   const hostSlug = event.clubName ? slugifyClubName(event.clubName) : null;
   const hostHref = hostSlug ? `/clubs/${hostSlug}` : "/clubs";
   const detailsParagraphs = splitParagraphs(event.description);
-  const registrationCount = event.registrationsCount || event.audience_count || 0;
   const hostLabel = event.clubName || "Campus office";
 
   return (
@@ -328,6 +332,9 @@ export function EventDetailPanel({ event }: EventDetailPanelProps) {
               <div className="text-sm font-medium text-gray-700">
                 {registrationCount === 1 ? "student is registered" : "students are registered"}
               </div>
+              <div className="mt-2 text-sm font-semibold text-[var(--primary)]">
+                {isRegistered ? "You are registered for this event." : "RSVP to save your spot."}
+              </div>
             </div>
           </div>
         </section>
@@ -359,7 +366,11 @@ export function EventDetailPanel({ event }: EventDetailPanelProps) {
               <EventRsvpAction
                 eventId={event.id}
                 hasSession={event.hasSession}
-                isRegistered={event.isRegistered}
+                isRegistered={isRegistered}
+                onChange={({ isRegistered: nextRegistered, registrationsCount: nextCount }) => {
+                  setIsRegistered(nextRegistered);
+                  setRegistrationCount(nextCount);
+                }}
               />
             </div>
           </div>
